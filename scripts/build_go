@@ -1,0 +1,4 @@
+#!/bin/bash
+
+glide --quiet install
+go build

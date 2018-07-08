@@ -1,0 +1,4 @@
+package: github.com/genetic-algorithms/mendel-web-example
+import:
+- package: github.com/gorilla/csrf
+- package: github.com/gorilla/securecookie

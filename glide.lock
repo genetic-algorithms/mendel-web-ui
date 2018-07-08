@@ -1,0 +1,8 @@
+hash: 60970a991ef7c3d39539db9987a463d35e38e8f364c8521821bcea8075ea5a6d
+updated: 2018-07-02T23:09:09.075449-04:00
+imports:
+- name: github.com/gorilla/csrf
+  version: 10bfafc91ef1c8d20ea9d015720365906b7f3fbd
+- name: github.com/gorilla/securecookie
+  version: 78f3d318a8bf316cda921f25e96fd0b441c5173d
+testImports: []

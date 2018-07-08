@@ -1,0 +1,3 @@
+#!/bin/bash
+
+./node_modules/.bin/browser-sync start --no-online --no-open --no-ghost-mode --no-ui --no-notify --proxy localhost:4565 --files 'static/css/**/*.css'

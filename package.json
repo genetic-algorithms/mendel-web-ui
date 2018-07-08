@@ -1,0 +1,11 @@
+{
+  "name": "site-package",
+  "version": "1.0.0",
+  "private": true,
+  "license": "ISC",
+  "devDependencies": {
+    "browser-sync": "^2.24.5",
+    "rollup": "^0.62.0"
+  },
+  "dependencies": {}
+}
