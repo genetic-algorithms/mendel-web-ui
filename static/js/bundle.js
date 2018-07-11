@@ -69,14 +69,186 @@
 
     const Header = ReactRedux.connect(mapStateToProps, mapDispatchToProps)(Component);
 
+    function mapDispatchToProps$1(dispatch) {
+        return {
+            onShowLogin: () => {
+                dispatch({
+                    type: 'ROUTE',
+                    value: '/login/',
+                });
+                history.pushState(null, null, '/login/');
+            },
+        };
+    }
+
+    class Component$1 extends React.Component {
+        constructor(props) {
+            super(props);
+
+            this.state = {
+                loading: true,
+                data: null,
+            };
+        }
+
+        componentDidMount() {
+            fetch('/api/new-job/', {
+                credentials: 'same-origin',
+            }).then(response => {
+                if (response.status === 401) {
+                    this.props.onShowLogin();
+                } else {
+                    response.json().then(responseJson => {
+                        this.setState({
+                            loading: false,
+                            data: responseJson,
+                        });
+                    });
+                }
+            });
+        }
+
+        render() {
+            return React.createElement('div', { className: 'new-job-view' },
+                (this.state.loading ?
+                    React.createElement('div', { className: 'new-job-view__loading' }) :
+                    React.createElement('form', { className: 'new-job-view__form' },
+                    )
+                )
+            );
+        }
+    }
+
+    const NewJob = ReactRedux.connect(null, mapDispatchToProps$1)(Component$1);
+
+    function mapDispatchToProps$2(dispatch) {
+        return {
+            onShowHome: () => {
+                dispatch({
+                    type: 'ROUTE',
+                    value: '/',
+                });
+                history.pushState(null, null, '/');
+            },
+        };
+    }
+
+    class Component$2 extends React.Component {
+        constructor(props) {
+            super(props);
+
+            this.state = {
+                password: '',
+                submitting: false,
+                wrongCredentials: false,
+            };
+
+            this.onPasswordChange = this.onPasswordChange.bind(this);
+            this.onSubmit = this.onSubmit.bind(this);
+        }
+
+        onPasswordChange(e) {
+            const value = e.target.value;
+
+            this.setState((prevState) => (Object.assign({}, prevState, {
+                password: value,
+            })));
+        }
+
+        onSubmit(e) {
+            e.preventDefault();
+
+            if (this.state.submitting) return;
+
+            this.setState((prevState) => (Object.assign({}, prevState, {
+                submitting: true,
+            })));
+
+            fetch('/api/login/', {
+                method: 'POST',
+                body: JSON.stringify({
+                    password: this.state.password,
+                }),
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                credentials: 'same-origin',
+            }).then(
+                response => response.json()
+            ).then(responseJson => {
+                if (responseJson.status === 'success') {
+                    this.props.onShowHome();
+                } else if (responseJson.status === 'wrong_credentials') {
+                    this.setState({
+                        password: '',
+                        submitting: false,
+                        wrongCredentials: true,
+                    });
+                }
+            });
+        }
+
+        render() {
+            return React.createElement('div', { className: 'login-view' },
+                React.createElement('div', { className: 'login-view__title' }, 'Login'),
+                React.createElement('form', { className: 'login-view__form', onSubmit: this.onSubmit },
+                    React.createElement('input', {
+                        className: 'login-view__input',
+                        type: 'password',
+                        placeholder: 'Password',
+                        value: this.state.password,
+                        required: true,
+                        onChange: this.onPasswordChange,
+                    }),
+
+                    (this.state.wrongCredentials ?
+                        React.createElement('div', { className: 'login-view__form-error' }, 'Incorrect password') :
+                        null
+                    ),
+
+                    React.createElement('input', {
+                        className: 'login-view__submit',
+                        type: 'submit',
+                        value: this.state.submitting ? 'Processing…' : 'Login',
+                    }),
+                ),
+            );
+        }
+    }
+
+    const Login = ReactRedux.connect(null, mapDispatchToProps$2)(Component$2);
+
+    function mapStateToProps$1(state) {
+        return {
+            route: state.route,
+        };
+    }
+
+    function getView(route) {
+        if (route === '/') {
+            return React.createElement(NewJob, {});
+        } else if (route === '/login/') {
+            return React.createElement(Login, {});
+        } else {
+            return null;
+        }
+    }
+
+    function Component$3(props) {
+        return React.createElement('div', { className: 'page-content' },
+            getView(props.route),
+        );
+    }
+
+    const Content = ReactRedux.connect(mapStateToProps$1)(Component$3);
+
     function init() {
         const store = Redux.createStore(reducer);
 
         const root = React.createElement(ReactRedux.Provider, { store: store },
             React.createElement('div', null,
-
                 React.createElement(Header, {}),
-                React.createElement('div', { className: 'page-content' }),
+                React.createElement(Content, {}),
             ),
         );
 
@@ -88,21 +260,6 @@
                 value: location.pathname,
             });
         });
-
-        (fetch('/api/new-job/')
-            .then(response => response.json())
-            .then(responseJson => {
-                if (responseJson.status === 'login') {
-                    store.dispatch({
-                        type: 'PAGE_LOADED',
-                        page_data: {},
-                        authenticated: false,
-                    });
-                } else {
-                    console.log('Loaded data:', responseJson);
-                }
-            })
-        );
     }
 
     init();

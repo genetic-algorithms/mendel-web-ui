@@ -11,6 +11,7 @@ var Base = `
 
 			<link href="/static/css/main.css" rel="stylesheet" />
 			<link href="/static/css/header.css" rel="stylesheet" />
+			<link href="/static/css/login.css" rel="stylesheet" />
 		</head>
 		<body>
 			<div id="react-root"></div>
