@@ -1,0 +1,17 @@
+.button {
+    background-color: #1AB41E;
+    color: #FFF;
+    border: none;
+    display: inline-block;
+    vertical-align: top;
+    font-size: 14px;
+    padding: 10px 18px;
+    border-radius: 4px;
+    text-transform: uppercase;
+    font-weight: 500;
+    cursor: pointer;
+}
+
+.button:focus {
+    outline: none;
+}

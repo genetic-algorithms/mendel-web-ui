@@ -1,0 +1,44 @@
+.new-job-view__form {
+    max-width: 700px;
+    padding-left: 24px;
+    padding-right: 24px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.new-job-view__form-section-title {
+    font-size: 30px;
+    margin-top: 60px;
+    margin-bottom: 30px;
+}
+
+.new-job-view__field {
+    display: flex;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.new-job-view__form label {
+    display: block;
+    font-size: 14px;
+    flex-grow: 1;
+}
+
+.new-job-view__form input[type=number] {
+    display: block;
+    border: 1px solid transparent;
+    width: 300px;
+    font-size: 14px;
+    font-family: "Roboto", sans-serif;
+    box-sizing: border-box;
+    padding: 8px 10px;
+}
+
+.new-job-view__form input[type=number]:focus {
+    outline: none;
+    border-color: #CCC;
+}
+
+.new-job-view__form input[type=submit] {
+    margin-top: 30px;
+}

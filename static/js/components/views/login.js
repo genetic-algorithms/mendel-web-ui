@@ -84,7 +84,7 @@ export class Component extends React.Component {
                 ),
 
                 React.createElement('input', {
-                    className: 'login-view__submit',
+                    className: 'login-view__submit button',
                     type: 'submit',
                     value: this.state.submitting ? 'Processing…' : 'Login',
                 }),

@@ -10,8 +10,10 @@ var Base = `
 			<link href="https://fonts.googleapis.com/css?family=Roboto:400,500" rel="stylesheet" />
 
 			<link href="/static/css/main.css" rel="stylesheet" />
+			<link href="/static/css/button.css" rel="stylesheet" />
 			<link href="/static/css/header.css" rel="stylesheet" />
 			<link href="/static/css/login.css" rel="stylesheet" />
+			<link href="/static/css/new_job.css" rel="stylesheet" />
 		</head>
 		<body>
 			<div id="react-root"></div>
