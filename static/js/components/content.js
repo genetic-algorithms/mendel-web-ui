@@ -1,5 +1,6 @@
 import { NewJob } from './views/new_job';
 import { Login } from './views/login';
+import { JobDetail } from './views/job_detail';
 
 function mapStateToProps(state) {
     return {
@@ -8,10 +9,16 @@ function mapStateToProps(state) {
 }
 
 function getView(route) {
+    const jobDetailMatch = route.match(new RegExp('^/jobs/(\\w+)/$'));
+
     if (route === '/') {
         return React.createElement(NewJob, {});
     } else if (route === '/login/') {
         return React.createElement(Login, {});
+    } else if (jobDetailMatch) {
+        return React.createElement(JobDetail, {
+            jobId: jobDetailMatch[1],
+        });
     } else {
         return null;
     }

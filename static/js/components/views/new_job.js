@@ -7,6 +7,25 @@ function mapDispatchToProps(dispatch) {
             });
             history.pushState(null, null, '/login/');
         },
+        onSubmit: (fieldValues) => {
+            fetch('/api/new-job/create/', {
+                method: 'POST',
+                body: JSON.stringify(fieldValues),
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                credentials: 'same-origin',
+            }).then(response => {
+                response.json().then(responseJson => {
+                    const url = '/jobs/' + responseJson.job_id + '/';
+                    dispatch({
+                        type: 'ROUTE',
+                        value: url,
+                    });
+                    history.pushState(null, null, url);
+                });
+            });
+        },
     };
 }
 
@@ -19,6 +38,8 @@ export class Component extends React.Component {
             num_generations: (e) => this.simpleFieldChanged('num_generations', e),
         };
 
+        this.onSubmit = this.onSubmit.bind(this);
+
         this.state = {
             loading: true,
             data: null,
@@ -27,6 +48,11 @@ export class Component extends React.Component {
                 num_generations: '200',
             },
         };
+    }
+
+    onSubmit(e) {
+        e.preventDefault();
+        this.props.onSubmit(this.state.fieldValues);
     }
 
     simpleFieldChanged(id, e) {
@@ -63,7 +89,7 @@ export class Component extends React.Component {
         return React.createElement('div', { className: 'new-job-view' },
             (this.state.loading ?
                 React.createElement('div', { className: 'new-job-view__loading' }) :
-                React.createElement('form', { className: 'new-job-view__form' },
+                React.createElement('form', { className: 'new-job-view__form', onSubmit: this.onSubmit },
                     React.createElement('div', { className: 'new-job-view__form-section-title' }, 'Basic'),
                     React.createElement('div', { className: 'new-job-view__field' },
                         React.createElement('label', {}, 'Population size (initial or fixed)'),

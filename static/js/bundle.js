@@ -78,6 +78,25 @@
                 });
                 history.pushState(null, null, '/login/');
             },
+            onSubmit: (fieldValues) => {
+                fetch('/api/new-job/create/', {
+                    method: 'POST',
+                    body: JSON.stringify(fieldValues),
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    credentials: 'same-origin',
+                }).then(response => {
+                    response.json().then(responseJson => {
+                        const url = '/jobs/' + responseJson.job_id + '/';
+                        dispatch({
+                            type: 'ROUTE',
+                            value: url,
+                        });
+                        history.pushState(null, null, url);
+                    });
+                });
+            },
         };
     }
 
@@ -90,6 +109,8 @@
                 num_generations: (e) => this.simpleFieldChanged('num_generations', e),
             };
 
+            this.onSubmit = this.onSubmit.bind(this);
+
             this.state = {
                 loading: true,
                 data: null,
@@ -98,6 +119,11 @@
                     num_generations: '200',
                 },
             };
+        }
+
+        onSubmit(e) {
+            e.preventDefault();
+            this.props.onSubmit(this.state.fieldValues);
         }
 
         simpleFieldChanged(id, e) {
@@ -134,7 +160,7 @@
             return React.createElement('div', { className: 'new-job-view' },
                 (this.state.loading ?
                     React.createElement('div', { className: 'new-job-view__loading' }) :
-                    React.createElement('form', { className: 'new-job-view__form' },
+                    React.createElement('form', { className: 'new-job-view__form', onSubmit: this.onSubmit },
                         React.createElement('div', { className: 'new-job-view__form-section-title' }, 'Basic'),
                         React.createElement('div', { className: 'new-job-view__field' },
                             React.createElement('label', {}, 'Population size (initial or fixed)'),
@@ -265,6 +291,74 @@
 
     const Login = ReactRedux.connect(null, mapDispatchToProps$2)(Component$2);
 
+    function mapDispatchToProps$3(dispatch) {
+        return {
+            onShowLogin: () => {
+                dispatch({
+                    type: 'ROUTE',
+                    value: '/login/',
+                });
+                history.pushState(null, null, '/login/');
+            },
+        };
+    }
+
+    class Component$3 extends React.Component {
+        constructor(props) {
+            super(props);
+
+            this.fetchOutput = this.fetchOutput.bind(this);
+
+            this.state = {
+                output: '',
+            };
+
+            this.mounted = false;
+            this.outputOffset = 0;
+        }
+
+        componentDidMount() {
+            this.mounted = true;
+            this.fetchOutput();
+        }
+
+        componentWillUnmount() {
+            this.mounted = false;
+        }
+
+        fetchOutput() {
+            if (!this.mounted) return;
+
+            fetch('/api/job-output/?jobId=' + encodeURIComponent(this.props.jobId) + '&offset=' + encodeURIComponent(this.outputOffset), {
+                credentials: 'same-origin',
+            }).then(response => {
+                response.json().then(responseJson => {
+                    if (!this.mounted) return;
+
+                    this.outputOffset += responseJson.output.length;
+
+                    this.setState((prevState, props) => ({
+                        output: prevState.output + responseJson.output,
+                        finished: responseJson.done,
+                    }));
+
+                    if (!responseJson.done) {
+                        this.timeout = setTimeout(this.fetchOutput, 1000);
+                    }
+                });
+            });
+        }
+
+        render() {
+            return React.createElement('div', { className: 'job-detail-view' },
+                React.createElement('div', { className: 'job-detail-view__id' }, this.props.jobId),
+                React.createElement('pre', { className: 'job-detail-view__output' }, this.state.output),
+            );
+        }
+    }
+
+    const JobDetail = ReactRedux.connect(null, mapDispatchToProps$3)(Component$3);
+
     function mapStateToProps$1(state) {
         return {
             route: state.route,
@@ -272,22 +366,28 @@
     }
 
     function getView(route) {
+        const jobDetailMatch = route.match(new RegExp('^/jobs/(\\w+)/$'));
+
         if (route === '/') {
             return React.createElement(NewJob, {});
         } else if (route === '/login/') {
             return React.createElement(Login, {});
+        } else if (jobDetailMatch) {
+            return React.createElement(JobDetail, {
+                jobId: jobDetailMatch[1],
+            });
         } else {
             return null;
         }
     }
 
-    function Component$3(props) {
+    function Component$4(props) {
         return React.createElement('div', { className: 'page-content' },
             getView(props.route),
         );
     }
 
-    const Content = ReactRedux.connect(mapStateToProps$1)(Component$3);
+    const Content = ReactRedux.connect(mapStateToProps$1)(Component$4);
 
     function init() {
         const store = Redux.createStore(reducer);

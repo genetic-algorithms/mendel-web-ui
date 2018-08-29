@@ -1,14 +1,24 @@
 package main
 
 import (
-	"log"
-	"net/http"
-	"html/template"
-	"io/ioutil"
+	"bufio"
+	"crypto/rand"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
+	"html/template"
+	"io/ioutil"
+	"log"
+	"net/http"
+	"os"
+	"os/exec"
+	"path/filepath"
+	"strconv"
+	"strings"
+	"sync"
 	"golang.org/x/crypto/bcrypt"
 	"github.com/gorilla/securecookie"
+	"github.com/BurntSushi/toml"
 	"github.com/genetic-algorithms/mendel-web-example/templates"
 )
 
@@ -26,10 +36,15 @@ type templateStore struct {
 var globalTemplateStore templateStore
 var globalSettings settings
 var globalSecureCookie *securecookie.SecureCookie
+var globalRunningJobsOutput map[string]*strings.Builder
+var globalRunningJobsLock sync.RWMutex
+var globalJobsDir string = "./output/jobs"
 
 
 func main() {
 	var err error
+
+	globalRunningJobsOutput = make(map[string]*strings.Builder)
 
 	globalTemplateStore = loadTemplates()
 	globalSettings, err = loadSettings()
@@ -90,6 +105,10 @@ func apiHandler(w http.ResponseWriter, r *http.Request) {
 		apiLoginHandler(w, r)
 	} else if r.URL.Path == "/api/new-job/" {
 		apiNewJobHandler(w, r)
+	} else if r.URL.Path == "/api/new-job/create/" {
+		apiNewJobCreateHandler(w, r)
+	} else if r.URL.Path == "/api/job-output/" {
+		apiJobOutputHandler(w, r)
 	} else {
 		http.Error(w, "404 Not Found", http.StatusNotFound)
 	}
@@ -178,6 +197,193 @@ func apiNewJobHandler(w http.ResponseWriter, r *http.Request) {
 	w.Write(resultJson)
 }
 
+func apiNewJobCreateHandler(w http.ResponseWriter, r *http.Request) {
+	type TomlConfigBasic struct {
+		CaseId string `toml:"case_id"`
+		PopSize int `toml:"pop_size"`
+		NumGenerations int `toml:"num_generations"`
+	}
+
+	type TomlConfigComputation struct {
+		DataFilePath string `toml:"data_file_path"`
+	}
+
+	type TomlConfig struct {
+		Basic TomlConfigBasic `toml:"basic"`
+		Computation TomlConfigComputation `toml:"computation"`
+	}
+
+	if !isAuthenticated(r) {
+		http.Error(w, "401 Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	if !isValidPostJson(r) {
+		http.Error(w, "400 Bad Request (method or content-type)", http.StatusBadRequest)
+		return
+	}
+
+	decoder := json.NewDecoder(r.Body)
+	var data struct {
+		PopSize string `json:"pop_size"`
+		NumGenerations string `json:"num_generations"`
+	}
+	err := decoder.Decode(&data)
+	if err != nil {
+		http.Error(w, "400 Bad Request (parsing body)", http.StatusBadRequest)
+		return
+	}
+
+	jobId, err := generateUuid()
+	if err != nil {
+		http.Error(w, "500 Internal Server Error (could not generate jobId)", http.StatusInternalServerError)
+		return
+	}
+
+	jobDir := filepath.Join(globalJobsDir, jobId)
+	err = os.MkdirAll(jobDir, 0755)
+	if err != nil {
+		http.Error(w, "500 Internal Server Error (could not create job directory)", http.StatusInternalServerError)
+		return
+	}
+
+	config := TomlConfig{
+		Basic: TomlConfigBasic{
+			CaseId: jobId,
+			PopSize: 100,
+			NumGenerations: 20,
+		},
+		Computation: TomlConfigComputation{
+			DataFilePath: jobDir,
+		},
+	}
+
+	configFilePath := filepath.Join(jobDir, "config.toml")
+	configFile, err := os.Create(configFilePath)
+	if err != nil {
+		http.Error(w, "500 Internal Server Error (could not create job config.toml file)", http.StatusInternalServerError)
+		return
+	}
+
+	err = toml.NewEncoder(configFile).Encode(config)
+	if err != nil {
+		configFile.Close()
+		http.Error(w, "500 Internal Server Error (could not encode job config)", http.StatusInternalServerError)
+		return
+	}
+	configFile.Close()
+
+	outputBuilder := &strings.Builder{}
+
+	globalRunningJobsLock.Lock()
+	globalRunningJobsOutput[jobId] = outputBuilder
+	globalRunningJobsLock.Unlock()
+
+	go func() {
+		cmd := exec.Command("../mendel-go/mendel-go", "-f", configFilePath)
+		stdout, err := cmd.StdoutPipe()
+		if err != nil {
+			fmt.Println(err)
+		}
+
+		err = cmd.Start()
+		if err != nil {
+			fmt.Println(err)
+		}
+
+		scanner := bufio.NewScanner(stdout)
+		for scanner.Scan() {
+			globalRunningJobsLock.Lock()
+			outputBuilder.WriteString(scanner.Text())
+			outputBuilder.WriteString("\n")
+			globalRunningJobsLock.Unlock()
+		}
+
+		err = cmd.Wait()
+		if err != nil {
+			fmt.Println(err)
+		}
+
+		globalRunningJobsLock.Lock()
+		delete(globalRunningJobsOutput, jobId)
+
+		outputFile, err := os.Create(filepath.Join(jobDir, "stdout.txt"))
+		if err != nil {
+			globalRunningJobsLock.Unlock()
+			http.Error(w, "500 Internal Server Error (could not create job stdout.txt file)", http.StatusInternalServerError)
+			return
+		}
+
+		outputFile.WriteString(outputBuilder.String());
+		outputFile.Close()
+		globalRunningJobsLock.Unlock()
+	}()
+
+	result := struct {
+		JobId string `json:"job_id"`
+	}{
+		JobId: jobId,
+	}
+
+	resultJson, err := json.Marshal(result)
+	if err != nil {
+		http.Error(w, "500 Internal Server Error (could not encode json response)", http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(resultJson)
+}
+
+func apiJobOutputHandler(w http.ResponseWriter, r *http.Request) {
+	if !isAuthenticated(r) {
+		http.Error(w, "401 Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	jobId := r.URL.Query().Get("jobId")
+	offset, err := strconv.Atoi(r.URL.Query().Get("offset"))
+	if err != nil {
+		http.Error(w, "400 Bad Request (cannot convert offset to int)", http.StatusBadRequest)
+		return
+	}
+
+	jobDir := filepath.Join(globalJobsDir, jobId)
+
+	globalRunningJobsLock.RLock()
+	output, inProgress := globalRunningJobsOutput[jobId]
+
+	result := struct {
+		Output string `json:"output"`
+		Done bool `json:"done"`
+	}{
+		Output: "",
+		Done: !inProgress,
+	}
+
+	if inProgress {
+		result.Output = output.String()[offset:]
+	} else {
+		bytes, err := ioutil.ReadFile(filepath.Join(jobDir, "stdout.txt"))
+		if err != nil {
+			globalRunningJobsLock.RUnlock()
+			http.Error(w, "500 Internal Server Error (could not read stdout.txt)", http.StatusInternalServerError)
+			return
+		}
+		result.Output = string(bytes)[offset:]
+	}
+	globalRunningJobsLock.RUnlock()
+
+	resultJson, err := json.Marshal(result)
+	if err != nil {
+		http.Error(w, "500 Internal Server Error (could not encode json response)", http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(resultJson)
+}
+
 func isValidPostJson(r *http.Request) bool {
 	if r.Method != "POST" {
 		return false
@@ -206,4 +412,15 @@ func isAuthenticated(r *http.Request) bool {
 
 	val, ok := session["authenticated"]
 	return ok && val == "true"
+}
+
+func generateUuid() (string, error) {
+	bytes := make([]byte, 16)
+
+	_, err := rand.Read(bytes);
+	if err != nil {
+		return "", err
+	}
+
+	return hex.EncodeToString(bytes), nil
 }
