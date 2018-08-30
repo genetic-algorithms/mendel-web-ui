@@ -311,6 +311,7 @@
 
             this.state = {
                 output: '',
+                done: false,
             };
 
             this.mounted = false;
@@ -339,7 +340,7 @@
 
                     this.setState((prevState, props) => ({
                         output: prevState.output + responseJson.output,
-                        finished: responseJson.done,
+                        done: responseJson.done,
                     }));
 
                     if (!responseJson.done) {
@@ -351,13 +352,107 @@
 
         render() {
             return React.createElement('div', { className: 'job-detail-view' },
-                React.createElement('div', { className: 'job-detail-view__id' }, this.props.jobId),
+                React.createElement('div', { className: 'job-detail-view__title' },
+                    'Job',
+                    React.createElement('span', { className: 'job-detail-view__job-id' }, this.props.jobId),
+                ),
                 React.createElement('pre', { className: 'job-detail-view__output' }, this.state.output),
+                React.createElement('div', { className: 'job-detail-view__bottom' },
+                    React.createElement('div', { className: 'job-detail-view__status' },
+                        'Status: ' + (this.state.done ? 'Done' : 'Running')
+                    ),
+                    (this.state.done ?
+                        React.createElement('div', { className: 'job-detail-view__plots-button button' }, 'Plots') :
+                        null
+                    ),
+                ),
             );
         }
     }
 
     const JobDetail = ReactRedux.connect(null, mapDispatchToProps$3)(Component$3);
+
+    function mapDispatchToProps$4(dispatch) {
+        return {
+            onShowLogin: () => {
+                dispatch({
+                    type: 'ROUTE',
+                    value: '/login/',
+                });
+                history.pushState(null, null, '/login/');
+            },
+            onClick: (jobId) => {
+                const url = '/jobs/' + jobId + '/';
+                dispatch({
+                    type: 'ROUTE',
+                    value: url,
+                });
+                history.pushState(null, null, url);
+            },
+        };
+    }
+
+    class Component$4 extends React.Component {
+        constructor(props) {
+            super(props);
+
+            this.state = {
+                jobs: [],
+            };
+
+            this.mounted = false;
+        }
+
+        componentDidMount() {
+            this.mounted = true;
+
+            fetch('/api/job-list/', {
+                credentials: 'same-origin',
+            }).then(response => {
+                response.json().then(responseJson => {
+                    if (!this.mounted) return;
+
+                    this.setState({
+                        jobs: responseJson.jobs,
+                    });
+                });
+            });
+        }
+
+        componentWillUnmount() {
+            this.mounted = false;
+        }
+
+        render() {
+            return React.createElement('div', { className: 'job-listing-view' },
+                React.createElement('div', { className: 'job-listing-view__title' }, 'Jobs'),
+                React.createElement('div', { className: 'job-listing-view__jobs' },
+                    React.createElement('div', { className: 'job-listing-view__labels' },
+                        React.createElement('div', { className: 'job-listing-view__labels__id' }, 'Job ID'),
+                        React.createElement('div', { className: 'job-listing-view__labels__time' }, 'Time'),
+                        React.createElement('div', { className: 'job-listing-view__labels__status' }, 'Status'),
+                    ),
+
+                    this.state.jobs.map(job => (
+                        React.createElement('div',
+                            {
+                                className: 'job-listing-view__job',
+                                key: job.job_id,
+                                onClick: () => this.props.onClick(job.job_id),
+                            },
+                            React.createElement('div', { className: 'job-listing-view__job__id' }, job.job_id),
+                            React.createElement('div', { className: 'job-listing-view__job__time' }, job.time),
+                            React.createElement('div', { className: 'job-listing-view__job__status' },
+                                (job.done ? 'Done' : 'Running'),
+                            ),
+                        )
+                    )),
+                ),
+            );
+        }
+    }
+
+    const JobListing = ReactRedux.connect(null, mapDispatchToProps$4)(Component$4);
 
     function mapStateToProps$1(state) {
         return {
@@ -372,6 +467,8 @@
             return React.createElement(NewJob, {});
         } else if (route === '/login/') {
             return React.createElement(Login, {});
+        } else if (route === '/jobs/') {
+            return React.createElement(JobListing, {});
         } else if (jobDetailMatch) {
             return React.createElement(JobDetail, {
                 jobId: jobDetailMatch[1],
@@ -381,13 +478,13 @@
         }
     }
 
-    function Component$4(props) {
+    function Component$5(props) {
         return React.createElement('div', { className: 'page-content' },
             getView(props.route),
         );
     }
 
-    const Content = ReactRedux.connect(mapStateToProps$1)(Component$4);
+    const Content = ReactRedux.connect(mapStateToProps$1)(Component$5);
 
     function init() {
         const store = Redux.createStore(reducer);

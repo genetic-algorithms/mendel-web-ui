@@ -1,0 +1,45 @@
+.job-listing-view {
+    max-width: 1000px;
+    padding-left: 24px;
+    padding-right: 24px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.job-listing-view__title {
+    font-size: 30px;
+    padding-top: 40px;
+    padding-bottom: 40px;
+}
+
+.job-listing-view__labels {
+    display: flex;
+    border-bottom: 1px solid #DDD;
+}
+
+.job-listing-view__labels__id,
+.job-listing-view__labels__time,
+.job-listing-view__labels__status {
+    width: 33.33%;
+    font-weight: 700;
+    padding: 14px 0;
+    font-size: 14px;
+}
+
+.job-listing-view__job {
+    display: flex;
+    cursor: pointer;
+    border-bottom: 1px solid #DDD;
+}
+
+.job-listing-view__job:hover {
+    background-color: #EEE;
+}
+
+.job-listing-view__job__id,
+.job-listing-view__job__time,
+.job-listing-view__job__status {
+    width: 33.33%;
+    padding: 14px 0;
+    font-size: 14px;
+}

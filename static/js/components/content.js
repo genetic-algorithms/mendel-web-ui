@@ -1,6 +1,7 @@
 import { NewJob } from './views/new_job';
 import { Login } from './views/login';
 import { JobDetail } from './views/job_detail';
+import { JobListing } from './views/job_listing';
 
 function mapStateToProps(state) {
     return {
@@ -15,6 +16,8 @@ function getView(route) {
         return React.createElement(NewJob, {});
     } else if (route === '/login/') {
         return React.createElement(Login, {});
+    } else if (route === '/jobs/') {
+        return React.createElement(JobListing, {});
     } else if (jobDetailMatch) {
         return React.createElement(JobDetail, {
             jobId: jobDetailMatch[1],

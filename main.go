@@ -1,6 +1,8 @@
 package main
 
 import (
+	"sort"
+	"time"
 	"bufio"
 	"crypto/rand"
 	"encoding/hex"
@@ -33,6 +35,12 @@ type templateStore struct {
 	base *template.Template
 }
 
+type JobMetaData struct {
+	Version int `json:"version"`
+	JobId string `json:"job_id"`
+	Time time.Time `json:"time"`
+}
+
 var globalTemplateStore templateStore
 var globalSettings settings
 var globalSecureCookie *securecookie.SecureCookie
@@ -51,8 +59,6 @@ func main() {
 	check(err)
 
 	globalSecureCookie = securecookie.New(globalSettings.CookieHashKey, globalSettings.CookieBlockKey)
-
-	fmt.Println(globalSettings)
 
 	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
 
@@ -109,6 +115,8 @@ func apiHandler(w http.ResponseWriter, r *http.Request) {
 		apiNewJobCreateHandler(w, r)
 	} else if r.URL.Path == "/api/job-output/" {
 		apiJobOutputHandler(w, r)
+	} else if r.URL.Path == "/api/job-list/" {
+		apiJobListHandler(w, r)
 	} else {
 		http.Error(w, "404 Not Found", http.StatusNotFound)
 	}
@@ -258,10 +266,10 @@ func apiNewJobCreateHandler(w http.ResponseWriter, r *http.Request) {
 		},
 	}
 
-	configFilePath := filepath.Join(jobDir, "config.toml")
+	configFilePath := filepath.Join(jobDir, "mendel_go.toml")
 	configFile, err := os.Create(configFilePath)
 	if err != nil {
-		http.Error(w, "500 Internal Server Error (could not create job config.toml file)", http.StatusInternalServerError)
+		http.Error(w, "500 Internal Server Error (could not create job mendel_go.toml file)", http.StatusInternalServerError)
 		return
 	}
 
@@ -307,15 +315,32 @@ func apiNewJobCreateHandler(w http.ResponseWriter, r *http.Request) {
 		globalRunningJobsLock.Lock()
 		delete(globalRunningJobsOutput, jobId)
 
-		outputFile, err := os.Create(filepath.Join(jobDir, "stdout.txt"))
+		err = ioutil.WriteFile(filepath.Join(jobDir, "mendel_go.out"), []byte(outputBuilder.String()), 0644)
 		if err != nil {
 			globalRunningJobsLock.Unlock()
-			http.Error(w, "500 Internal Server Error (could not create job stdout.txt file)", http.StatusInternalServerError)
+			http.Error(w, "500 Internal Server Error (could not write to mendel_go.out file)", http.StatusInternalServerError)
 			return
 		}
 
-		outputFile.WriteString(outputBuilder.String());
-		outputFile.Close()
+		metaData := JobMetaData{
+			Version: 1,
+			JobId: jobId,
+			Time: time.Now().UTC(),
+		}
+		metaDataJson, err := json.Marshal(metaData)
+		if err != nil {
+			globalRunningJobsLock.Unlock()
+			http.Error(w, "500 Internal Server Error (could not encode metadata json)", http.StatusInternalServerError)
+			return
+		}
+
+		err = ioutil.WriteFile(filepath.Join(jobDir, "metadata.json"), metaDataJson, 0644)
+		if err != nil {
+			globalRunningJobsLock.Unlock()
+			http.Error(w, "500 Internal Server Error (could not write to metadata.json file)", http.StatusInternalServerError)
+			return
+		}
+
 		globalRunningJobsLock.Unlock()
 	}()
 
@@ -364,15 +389,87 @@ func apiJobOutputHandler(w http.ResponseWriter, r *http.Request) {
 	if inProgress {
 		result.Output = output.String()[offset:]
 	} else {
-		bytes, err := ioutil.ReadFile(filepath.Join(jobDir, "stdout.txt"))
+		bytes, err := ioutil.ReadFile(filepath.Join(jobDir, "mendel_go.out"))
 		if err != nil {
 			globalRunningJobsLock.RUnlock()
-			http.Error(w, "500 Internal Server Error (could not read stdout.txt)", http.StatusInternalServerError)
+			http.Error(w, "500 Internal Server Error (could not read mendel_go.out)", http.StatusInternalServerError)
 			return
 		}
 		result.Output = string(bytes)[offset:]
 	}
 	globalRunningJobsLock.RUnlock()
+
+	resultJson, err := json.Marshal(result)
+	if err != nil {
+		http.Error(w, "500 Internal Server Error (could not encode json response)", http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(resultJson)
+}
+
+func apiJobListHandler(w http.ResponseWriter, r *http.Request) {
+	if !isAuthenticated(r) {
+		http.Error(w, "401 Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	globalRunningJobsLock.RLock()
+	fileInfos, err := ioutil.ReadDir(globalJobsDir)
+	if err != nil {
+		globalRunningJobsLock.RUnlock()
+		http.Error(w, "500 Internal Server Error (could not read jobs directory)", http.StatusInternalServerError)
+		return
+	}
+
+	type JobInfo struct {
+		JobId string `json:"job_id"`
+		Time time.Time `json:"time"`
+		Done bool `json:"done"`
+	}
+
+	jobInfos := []JobInfo{}
+
+	for _, fileInfo := range fileInfos {
+		if !fileInfo.IsDir() {
+			continue
+		}
+
+		jobId := fileInfo.Name()
+		_, inProgress := globalRunningJobsOutput[jobId]
+
+		rawMetaData, err := ioutil.ReadFile(filepath.Join(globalJobsDir, jobId, "metadata.json"))
+		if err != nil {
+			log.Println("cannot read metadata.json for job:", jobId)
+			continue
+		}
+
+		var metaData JobMetaData
+		err = json.Unmarshal(rawMetaData, &metaData)
+		if err != nil {
+			log.Println("cannot parse metadata.json for job:", jobId)
+			continue
+		}
+
+		jobInfos = append(jobInfos, JobInfo{
+			JobId: metaData.JobId,
+			Time: metaData.Time,
+			Done: !inProgress,
+		})
+
+		sort.Slice(jobInfos, func(i, j int) bool {
+			return jobInfos[i].Time.After(jobInfos[j].Time)
+		})
+	}
+	globalRunningJobsLock.RUnlock()
+
+
+	result := struct {
+		Jobs []JobInfo `json:"jobs"`
+	}{
+		Jobs: jobInfos,
+	}
 
 	resultJson, err := json.Marshal(result)
 	if err != nil {

@@ -7,13 +7,15 @@ var Base = `
 			<title>Mendel's Accountant</title>
 			<meta name="viewport" content="initial-scale=1.0" />
 
-			<link href="https://fonts.googleapis.com/css?family=Roboto:400,500" rel="stylesheet" />
+			<link href="https://fonts.googleapis.com/css?family=Roboto:400,500,700" rel="stylesheet" />
 
 			<link href="/static/css/main.css" rel="stylesheet" />
 			<link href="/static/css/button.css" rel="stylesheet" />
 			<link href="/static/css/header.css" rel="stylesheet" />
 			<link href="/static/css/login.css" rel="stylesheet" />
 			<link href="/static/css/new_job.css" rel="stylesheet" />
+			<link href="/static/css/job_detail.css" rel="stylesheet" />
+			<link href="/static/css/job_listing.css" rel="stylesheet" />
 		</head>
 		<body>
 			<div id="react-root"></div>
