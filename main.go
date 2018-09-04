@@ -1,8 +1,6 @@
 package main
 
 import (
-	"sort"
-	"time"
 	"bufio"
 	"crypto/rand"
 	"encoding/hex"
@@ -15,9 +13,11 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"sort"
 	"strconv"
 	"strings"
 	"sync"
+	"time"
 	"golang.org/x/crypto/bcrypt"
 	"github.com/gorilla/securecookie"
 	"github.com/BurntSushi/toml"
@@ -117,6 +117,8 @@ func apiHandler(w http.ResponseWriter, r *http.Request) {
 		apiJobOutputHandler(w, r)
 	} else if r.URL.Path == "/api/job-list/" {
 		apiJobListHandler(w, r)
+	} else if r.URL.Path == "/api/plot-average-mutations/" {
+		apiPlotAverageMutationsHandler(w, r)
 	} else {
 		http.Error(w, "404 Not Found", http.StatusNotFound)
 	}
@@ -464,11 +466,81 @@ func apiJobListHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	globalRunningJobsLock.RUnlock()
 
-
 	result := struct {
 		Jobs []JobInfo `json:"jobs"`
 	}{
 		Jobs: jobInfos,
+	}
+
+	resultJson, err := json.Marshal(result)
+	if err != nil {
+		http.Error(w, "500 Internal Server Error (could not encode json response)", http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(resultJson)
+}
+
+func apiPlotAverageMutationsHandler(w http.ResponseWriter, r *http.Request) {
+	if !isAuthenticated(r) {
+		http.Error(w, "401 Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	jobId := r.URL.Query().Get("jobId")
+
+	globalRunningJobsLock.RLock()
+	bytes, err := ioutil.ReadFile(filepath.Join(globalJobsDir, jobId, "mendel.hst"))
+	globalRunningJobsLock.RUnlock()
+
+    if err != nil {
+		http.Error(w, "500 Internal Server Error (could not open mendel.hst)", http.StatusInternalServerError)
+		return
+    }
+
+	lines := strings.Split(string(bytes), "\n")
+
+	result := struct {
+		Generations []int `json:"generations"`
+		Deleterious []float64 `json:"deleterious"`
+		Neutral []float64 `json:"neutral"`
+		Favorable []float64 `json:"favorable"`
+	}{
+		Generations: []int{},
+		Deleterious: []float64{},
+		Neutral: []float64{},
+		Favorable: []float64{},
+	}
+
+	for _, line := range lines {
+		if strings.HasPrefix(line, "#") {
+			continue
+		}
+
+		for i, column := range strings.Fields(line) {
+			if i == 0 {
+				n, err := strconv.Atoi(column)
+				if err != nil {
+					log.Println("cannot parse int:", column)
+				} else {
+					result.Generations = append(result.Generations, n)
+				}
+			} else {
+				n, err := strconv.ParseFloat(column, 64)
+				if err != nil {
+					log.Println("cannot parse float64:", column)
+				} else {
+					if i == 1 {
+						result.Deleterious = append(result.Deleterious, n)
+					} else if i == 2 {
+						result.Neutral = append(result.Neutral, n)
+					} else if i == 3 {
+						result.Favorable = append(result.Favorable, n)
+					}
+				}
+			}
+		}
 	}
 
 	resultJson, err := json.Marshal(result)

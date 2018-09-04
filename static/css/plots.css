@@ -1,0 +1,40 @@
+.plots-view {
+    position: relative;
+    height: calc(100vh - 56px);
+}
+
+.plots-view__sidebar {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 400px;
+    height: 100%;
+    padding-top: 12px;
+    padding-bottom: 12px;
+    padding-left: 4px;
+    box-sizing: border-box;
+    overflow: auto;
+}
+
+.plots-view__sidebar__item {
+    padding: 12px 20px;
+    border-right: 4px solid transparent;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.plots-view__sidebar__item:hover {
+    background-color: #EEE;
+}
+
+.plots-view__sidebar--active {
+    border-right-color: #00B600;
+}
+
+.plots-view__plot {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: calc(100% - 400px);
+    height: 100%;
+}

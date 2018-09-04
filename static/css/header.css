@@ -1,6 +1,8 @@
 .page-header {
     background-color: #00B600;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    position: relative;
+    z-index: 2000;
 }
 
 .page-header__tabs {

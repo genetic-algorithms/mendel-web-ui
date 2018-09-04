@@ -291,7 +291,7 @@
 
     const Login = ReactRedux.connect(null, mapDispatchToProps$2)(Component$2);
 
-    function mapDispatchToProps$3(dispatch) {
+    function mapDispatchToProps$3(dispatch, ownProps) {
         return {
             onShowLogin: () => {
                 dispatch({
@@ -299,6 +299,15 @@
                     value: '/login/',
                 });
                 history.pushState(null, null, '/login/');
+            },
+            onPlotsClick: () => {
+                const url = '/jobs/' + ownProps.jobId + '/plots/average-mutations/';
+
+                dispatch({
+                    type: 'ROUTE',
+                    value: url,
+                });
+                history.pushState(null, null, url);
             },
         };
     }
@@ -362,7 +371,13 @@
                         'Status: ' + (this.state.done ? 'Done' : 'Running')
                     ),
                     (this.state.done ?
-                        React.createElement('div', { className: 'job-detail-view__plots-button button' }, 'Plots') :
+                        React.createElement('div',
+                            {
+                                className: 'job-detail-view__plots-button button',
+                                onClick: this.props.onPlotsClick,
+                            },
+                            'Plots',
+                        ) :
                         null
                     ),
                 ),
@@ -454,6 +469,110 @@
 
     const JobListing = ReactRedux.connect(null, mapDispatchToProps$4)(Component$4);
 
+    function mapDispatchToProps$5(dispatch) {
+        return {
+        };
+    }
+
+    class Component$5 extends React.Component {
+        constructor(props) {
+            super(props);
+
+        //     this.state = {
+        //         output: '',
+        //         done: false,
+        //     };
+
+            this.resizePlot = this.resizePlot.bind(this);
+
+            this.mounted = false;
+            this.plotElement = null;
+        }
+
+        resizePlot() {
+            Plotly.Plots.resize(this.plotElement);
+        }
+
+        componentDidMount() {
+            fetch('/api/plot-average-mutations/?jobId=' + encodeURIComponent(this.props.jobId), {
+                credentials: 'same-origin',
+            }).then(response => {
+                response.json().then(responseJson => {
+                    if (!this.mounted) return;
+
+                    console.log(responseJson);
+
+                    const trace1 = {
+                        x: responseJson.generations,
+                        y: responseJson.deleterious,
+                        type: 'scatter',
+                        name: 'Deleterious',
+                        line: {
+                            color: 'rgb(200, 0, 0)',
+                        },
+                    };
+
+                    const trace2 = {
+                        x: responseJson.generations,
+                        y: responseJson.neutral,
+                        type: 'scatter',
+                        name: 'Neutral',
+                        line: {
+                            color: 'rgb(0, 0, 200)',
+                        },
+                    };
+
+                    const trace3 = {
+                        x: responseJson.generations,
+                        y: responseJson.favorable,
+                        type: 'scatter',
+                        name: 'Favorable',
+                        line: {
+                            color: 'rgb(0, 200, 0)',
+                        },
+                    };
+
+                    Plotly.newPlot(this.plotElement, [trace1, trace2, trace3], {
+                        title: 'Average mutations/individual',
+                        autosize: true,
+                        xaxis: {
+                            title: 'Generations',
+                        },
+                        yaxis: {
+                            title: 'Mutations',
+                        },
+                    });
+                });
+            });
+
+            window.addEventListener('resize', this.resizePlot);
+
+            this.mounted = true;
+        }
+
+        componentWillUnmount() {
+            Plotly.purge(this.plotElement);
+            window.removeEventListener('resize', this.resizePlot);
+            this.mounted = false;
+        }
+
+        render() {
+            return React.createElement('div', { className: 'plots-view' },
+                React.createElement('div', { className: 'plots-view__sidebar' },
+                    React.createElement('div', { className: 'plots-view__sidebar__item plots-view__sidebar--active' }, 'Average mutations/individual'),
+                    React.createElement('div', { className: 'plots-view__sidebar__item' }, 'Fitness history'),
+                    React.createElement('div', { className: 'plots-view__sidebar__item' }, 'Distribution of accumulated mutations (deleterious)'),
+                    React.createElement('div', { className: 'plots-view__sidebar__item' }, 'Distribution of accumulated mutations (beneficial)'),
+                    React.createElement('div', { className: 'plots-view__sidebar__item' }, 'SNP Frequencies'),
+                    React.createElement('div', { className: 'plots-view__sidebar__item' }, 'Minor Allele Frequencies'),
+                ),
+                React.createElement('div', { className: 'plots-view__plot', ref: el => this.plotElement = el }),
+            );
+        }
+    }
+
+    const AverageMutations = ReactRedux.connect(null, mapDispatchToProps$5)(Component$5);
+
     function mapStateToProps$1(state) {
         return {
             route: state.route,
@@ -462,6 +581,7 @@
 
     function getView(route) {
         const jobDetailMatch = route.match(new RegExp('^/jobs/(\\w+)/$'));
+        const plotsAverageMutationsMatch = route.match(new RegExp('^/jobs/(\\w+)/plots/average-mutations/$'));
 
         if (route === '/') {
             return React.createElement(NewJob, {});
@@ -473,18 +593,22 @@
             return React.createElement(JobDetail, {
                 jobId: jobDetailMatch[1],
             });
+        } else if (plotsAverageMutationsMatch) {
+            return React.createElement(AverageMutations, {
+                jobId: plotsAverageMutationsMatch[1],
+            });
         } else {
             return null;
         }
     }
 
-    function Component$5(props) {
+    function Component$6(props) {
         return React.createElement('div', { className: 'page-content' },
             getView(props.route),
         );
     }
 
-    const Content = ReactRedux.connect(mapStateToProps$1)(Component$5);
+    const Content = ReactRedux.connect(mapStateToProps$1)(Component$6);
 
     function init() {
         const store = Redux.createStore(reducer);

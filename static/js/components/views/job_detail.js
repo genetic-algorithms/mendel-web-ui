@@ -1,4 +1,4 @@
-function mapDispatchToProps(dispatch) {
+function mapDispatchToProps(dispatch, ownProps) {
     return {
         onShowLogin: () => {
             dispatch({
@@ -6,6 +6,15 @@ function mapDispatchToProps(dispatch) {
                 value: '/login/',
             });
             history.pushState(null, null, '/login/');
+        },
+        onPlotsClick: () => {
+            const url = '/jobs/' + ownProps.jobId + '/plots/average-mutations/';
+
+            dispatch({
+                type: 'ROUTE',
+                value: url,
+            });
+            history.pushState(null, null, url);
         },
     };
 }
@@ -69,7 +78,13 @@ export class Component extends React.Component {
                     'Status: ' + (this.state.done ? 'Done' : 'Running')
                 ),
                 (this.state.done ?
-                    React.createElement('div', { className: 'job-detail-view__plots-button button' }, 'Plots') :
+                    React.createElement('div',
+                        {
+                            className: 'job-detail-view__plots-button button',
+                            onClick: this.props.onPlotsClick,
+                        },
+                        'Plots',
+                    ) :
                     null
                 ),
             ),

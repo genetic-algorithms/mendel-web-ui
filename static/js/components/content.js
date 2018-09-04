@@ -2,6 +2,7 @@ import { NewJob } from './views/new_job';
 import { Login } from './views/login';
 import { JobDetail } from './views/job_detail';
 import { JobListing } from './views/job_listing';
+import { AverageMutations } from './views/plots/average_mutations';
 
 function mapStateToProps(state) {
     return {
@@ -11,6 +12,7 @@ function mapStateToProps(state) {
 
 function getView(route) {
     const jobDetailMatch = route.match(new RegExp('^/jobs/(\\w+)/$'));
+    const plotsAverageMutationsMatch = route.match(new RegExp('^/jobs/(\\w+)/plots/average-mutations/$'));
 
     if (route === '/') {
         return React.createElement(NewJob, {});
@@ -21,6 +23,10 @@ function getView(route) {
     } else if (jobDetailMatch) {
         return React.createElement(JobDetail, {
             jobId: jobDetailMatch[1],
+        });
+    } else if (plotsAverageMutationsMatch) {
+        return React.createElement(AverageMutations, {
+            jobId: plotsAverageMutationsMatch[1],
         });
     } else {
         return null;
