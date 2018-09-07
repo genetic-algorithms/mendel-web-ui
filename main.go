@@ -119,6 +119,10 @@ func apiHandler(w http.ResponseWriter, r *http.Request) {
 		apiJobListHandler(w, r)
 	} else if r.URL.Path == "/api/plot-average-mutations/" {
 		apiPlotAverageMutationsHandler(w, r)
+	} else if r.URL.Path == "/api/plot-fitness-history/" {
+		apiPlotFitnessHistoryHandler(w, r)
+	} else if r.URL.Path == "/api/plot-deleterious-mutations/" {
+		apiPlotDeleteriousMutationsHandler(w, r)
 	} else {
 		http.Error(w, "404 Not Found", http.StatusNotFound)
 	}
@@ -216,6 +220,7 @@ func apiNewJobCreateHandler(w http.ResponseWriter, r *http.Request) {
 
 	type TomlConfigComputation struct {
 		DataFilePath string `toml:"data_file_path"`
+		PlotAlleleGens int `toml:"plot_allele_gens"`
 	}
 
 	type TomlConfig struct {
@@ -265,6 +270,7 @@ func apiNewJobCreateHandler(w http.ResponseWriter, r *http.Request) {
 		},
 		Computation: TomlConfigComputation{
 			DataFilePath: jobDir,
+			PlotAlleleGens: 1,
 		},
 	}
 
@@ -499,7 +505,7 @@ func apiPlotAverageMutationsHandler(w http.ResponseWriter, r *http.Request) {
 		return
     }
 
-	lines := strings.Split(string(bytes), "\n")
+	rows := parseSpaceSeparatedPlotFile(bytes)
 
 	result := struct {
 		Generations []int `json:"generations"`
@@ -513,33 +519,38 @@ func apiPlotAverageMutationsHandler(w http.ResponseWriter, r *http.Request) {
 		Favorable: []float64{},
 	}
 
-	for _, line := range lines {
-		if strings.HasPrefix(line, "#") {
+	for _, columns := range rows {
+		if len(columns) < 4 {
+			log.Println("not enough columns")
 			continue
 		}
 
-		for i, column := range strings.Fields(line) {
-			if i == 0 {
-				n, err := strconv.Atoi(column)
-				if err != nil {
-					log.Println("cannot parse int:", column)
-				} else {
-					result.Generations = append(result.Generations, n)
-				}
-			} else {
-				n, err := strconv.ParseFloat(column, 64)
-				if err != nil {
-					log.Println("cannot parse float64:", column)
-				} else {
-					if i == 1 {
-						result.Deleterious = append(result.Deleterious, n)
-					} else if i == 2 {
-						result.Neutral = append(result.Neutral, n)
-					} else if i == 3 {
-						result.Favorable = append(result.Favorable, n)
-					}
-				}
-			}
+		n, err := strconv.Atoi(columns[0])
+		if err != nil {
+			log.Println("cannot parse int:", columns[0])
+		} else {
+			result.Generations = append(result.Generations, n)
+		}
+
+		f, err := strconv.ParseFloat(columns[1], 64)
+		if err != nil {
+			log.Println("cannot parse float64:", columns[1])
+		} else {
+			result.Deleterious = append(result.Deleterious, f)
+		}
+
+		f, err = strconv.ParseFloat(columns[2], 64)
+		if err != nil {
+			log.Println("cannot parse float64:", columns[2])
+		} else {
+			result.Neutral = append(result.Neutral, f)
+		}
+
+		f, err = strconv.ParseFloat(columns[3], 64)
+		if err != nil {
+			log.Println("cannot parse float64:", columns[3])
+		} else {
+			result.Favorable = append(result.Favorable, f)
 		}
 	}
 
@@ -551,6 +562,145 @@ func apiPlotAverageMutationsHandler(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	w.Write(resultJson)
+}
+
+func apiPlotFitnessHistoryHandler(w http.ResponseWriter, r *http.Request) {
+	if !isAuthenticated(r) {
+		http.Error(w, "401 Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	jobId := r.URL.Query().Get("jobId")
+
+	globalRunningJobsLock.RLock()
+	bytes, err := ioutil.ReadFile(filepath.Join(globalJobsDir, jobId, "mendel.fit"))
+	globalRunningJobsLock.RUnlock()
+
+    if err != nil {
+		http.Error(w, "500 Internal Server Error (could not open mendel.hst)", http.StatusInternalServerError)
+		return
+    }
+
+	rows := parseSpaceSeparatedPlotFile(bytes)
+
+	result := struct {
+		Generations []int `json:"generations"`
+		PopSize []int `json:"pop_size"`
+		Fitness []float64 `json:"fitness"`
+	}{
+		Generations: []int{},
+		PopSize: []int{},
+		Fitness: []float64{},
+	}
+
+	for _, columns := range rows {
+		if len(columns) < 4 {
+			log.Println("not enough columns")
+			continue
+		}
+
+		n, err := strconv.Atoi(columns[0])
+		if err != nil {
+			log.Println("cannot parse int:", columns[0])
+		} else {
+			result.Generations = append(result.Generations, n)
+		}
+
+		n, err = strconv.Atoi(columns[1])
+		if err != nil {
+			log.Println("cannot parse int:", columns[1])
+		} else {
+			result.PopSize = append(result.PopSize, n)
+		}
+
+		f, err := strconv.ParseFloat(columns[3], 64)
+		if err != nil {
+			log.Println("cannot parse float64:", columns[3])
+		} else {
+			result.Fitness = append(result.Fitness, f)
+		}
+	}
+
+	resultJson, err := json.Marshal(result)
+	if err != nil {
+		http.Error(w, "500 Internal Server Error (could not encode json response)", http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(resultJson)
+}
+
+func apiPlotDeleteriousMutationsHandler(w http.ResponseWriter, r *http.Request) {
+	type GenerationData struct {
+		Generation int `json:"generation"`
+		BinMidpointFitness []float64 `json:"binmidpointfitness"`
+		Dominant []float64 `json:"dominant"`
+		Recessive []float64 `json:"recessive"`
+	}
+
+	if !isAuthenticated(r) {
+		http.Error(w, "401 Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	jobId := r.URL.Query().Get("jobId")
+
+	globalRunningJobsLock.RLock()
+	fileInfos, err := ioutil.ReadDir(filepath.Join(globalJobsDir, jobId, "allele-distribution-del"))
+
+    if err != nil {
+		globalRunningJobsLock.RUnlock()
+		http.Error(w, "500 Internal Server Error (could not list allele-distribution-del directory)", http.StatusInternalServerError)
+		return
+    }
+
+	result := []GenerationData{}
+	for _, fileInfo := range fileInfos {
+		fileName := fileInfo.Name()
+
+		if strings.HasSuffix(fileName, ".json") {
+			bytes, err := ioutil.ReadFile(filepath.Join(globalJobsDir, jobId, "allele-distribution-del", fileName))
+			if err != nil {
+				globalRunningJobsLock.RUnlock()
+				http.Error(w, "500 Internal Server Error (could not read file: " + fileName + ")", http.StatusInternalServerError)
+				return
+			}
+
+			var generationData GenerationData
+			err = json.Unmarshal(bytes, &generationData)
+			if err != nil {
+				globalRunningJobsLock.RUnlock()
+				http.Error(w, "500 Internal Server Error (could not parse json file: " + fileName + ")", http.StatusInternalServerError)
+				return
+			}
+
+			result = append(result, generationData)
+		}
+	}
+	globalRunningJobsLock.RUnlock()
+
+	resultJson, err := json.Marshal(result)
+	if err != nil {
+		http.Error(w, "500 Internal Server Error (could not encode json response)", http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(resultJson)
+}
+
+func parseSpaceSeparatedPlotFile(bytes []byte) [][]string {
+	lines := strings.Split(string(bytes), "\n")
+
+	numberLines := [][]string{}
+	for _, line := range lines {
+		if line != "" && !strings.HasPrefix(line, "#") {
+			numberLines = append(numberLines, strings.Fields(line))
+		}
+	}
+
+	return numberLines
 }
 
 func isValidPostJson(r *http.Request) bool {

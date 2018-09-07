@@ -1,6 +1,6 @@
 import { Sidebar } from './sidebar';
 
-export class AverageMutations extends React.Component {
+export class FitnessHistory extends React.Component {
     constructor(props) {
         super(props);
 
@@ -15,7 +15,7 @@ export class AverageMutations extends React.Component {
     }
 
     componentDidMount() {
-        fetch('/api/plot-average-mutations/?jobId=' + encodeURIComponent(this.props.jobId), {
+        fetch('/api/plot-fitness-history/?jobId=' + encodeURIComponent(this.props.jobId), {
             credentials: 'same-origin',
         }).then(response => {
             response.json().then(responseJson => {
@@ -24,40 +24,37 @@ export class AverageMutations extends React.Component {
                 const data = [
                     {
                         x: responseJson.generations,
-                        y: responseJson.deleterious,
+                        y: responseJson.fitness,
                         type: 'scatter',
-                        name: 'Deleterious',
+                        name: 'Fitness',
                         line: {
                             color: 'rgb(200, 0, 0)',
                         },
                     },
                     {
                         x: responseJson.generations,
-                        y: responseJson.neutral,
+                        y: responseJson.pop_size,
                         type: 'scatter',
-                        name: 'Neutral',
+                        name: 'Population Size',
                         line: {
                             color: 'rgb(0, 0, 200)',
                         },
-                    },
-                    {
-                        x: responseJson.generations,
-                        y: responseJson.favorable,
-                        type: 'scatter',
-                        name: 'Favorable',
-                        line: {
-                            color: 'rgb(0, 200, 0)',
-                        },
+                        yaxis: 'y2',
                     },
                 ];
 
                 const layout = {
-                    title: 'Average mutations/individual',
+                    title: 'Fitness history',
                     xaxis: {
                         title: 'Generations',
                     },
                     yaxis: {
-                        title: 'Mutations',
+                        title: 'Fitness',
+                    },
+                    yaxis2: {
+                        title: 'Population Size',
+                        overlaying: 'y',
+                        side: 'right',
                     },
                 };
 
@@ -78,7 +75,7 @@ export class AverageMutations extends React.Component {
 
     render() {
         return React.createElement('div', { className: 'plots-view' },
-            React.createElement(Sidebar, { jobId: this.props.jobId, activeSlug: 'average-mutations' }),
+            React.createElement(Sidebar, { jobId: this.props.jobId, activeSlug: 'fitness-history' }),
             React.createElement('div', { className: 'plots-view__non-sidebar' },
                 React.createElement('div', { className: 'plots-view__plot', ref: el => this.plotElement = el }),
             ),

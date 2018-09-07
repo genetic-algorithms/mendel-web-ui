@@ -469,19 +469,65 @@
 
     const JobListing = ReactRedux.connect(null, mapDispatchToProps$4)(Component$4);
 
-    function mapDispatchToProps$5(dispatch) {
+    const LINKS = [
+        {
+            title: 'Average mutations/individual',
+            slug: 'average-mutations',
+        },
+        {
+            title: 'Fitness history',
+            slug: 'fitness-history',
+        },
+        {
+            title: 'Distribution of accumulated mutations (deleterious)',
+            slug: 'deleterious-mutations',
+        },
+        {
+            title: 'Distribution of accumulated mutations (beneficial)',
+            slug: 'beneficial-mutations',
+        },
+        {
+            title: 'SNP Frequencies',
+            slug: 'snp-frequencies',
+        },
+        {
+            title: 'Minor Allele Frequencies',
+            slug: 'minor-allele-frequencies',
+        },
+    ];
+
+    function mapDispatchToProps$5(dispatch, ownProps) {
         return {
+            onClick: (slug) => {
+                const url = '/jobs/' + ownProps.jobId + '/plots/' + slug + '/';
+                dispatch({
+                    type: 'ROUTE',
+                    value: url,
+                });
+                history.pushState(null, null, url);
+            },
         };
     }
 
     class Component$5 extends React.Component {
+        render() {
+            return React.createElement('div', { className: 'plots-view__sidebar' },
+                LINKS.map(link => (
+                    React.createElement('div', {
+                        className: 'plots-view__sidebar__item ' + (this.props.activeSlug === link.slug ? 'plots-view__sidebar--active' : ''),
+                        onClick: () => this.props.onClick(link.slug),
+                        key: link.slug,
+                    }, link.title)
+                )),
+            );
+        }
+    }
+
+    const Sidebar = ReactRedux.connect(null, mapDispatchToProps$5)(Component$5);
+
+    class AverageMutations extends React.Component {
         constructor(props) {
             super(props);
-
-        //     this.state = {
-        //         output: '',
-        //         done: false,
-        //     };
 
             this.resizePlot = this.resizePlot.bind(this);
 
@@ -500,47 +546,258 @@
                 response.json().then(responseJson => {
                     if (!this.mounted) return;
 
-                    console.log(responseJson);
-
-                    const trace1 = {
-                        x: responseJson.generations,
-                        y: responseJson.deleterious,
-                        type: 'scatter',
-                        name: 'Deleterious',
-                        line: {
-                            color: 'rgb(200, 0, 0)',
+                    const data = [
+                        {
+                            x: responseJson.generations,
+                            y: responseJson.deleterious,
+                            type: 'scatter',
+                            name: 'Deleterious',
+                            line: {
+                                color: 'rgb(200, 0, 0)',
+                            },
                         },
-                    };
-
-                    const trace2 = {
-                        x: responseJson.generations,
-                        y: responseJson.neutral,
-                        type: 'scatter',
-                        name: 'Neutral',
-                        line: {
-                            color: 'rgb(0, 0, 200)',
+                        {
+                            x: responseJson.generations,
+                            y: responseJson.neutral,
+                            type: 'scatter',
+                            name: 'Neutral',
+                            line: {
+                                color: 'rgb(0, 0, 200)',
+                            },
                         },
-                    };
-
-                    const trace3 = {
-                        x: responseJson.generations,
-                        y: responseJson.favorable,
-                        type: 'scatter',
-                        name: 'Favorable',
-                        line: {
-                            color: 'rgb(0, 200, 0)',
+                        {
+                            x: responseJson.generations,
+                            y: responseJson.favorable,
+                            type: 'scatter',
+                            name: 'Favorable',
+                            line: {
+                                color: 'rgb(0, 200, 0)',
+                            },
                         },
-                    };
+                    ];
 
-                    Plotly.newPlot(this.plotElement, [trace1, trace2, trace3], {
+                    const layout = {
                         title: 'Average mutations/individual',
-                        autosize: true,
                         xaxis: {
                             title: 'Generations',
                         },
                         yaxis: {
                             title: 'Mutations',
                         },
+                    };
+
+                    Plotly.newPlot(this.plotElement, data, layout);
+                });
+            });
+
+            window.addEventListener('resize', this.resizePlot);
+
+            this.mounted = true;
+        }
+
+        componentWillUnmount() {
+            Plotly.purge(this.plotElement);
+            window.removeEventListener('resize', this.resizePlot);
+            this.mounted = false;
+        }
+
+        render() {
+            return React.createElement('div', { className: 'plots-view' },
+                React.createElement(Sidebar, { jobId: this.props.jobId, activeSlug: 'average-mutations' }),
+                React.createElement('div', { className: 'plots-view__non-sidebar' },
+                    React.createElement('div', { className: 'plots-view__plot', ref: el => this.plotElement = el }),
+                ),
+            );
+        }
+    }
+
+    class FitnessHistory extends React.Component {
+        constructor(props) {
+            super(props);
+
+            this.resizePlot = this.resizePlot.bind(this);
+
+            this.mounted = false;
+            this.plotElement = null;
+        }
+
+        resizePlot() {
+            Plotly.Plots.resize(this.plotElement);
+        }
+
+        componentDidMount() {
+            fetch('/api/plot-fitness-history/?jobId=' + encodeURIComponent(this.props.jobId), {
+                credentials: 'same-origin',
+            }).then(response => {
+                response.json().then(responseJson => {
+                    if (!this.mounted) return;
+
+                    const data = [
+                        {
+                            x: responseJson.generations,
+                            y: responseJson.fitness,
+                            type: 'scatter',
+                            name: 'Fitness',
+                            line: {
+                                color: 'rgb(200, 0, 0)',
+                            },
+                        },
+                        {
+                            x: responseJson.generations,
+                            y: responseJson.pop_size,
+                            type: 'scatter',
+                            name: 'Population Size',
+                            line: {
+                                color: 'rgb(0, 0, 200)',
+                            },
+                            yaxis: 'y2',
+                        },
+                    ];
+
+                    const layout = {
+                        title: 'Fitness history',
+                        xaxis: {
+                            title: 'Generations',
+                        },
+                        yaxis: {
+                            title: 'Fitness',
+                        },
+                        yaxis2: {
+                            title: 'Population Size',
+                            overlaying: 'y',
+                            side: 'right',
+                        },
+                    };
+
+                    Plotly.newPlot(this.plotElement, data, layout);
+                });
+            });
+
+            window.addEventListener('resize', this.resizePlot);
+
+            this.mounted = true;
+        }
+
+        componentWillUnmount() {
+            Plotly.purge(this.plotElement);
+            window.removeEventListener('resize', this.resizePlot);
+            this.mounted = false;
+        }
+
+        render() {
+            return React.createElement('div', { className: 'plots-view' },
+                React.createElement(Sidebar, { jobId: this.props.jobId, activeSlug: 'fitness-history' }),
+                React.createElement('div', { className: 'plots-view__non-sidebar' },
+                    React.createElement('div', { className: 'plots-view__plot', ref: el => this.plotElement = el }),
+                ),
+            );
+        }
+    }
+
+    class DeleteriousMutations extends React.Component {
+        constructor(props) {
+            super(props);
+
+            this.resizePlot = this.resizePlot.bind(this);
+            this.sliderInputChange = this.sliderInputChange.bind(this);
+
+            this.mounted = false;
+            this.plotElement = null;
+
+            this.state = {
+                data: [],
+                currentIndex : 0,
+            };
+        }
+
+        resizePlot() {
+            Plotly.Plots.resize(this.plotElement);
+        }
+
+        sliderInputChange(e) {
+            const newIndex = parseInt(e.target.value);
+
+            if (newIndex < this.state.data.length) {
+                Plotly.restyle(this.plotElement, {
+                    y: [this.state.data[newIndex].dominant, this.state.data[newIndex].recessive],
+                }, [0, 1]);
+            }
+
+            this.setState({
+                currentIndex: newIndex,
+            });
+        }
+
+        componentDidMount() {
+            fetch('/api/plot-deleterious-mutations/?jobId=' + encodeURIComponent(this.props.jobId), {
+                credentials: 'same-origin',
+            }).then(response => {
+                response.json().then(responseJson => {
+                    if (!this.mounted) return;
+
+                    let maxY = 0;
+                    for (let generation of responseJson) {
+                        for (let n of generation.dominant) {
+                            if (n > maxY) {
+                                maxY = n;
+                            }
+                        }
+
+                        for (let n of generation.recessive) {
+                            if (n > maxY) {
+                                maxY = n;
+                            }
+                        }
+                    }
+
+                    const generationData = responseJson[responseJson.length - 1];
+
+                    const data = [
+                        {
+                            x: generationData.binmidpointfitness,
+                            y: generationData.dominant,
+                            type: 'scatter',
+                            name: 'Dominant',
+                            line: {
+                                color: 'rgb(0, 200, 0)',
+                                shape: 'hvh',
+                            },
+                            fill: 'tozeroy',
+                            fillcolor: 'rgba(0, 200, 0, 0.5)',
+                        },
+                        {
+                            x: generationData.binmidpointfitness,
+                            y: generationData.recessive,
+                            type: 'scatter',
+                            name: 'Recessive',
+                            line: {
+                                color: 'rgb(200, 0, 0)',
+                                shape: 'hvh',
+                            },
+                            fill: 'tozeroy',
+                            fillcolor: 'rgba(200, 0, 0, 0.5)',
+                        },
+                    ];
+
+                    const layout = {
+                        title: 'Distribution of accumulated mutations (deleterious)',
+                        xaxis: {
+                            title: 'Mutational Fitness Degradation',
+                            type: 'log',
+                            autorange: 'reversed',
+                            exponentformat: 'e',
+                        },
+                        yaxis: {
+                            title: 'Fraction of Mutations Retained in Genome',
+                            range: [0, maxY],
+                        },
+                    };
+
+                    Plotly.newPlot(this.plotElement, data, layout);
+
+                    this.setState({
+                        data: responseJson,
+                        currentIndex: responseJson.length - 1,
                     });
                 });
             });
@@ -558,20 +815,26 @@
 
         render() {
             return React.createElement('div', { className: 'plots-view' },
-                React.createElement('div', { className: 'plots-view__sidebar' },
-                    React.createElement('div', { className: 'plots-view__sidebar__item plots-view__sidebar--active' }, 'Average mutations/individual'),
-                    React.createElement('div', { className: 'plots-view__sidebar__item' }, 'Fitness history'),
-                    React.createElement('div', { className: 'plots-view__sidebar__item' }, 'Distribution of accumulated mutations (deleterious)'),
-                    React.createElement('div', { className: 'plots-view__sidebar__item' }, 'Distribution of accumulated mutations (beneficial)'),
-                    React.createElement('div', { className: 'plots-view__sidebar__item' }, 'SNP Frequencies'),
-                    React.createElement('div', { className: 'plots-view__sidebar__item' }, 'Minor Allele Frequencies'),
+                React.createElement(Sidebar, { jobId: this.props.jobId, activeSlug: 'deleterious-mutations' }),
+                React.createElement('div', { className: 'plots-view__non-sidebar plots-view--has-slider' },
+                    React.createElement('div', { className: 'plots-view__plot', ref: el => this.plotElement = el }),
+                    React.createElement('div', { className: 'plots-view__slider' },
+                        React.createElement('div', { className: 'plots-view__slider-label' }, 'Generation:'),
+                        React.createElement('div', { className: 'plots-view__slider-number' },
+                            this.state.data.length === 0 ? '' : this.state.data[this.state.currentIndex].generation
+                        ),
+                        React.createElement('input', {
+                            className: 'plots-view__slider-input',
+                            type: 'range',
+                            max: this.state.data.length - 1,
+                            value: this.state.currentIndex,
+                            onChange: this.sliderInputChange,
+                        }),
+                    ),
                 ),
-                React.createElement('div', { className: 'plots-view__plot', ref: el => this.plotElement = el }),
             );
         }
     }
-
-    const AverageMutations = ReactRedux.connect(null, mapDispatchToProps$5)(Component$5);
 
     function mapStateToProps$1(state) {
         return {
@@ -581,7 +844,7 @@
 
     function getView(route) {
         const jobDetailMatch = route.match(new RegExp('^/jobs/(\\w+)/$'));
-        const plotsAverageMutationsMatch = route.match(new RegExp('^/jobs/(\\w+)/plots/average-mutations/$'));
+        const plotMatch = route.match(new RegExp('^/jobs/(\\w+)/plots/([\\w-]+)/$'));
 
         if (route === '/') {
             return React.createElement(NewJob, {});
@@ -593,10 +856,16 @@
             return React.createElement(JobDetail, {
                 jobId: jobDetailMatch[1],
             });
-        } else if (plotsAverageMutationsMatch) {
-            return React.createElement(AverageMutations, {
-                jobId: plotsAverageMutationsMatch[1],
-            });
+        } else if (plotMatch) {
+            const jobId = plotMatch[1];
+
+            if (plotMatch[2] === 'average-mutations') {
+                return React.createElement(AverageMutations, { jobId: jobId });
+            } else if (plotMatch[2] === 'fitness-history') {
+                return React.createElement(FitnessHistory, { jobId: jobId });
+            } else if (plotMatch[2] === 'deleterious-mutations') {
+                return React.createElement(DeleteriousMutations, { jobId: jobId });
+            }
         } else {
             return null;
         }

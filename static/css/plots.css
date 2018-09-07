@@ -31,10 +31,53 @@
     border-right-color: #00B600;
 }
 
-.plots-view__plot {
+.plots-view__non-sidebar {
     position: absolute;
     top: 0;
     right: 0;
     width: calc(100% - 400px);
     height: 100%;
+    background-color: #FFF;
+}
+
+.plots-view__plot {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 100%;
+    height: 100%;
+}
+
+.plots-view--has-slider .plots-view__plot {
+    height: calc(100% - 50px);
+}
+
+.plots-view__slider {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 50px;
+    display: flex;
+    align-items: center;
+}
+
+.plots-view__non-sidebar:not(.plots-view--has-slider) .plots-view__slider {
+    display: none;
+}
+
+.plots-view__slider-label {
+    margin-left: 20px;
+    font-size: 14px;
+}
+
+.plots-view__slider-number {
+    margin-left: 8px;
+    width: 60px;
+    font-size: 14px;
+}
+
+.plots-view__slider-input {
+    flex-grow: 1;
+    margin-right: 24px;
 }
