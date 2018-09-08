@@ -5,6 +5,9 @@ import { JobListing } from './views/job_listing';
 import { AverageMutations } from './views/plots/average_mutations';
 import { FitnessHistory } from './views/plots/fitness_history';
 import { DeleteriousMutations } from './views/plots/deleterious_mutations';
+import { BeneficialMutations } from './views/plots/beneficial_mutations';
+import { SnpFrequencies } from './views/plots/snp_frequencies';
+import { MinorAlleleFrequencies } from './views/plots/minor_allele_frequencies';
 
 function mapStateToProps(state) {
     return {
@@ -35,6 +38,12 @@ function getView(route) {
             return React.createElement(FitnessHistory, { jobId: jobId });
         } else if (plotMatch[2] === 'deleterious-mutations') {
             return React.createElement(DeleteriousMutations, { jobId: jobId });
+        } else if (plotMatch[2] === 'beneficial-mutations') {
+            return React.createElement(BeneficialMutations, { jobId: jobId });
+        } else if (plotMatch[2] === 'snp-frequencies') {
+            return React.createElement(SnpFrequencies, { jobId: jobId });
+        } else if (plotMatch[2] === 'minor-allele-frequencies') {
+            return React.createElement(MinorAlleleFrequencies, { jobId: jobId });
         }
     } else {
         return null;

@@ -123,6 +123,12 @@ func apiHandler(w http.ResponseWriter, r *http.Request) {
 		apiPlotFitnessHistoryHandler(w, r)
 	} else if r.URL.Path == "/api/plot-deleterious-mutations/" {
 		apiPlotDeleteriousMutationsHandler(w, r)
+	} else if r.URL.Path == "/api/plot-beneficial-mutations/" {
+		apiPlotBeneficialMutationsHandler(w, r)
+	} else if r.URL.Path == "/api/plot-snp-frequencies/" {
+		apiPlotSnpFrequenciesHandler(w, r)
+	} else if r.URL.Path == "/api/plot-minor-allele-frequencies/" {
+		apiPlotMinorAlleleFrequenciesHandler(w, r)
 	} else {
 		http.Error(w, "404 Not Found", http.StatusNotFound)
 	}
@@ -661,6 +667,189 @@ func apiPlotDeleteriousMutationsHandler(w http.ResponseWriter, r *http.Request) 
 
 		if strings.HasSuffix(fileName, ".json") {
 			bytes, err := ioutil.ReadFile(filepath.Join(globalJobsDir, jobId, "allele-distribution-del", fileName))
+			if err != nil {
+				globalRunningJobsLock.RUnlock()
+				http.Error(w, "500 Internal Server Error (could not read file: " + fileName + ")", http.StatusInternalServerError)
+				return
+			}
+
+			var generationData GenerationData
+			err = json.Unmarshal(bytes, &generationData)
+			if err != nil {
+				globalRunningJobsLock.RUnlock()
+				http.Error(w, "500 Internal Server Error (could not parse json file: " + fileName + ")", http.StatusInternalServerError)
+				return
+			}
+
+			result = append(result, generationData)
+		}
+	}
+	globalRunningJobsLock.RUnlock()
+
+	resultJson, err := json.Marshal(result)
+	if err != nil {
+		http.Error(w, "500 Internal Server Error (could not encode json response)", http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(resultJson)
+}
+
+func apiPlotBeneficialMutationsHandler(w http.ResponseWriter, r *http.Request) {
+	type GenerationData struct {
+		Generation int `json:"generation"`
+		BinMidpointFitness []float64 `json:"binmidpointfitness"`
+		Dominant []float64 `json:"dominant"`
+		Recessive []float64 `json:"recessive"`
+	}
+
+	if !isAuthenticated(r) {
+		http.Error(w, "401 Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	jobId := r.URL.Query().Get("jobId")
+
+	globalRunningJobsLock.RLock()
+	fileInfos, err := ioutil.ReadDir(filepath.Join(globalJobsDir, jobId, "allele-distribution-fav"))
+
+    if err != nil {
+		globalRunningJobsLock.RUnlock()
+		http.Error(w, "500 Internal Server Error (could not list allele-distribution-fav directory)", http.StatusInternalServerError)
+		return
+    }
+
+	result := []GenerationData{}
+	for _, fileInfo := range fileInfos {
+		fileName := fileInfo.Name()
+
+		if strings.HasSuffix(fileName, ".json") {
+			bytes, err := ioutil.ReadFile(filepath.Join(globalJobsDir, jobId, "allele-distribution-fav", fileName))
+			if err != nil {
+				globalRunningJobsLock.RUnlock()
+				http.Error(w, "500 Internal Server Error (could not read file: " + fileName + ")", http.StatusInternalServerError)
+				return
+			}
+
+			var generationData GenerationData
+			err = json.Unmarshal(bytes, &generationData)
+			if err != nil {
+				globalRunningJobsLock.RUnlock()
+				http.Error(w, "500 Internal Server Error (could not parse json file: " + fileName + ")", http.StatusInternalServerError)
+				return
+			}
+
+			result = append(result, generationData)
+		}
+	}
+	globalRunningJobsLock.RUnlock()
+
+	resultJson, err := json.Marshal(result)
+	if err != nil {
+		http.Error(w, "500 Internal Server Error (could not encode json response)", http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(resultJson)
+}
+
+func apiPlotSnpFrequenciesHandler(w http.ResponseWriter, r *http.Request) {
+	type GenerationData struct {
+		Generation int `json:"generation"`
+		Bins []int `json:"bins"`
+		Deleterious []int `json:"deleterious"`
+		Neutral []int `json:"neutral"`
+		Favorable []int `json:"favorable"`
+		DelInitialAlleles []int `json:"delInitialAlleles"`
+		FavInitialAlleles []int `json:"favInitialAlleles"`
+	}
+
+	if !isAuthenticated(r) {
+		http.Error(w, "401 Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	jobId := r.URL.Query().Get("jobId")
+
+	globalRunningJobsLock.RLock()
+	fileInfos, err := ioutil.ReadDir(filepath.Join(globalJobsDir, jobId, "allele-bins"))
+
+    if err != nil {
+		globalRunningJobsLock.RUnlock()
+		http.Error(w, "500 Internal Server Error (could not list allele-bins directory)", http.StatusInternalServerError)
+		return
+    }
+
+	result := []GenerationData{}
+	for _, fileInfo := range fileInfos {
+		fileName := fileInfo.Name()
+
+		if strings.HasSuffix(fileName, ".json") {
+			bytes, err := ioutil.ReadFile(filepath.Join(globalJobsDir, jobId, "allele-bins", fileName))
+			if err != nil {
+				globalRunningJobsLock.RUnlock()
+				http.Error(w, "500 Internal Server Error (could not read file: " + fileName + ")", http.StatusInternalServerError)
+				return
+			}
+
+			var generationData GenerationData
+			err = json.Unmarshal(bytes, &generationData)
+			if err != nil {
+				globalRunningJobsLock.RUnlock()
+				http.Error(w, "500 Internal Server Error (could not parse json file: " + fileName + ")", http.StatusInternalServerError)
+				return
+			}
+
+			result = append(result, generationData)
+		}
+	}
+	globalRunningJobsLock.RUnlock()
+
+	resultJson, err := json.Marshal(result)
+	if err != nil {
+		http.Error(w, "500 Internal Server Error (could not encode json response)", http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(resultJson)
+}
+
+func apiPlotMinorAlleleFrequenciesHandler(w http.ResponseWriter, r *http.Request) {
+	type GenerationData struct {
+		Generation int `json:"generation"`
+		Bins []int `json:"bins"`
+		Deleterious []float64 `json:"deleterious"`
+		Neutral []float64 `json:"neutral"`
+		Favorable []float64 `json:"favorable"`
+		DelInitialAlleles []float64 `json:"delInitialAlleles"`
+		FavInitialAlleles []float64 `json:"favInitialAlleles"`
+	}
+
+	if !isAuthenticated(r) {
+		http.Error(w, "401 Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	jobId := r.URL.Query().Get("jobId")
+
+	globalRunningJobsLock.RLock()
+	fileInfos, err := ioutil.ReadDir(filepath.Join(globalJobsDir, jobId, "normalized-allele-bins"))
+
+    if err != nil {
+		globalRunningJobsLock.RUnlock()
+		http.Error(w, "500 Internal Server Error (could not list normalized-allele-bins directory)", http.StatusInternalServerError)
+		return
+    }
+
+	result := []GenerationData{}
+	for _, fileInfo := range fileInfos {
+		fileName := fileInfo.Name()
+
+		if strings.HasSuffix(fileName, ".json") {
+			bytes, err := ioutil.ReadFile(filepath.Join(globalJobsDir, jobId, "normalized-allele-bins", fileName))
 			if err != nil {
 				globalRunningJobsLock.RUnlock()
 				http.Error(w, "500 Internal Server Error (could not read file: " + fileName + ")", http.StatusInternalServerError)
