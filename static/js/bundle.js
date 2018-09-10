@@ -400,7 +400,8 @@
             if (alleles) {
                 outputFiles.push('allele-bins/');
                 outputFiles.push('normalized-allele-bins/');
-                outputFiles.push('allele-distribution/');
+                outputFiles.push('allele-distribution-del/');
+                outputFiles.push('allele-distribution-fav/');
             }
 
             return outputFiles.join(',');

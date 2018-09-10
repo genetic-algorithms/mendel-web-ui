@@ -247,10 +247,9 @@ func apiNewJobCreateHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	decoder := json.NewDecoder(r.Body)
-	decoder.UseNumber()
 	var data struct {
 		Title string `json:"title"`
-		Config map[string]map[string]interface{} `json:"config"`
+		Config string `json:"config"`
 	}
 	err := decoder.Decode(&data)
 	if err != nil {
@@ -258,22 +257,11 @@ func apiNewJobCreateHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Convert json.Number instances to int64 or float64
-	for _, v1 := range data.Config {
-		for k2, v2 := range v1 {
-			number, ok := v2.(json.Number)
-			if ok {
-				i, err := number.Int64()
-				if err != nil {
-					f, err := number.Float64()
-					if err == nil {
-						v1[k2] = f
-					}
-				} else {
-					v1[k2] = i
-				}
-			}
-		}
+	var config map[string]map[string]interface{}
+	_, err = toml.Decode(data.Config, &config)
+	if err != nil {
+		http.Error(w, "400 Bad Request (parsing toml)", http.StatusBadRequest)
+		return
 	}
 
 	jobId, err := generateUuid()
@@ -289,8 +277,8 @@ func apiNewJobCreateHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	data.Config["basic"]["case_id"] = jobId
-	data.Config["computation"]["data_file_path"] = jobDir
+	config["basic"]["case_id"] = jobId
+	config["computation"]["data_file_path"] = jobDir
 
 	configFilePath := filepath.Join(jobDir, "mendel_go.toml")
 	configFile, err := os.Create(configFilePath)
@@ -299,7 +287,7 @@ func apiNewJobCreateHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = toml.NewEncoder(configFile).Encode(data.Config)
+	err = toml.NewEncoder(configFile).Encode(config)
 	if err != nil {
 		configFile.Close()
 		http.Error(w, "500 Internal Server Error (could not encode job config)", http.StatusInternalServerError)

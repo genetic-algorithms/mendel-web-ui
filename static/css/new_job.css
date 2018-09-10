@@ -44,6 +44,7 @@
     padding: 8px 10px;
 }
 
+.new-job-view__form input[type=text]:focus,
 .new-job-view__form input[type=number]:focus {
     outline: none;
     border-color: #CCC;
