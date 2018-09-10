@@ -1,3 +1,7 @@
+.new-job-view {
+    padding-bottom: 60px;
+}
+
 .new-job-view__form {
     max-width: 700px;
     padding-left: 24px;
@@ -18,18 +22,24 @@
     margin-bottom: 15px;
 }
 
+.new-job-view__field.new-job-view--indented {
+    padding-left: 50px;
+}
+
 .new-job-view__form label {
     display: block;
     font-size: 14px;
     flex-grow: 1;
 }
 
+.new-job-view__form input[type=text],
 .new-job-view__form input[type=number] {
     display: block;
     border: 1px solid transparent;
     width: 300px;
     font-size: 14px;
     font-family: "Roboto", sans-serif;
+    color: #333;
     box-sizing: border-box;
     padding: 8px 10px;
 }
@@ -37,6 +47,56 @@
 .new-job-view__form input[type=number]:focus {
     outline: none;
     border-color: #CCC;
+}
+
+.new-job-view__form input[type=text]:disabled,
+.new-job-view__form input[type=number]:disabled {
+    opacity: 0.5;
+    background-color: transparent;
+}
+
+.new-job-view__form select {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    display: block;
+    border: 1px solid transparent;
+    width: 300px;
+    font-size: 14px;
+    font-family: "Roboto", sans-serif;
+    color: #333;
+    box-sizing: border-box;
+    padding: 8px 10px;
+    background-color: #FFF;
+    border-radius: 0;
+    background-image: url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0Ij4KICAgIDxwYXRoIGQ9Ik03IDEwbDUgNSA1LTV6IiBmaWxsPSIjMzMzIiAvPgo8L3N2Zz4K);
+    background-repeat: no-repeat;
+    background-position: right center;
+}
+
+.new-job-view__form select:focus {
+    outline: none;
+    border-color: #CCC;
+}
+
+.new-job-view__form .new-job-view__checkbox-wrapper {
+    width: 300px;
+}
+
+.new-job-view__form .checkbox {
+    display: inline-block;
+    vertical-align: top;
+    padding: 5px;
+}
+
+.new-job-view__form .checkbox svg {
+    display: inline-block;
+    vertical-align: top;
+    fill: #333";
+}
+
+.new-job-view__form .checkbox.checkbox--checked svg {
+    fill: #00B600;
 }
 
 .new-job-view__form input[type=submit] {

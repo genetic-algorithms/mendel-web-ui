@@ -39,6 +39,7 @@ type JobMetaData struct {
 	Version int `json:"version"`
 	JobId string `json:"job_id"`
 	Time time.Time `json:"time"`
+	Title string `json:"title"`
 }
 
 var globalTemplateStore templateStore
@@ -77,10 +78,6 @@ func loadTemplates() templateStore {
 	}
 }
 
-func extendTemplate(base *template.Template, s string) *template.Template {
-	return template.Must(template.Must(base.Clone()).Parse(s))
-}
-
 func check(err error) {
 	if err != nil {
 		panic(err)
@@ -103,7 +100,28 @@ func loadSettings() (settings, error) {
 }
 
 func rootHandler(w http.ResponseWriter, r *http.Request) {
-	globalTemplateStore.base.Execute(w, nil)
+	type Context struct {
+		CssFiles []string
+		JsFiles []string
+	}
+
+	context := Context{
+		CssFiles: []string{
+			staticMtime("static/css/main.css"),
+			staticMtime("static/css/button.css"),
+			staticMtime("static/css/header.css"),
+			staticMtime("static/css/login.css"),
+			staticMtime("static/css/new_job.css"),
+			staticMtime("static/css/job_detail.css"),
+			staticMtime("static/css/job_listing.css"),
+			staticMtime("static/css/plots.css"),
+		},
+		JsFiles: []string{
+			staticMtime("static/js/bundle.js"),
+		},
+	}
+
+	globalTemplateStore.base.Execute(w, context)
 }
 
 func apiHandler(w http.ResponseWriter, r *http.Request) {
@@ -218,22 +236,6 @@ func apiNewJobHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func apiNewJobCreateHandler(w http.ResponseWriter, r *http.Request) {
-	type TomlConfigBasic struct {
-		CaseId string `toml:"case_id"`
-		PopSize int `toml:"pop_size"`
-		NumGenerations int `toml:"num_generations"`
-	}
-
-	type TomlConfigComputation struct {
-		DataFilePath string `toml:"data_file_path"`
-		PlotAlleleGens int `toml:"plot_allele_gens"`
-	}
-
-	type TomlConfig struct {
-		Basic TomlConfigBasic `toml:"basic"`
-		Computation TomlConfigComputation `toml:"computation"`
-	}
-
 	if !isAuthenticated(r) {
 		http.Error(w, "401 Unauthorized", http.StatusUnauthorized)
 		return
@@ -245,14 +247,33 @@ func apiNewJobCreateHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	decoder := json.NewDecoder(r.Body)
+	decoder.UseNumber()
 	var data struct {
-		PopSize string `json:"pop_size"`
-		NumGenerations string `json:"num_generations"`
+		Title string `json:"title"`
+		Config map[string]map[string]interface{} `json:"config"`
 	}
 	err := decoder.Decode(&data)
 	if err != nil {
 		http.Error(w, "400 Bad Request (parsing body)", http.StatusBadRequest)
 		return
+	}
+
+	// Convert json.Number instances to int64 or float64
+	for _, v1 := range data.Config {
+		for k2, v2 := range v1 {
+			number, ok := v2.(json.Number)
+			if ok {
+				i, err := number.Int64()
+				if err != nil {
+					f, err := number.Float64()
+					if err == nil {
+						v1[k2] = f
+					}
+				} else {
+					v1[k2] = i
+				}
+			}
+		}
 	}
 
 	jobId, err := generateUuid()
@@ -268,17 +289,8 @@ func apiNewJobCreateHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	config := TomlConfig{
-		Basic: TomlConfigBasic{
-			CaseId: jobId,
-			PopSize: 100,
-			NumGenerations: 20,
-		},
-		Computation: TomlConfigComputation{
-			DataFilePath: jobDir,
-			PlotAlleleGens: 1,
-		},
-	}
+	data.Config["basic"]["case_id"] = jobId
+	data.Config["computation"]["data_file_path"] = jobDir
 
 	configFilePath := filepath.Join(jobDir, "mendel_go.toml")
 	configFile, err := os.Create(configFilePath)
@@ -287,7 +299,7 @@ func apiNewJobCreateHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = toml.NewEncoder(configFile).Encode(config)
+	err = toml.NewEncoder(configFile).Encode(data.Config)
 	if err != nil {
 		configFile.Close()
 		http.Error(w, "500 Internal Server Error (could not encode job config)", http.StatusInternalServerError)
@@ -340,6 +352,7 @@ func apiNewJobCreateHandler(w http.ResponseWriter, r *http.Request) {
 			Version: 1,
 			JobId: jobId,
 			Time: time.Now().UTC(),
+			Title: data.Title,
 		}
 		metaDataJson, err := json.Marshal(metaData)
 		if err != nil {
@@ -439,6 +452,7 @@ func apiJobListHandler(w http.ResponseWriter, r *http.Request) {
 
 	type JobInfo struct {
 		JobId string `json:"job_id"`
+		Title string `json:"title"`
 		Time time.Time `json:"time"`
 		Done bool `json:"done"`
 	}
@@ -468,6 +482,7 @@ func apiJobListHandler(w http.ResponseWriter, r *http.Request) {
 
 		jobInfos = append(jobInfos, JobInfo{
 			JobId: metaData.JobId,
+			Title: metaData.Title,
 			Time: metaData.Time,
 			Done: !inProgress,
 		})
@@ -931,4 +946,13 @@ func generateUuid() (string, error) {
 	}
 
 	return hex.EncodeToString(bytes), nil
+}
+
+func staticMtime(path string) string {
+	fileInfo, err := os.Stat(path)
+	if err != nil {
+		fmt.Println("cannot stat file", path)
+	}
+
+	return fmt.Sprint("/", path, "?v=", fileInfo.ModTime().Unix())
 }
