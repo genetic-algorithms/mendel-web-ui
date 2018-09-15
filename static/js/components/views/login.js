@@ -15,20 +15,30 @@ export class Component extends React.Component {
         super(props);
 
         this.state = {
+            username: '',
             password: '',
             submitting: false,
             wrongCredentials: false,
         };
 
         this.onPasswordChange = this.onPasswordChange.bind(this);
+        this.onUsernameChange = this.onUsernameChange.bind(this);
         this.onSubmit = this.onSubmit.bind(this);
     }
 
     onPasswordChange(e) {
         const value = e.target.value;
 
-        this.setState((prevState) => (Object.assign({}, prevState, {
+        this.setState(prevState => (Object.assign({}, prevState, {
             password: value,
+        })));
+    }
+
+    onUsernameChange(e) {
+        const value = e.target.value;
+
+        this.setState(prevState => (Object.assign({}, prevState, {
+            username: value,
         })));
     }
 
@@ -37,13 +47,14 @@ export class Component extends React.Component {
 
         if (this.state.submitting) return;
 
-        this.setState((prevState) => (Object.assign({}, prevState, {
+        this.setState(prevState => (Object.assign({}, prevState, {
             submitting: true,
         })));
 
         fetch('/api/login/', {
             method: 'POST',
             body: JSON.stringify({
+                username: this.state.username,
                 password: this.state.password,
             }),
             headers: {
@@ -57,6 +68,7 @@ export class Component extends React.Component {
                 this.props.onShowHome();
             } else if (responseJson.status === 'wrong_credentials') {
                 this.setState({
+                    username: '',
                     password: '',
                     submitting: false,
                     wrongCredentials: true,
@@ -71,6 +83,14 @@ export class Component extends React.Component {
             React.createElement('form', { className: 'login-view__form', onSubmit: this.onSubmit },
                 React.createElement('input', {
                     className: 'login-view__input',
+                    type: 'text',
+                    placeholder: 'Username',
+                    value: this.state.username,
+                    required: true,
+                    onChange: this.onUsernameChange,
+                }),
+                React.createElement('input', {
+                    className: 'login-view__password login-view__input',
                     type: 'password',
                     placeholder: 'Password',
                     value: this.state.password,
@@ -79,7 +99,7 @@ export class Component extends React.Component {
                 }),
 
                 (this.state.wrongCredentials ?
-                    React.createElement('div', { className: 'login-view__form-error' }, 'Incorrect password') :
+                    React.createElement('div', { className: 'login-view__form-error' }, 'Incorrect credentials') :
                     null
                 ),
 

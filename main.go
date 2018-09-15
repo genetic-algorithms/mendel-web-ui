@@ -24,13 +24,6 @@ import (
 	"github.com/genetic-algorithms/mendel-web-example/templates"
 )
 
-type settings struct {
-	CookieHashKey []byte `json:"cookie_hash_key"`
-	CookieBlockKey []byte `json:"cookie_block_key"`
-	CsrfKey []byte `json:"csrf_key"`
-	Password string `json:"password"`
-}
-
 type templateStore struct {
 	base *template.Template
 }
@@ -42,8 +35,31 @@ type JobMetaData struct {
 	Title string `json:"title"`
 }
 
+type Database struct {
+	Version int `json:"version"`
+	CookieHashKey []byte `json:"cookie_hash_key"`
+	CookieBlockKey []byte `json:"cookie_block_key"`
+	Jobs map[string]DatabaseJob `json:"jobs"`
+	Users map[string]DatabaseUser `json:"users"`
+}
+
+type DatabaseJob struct {
+	Id string `json:"id"`
+	Time time.Time `json:"time"`
+	Title string `json:"title"`
+	OwnerId string `json:"owner_id"`
+}
+
+type DatabaseUser struct {
+	Id string `json:"id"`
+	Username string `json:"username"`
+	Password []byte `json:"password"`
+	IsAdmin bool `json:"is_admin"`
+}
+
 var globalTemplateStore templateStore
-var globalSettings settings
+var globalDb Database
+var globalDbLock sync.RWMutex
 var globalSecureCookie *securecookie.SecureCookie
 var globalRunningJobsOutput map[string]*strings.Builder
 var globalRunningJobsLock sync.RWMutex
@@ -51,15 +67,12 @@ var globalJobsDir string = "./output/jobs"
 
 
 func main() {
-	var err error
-
 	globalRunningJobsOutput = make(map[string]*strings.Builder)
 
 	globalTemplateStore = loadTemplates()
-	globalSettings, err = loadSettings()
-	check(err)
+	globalDb = loadDatabase()
 
-	globalSecureCookie = securecookie.New(globalSettings.CookieHashKey, globalSettings.CookieBlockKey)
+	globalSecureCookie = securecookie.New(globalDb.CookieHashKey, globalDb.CookieBlockKey)
 
 	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
 
@@ -69,6 +82,90 @@ func main() {
 	log.Fatal(http.ListenAndServe(":8580", nil))
 }
 
+func loadDatabase() Database {
+	_, err := os.Stat("./database")
+	if err != nil {
+		err = os.Mkdir("./database", 0755)
+		if err != nil {
+			panic(err)
+		}
+	}
+
+	_, err = os.Stat("./database/database.json")
+	if err != nil {
+		cookieHashKey := make([]byte, 64)
+		_, err = rand.Read(cookieHashKey);
+		if err != nil {
+			panic(err)
+		}
+
+		cookieBlockKey := make([]byte, 32)
+		_, err = rand.Read(cookieBlockKey);
+		if err != nil {
+			panic(err)
+		}
+
+		dbUserId, err := generateUuid()
+		if err != nil {
+			panic(err)
+		}
+		dbUserPassword, err := generateUuid()
+		if err != nil {
+			panic(err)
+		}
+		dbUserPasswordHash, err := bcrypt.GenerateFromPassword([]byte(dbUserPassword), bcrypt.DefaultCost)
+		if err != nil {
+			panic(err)
+		}
+
+		dbUser := DatabaseUser{
+			Id: dbUserId,
+			Username: "admin",
+			Password: dbUserPasswordHash,
+			IsAdmin: true,
+		}
+
+		dbUsers := make(map[string]DatabaseUser)
+		dbUsers[dbUser.Id] = dbUser
+
+		db := Database{
+			Version: 1,
+			CookieHashKey: cookieHashKey,
+			CookieBlockKey: cookieBlockKey,
+			Jobs: make(map[string]DatabaseJob),
+			Users: dbUsers,
+		}
+
+		dbJson, err := json.Marshal(db)
+		if err != nil {
+			panic(err)
+		}
+
+		err = ioutil.WriteFile("./database/database.json", dbJson, 0644)
+		if err != nil {
+			panic(err)
+		}
+
+		fmt.Println("Initialized database")
+		fmt.Println("Username:", dbUser.Username)
+		fmt.Println("Password:", dbUserPassword)
+
+		return db
+	}
+
+	bytes, err := ioutil.ReadFile("./database/database.json")
+	if err != nil {
+		panic(err)
+	}
+
+	var db Database
+	err = json.Unmarshal(bytes, &db)
+	if err != nil {
+		panic(err)
+	}
+
+	return db
+}
 
 func loadTemplates() templateStore {
 	base := template.Must(template.New("base").Parse(templates.Base))
@@ -76,27 +173,6 @@ func loadTemplates() templateStore {
 	return templateStore{
 		base: base,
 	}
-}
-
-func check(err error) {
-	if err != nil {
-		panic(err)
-	}
-}
-
-func loadSettings() (settings, error) {
-	raw, err := ioutil.ReadFile("./settings.json")
-    if err != nil {
-		return settings{}, err
-    }
-
-    var s settings
-    err = json.Unmarshal(raw, &s)
-    if err != nil {
-		return settings{}, err
-    }
-
-	return s, nil
 }
 
 func rootHandler(w http.ResponseWriter, r *http.Request) {
@@ -153,6 +229,10 @@ func apiHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func apiLoginHandler(w http.ResponseWriter, r *http.Request) {
+	type JsonResponse struct {
+		Status string `json:"status"`
+	}
+
 	if !isValidPostJson(r) {
 		http.Error(w, "400 Bad Request (method or content-type)", http.StatusBadRequest)
 		return
@@ -160,6 +240,7 @@ func apiLoginHandler(w http.ResponseWriter, r *http.Request) {
 
 	decoder := json.NewDecoder(r.Body)
 	var creds struct {
+		Username string `json:"username"`
 		Password string `json:"password"`
 	}
 	err := decoder.Decode(&creds)
@@ -168,53 +249,56 @@ func apiLoginHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = bcrypt.CompareHashAndPassword([]byte(globalSettings.Password), []byte(creds.Password))
-
-	status := "success"
-	var cookie *http.Cookie
-	if err == nil {
-		session := map[string]string{
-			"authenticated": "true",
+	globalDbLock.RLock()
+	user := DatabaseUser{}
+	for _, u := range globalDb.Users {
+		if u.Username == creds.Username {
+			user = u
+			break
 		}
-
-		encoded, err := globalSecureCookie.Encode("session", session)
-		if err != nil {
-			http.Error(w, "500 Internal Server Error (could not encode session cookie)", http.StatusInternalServerError)
-			return
-		}
-
-		cookie = &http.Cookie{
-            Name:  "session",
-            Value: encoded,
-            Path:  "/",
-			HttpOnly: true,
-        }
-	} else {
-		status = "wrong_credentials"
 	}
+	globalDbLock.RUnlock()
 
-	result := struct {
-		Status string `json:"status"`
-	}{
-		Status: status,
-	}
-
-	resultJson, err := json.Marshal(result)
-	if err != nil {
-		http.Error(w, "500 Internal Server Error (could not encode json response)", http.StatusInternalServerError)
+	if user.Id == "" {
+		responseJson, _ := json.Marshal(JsonResponse{Status: "wrong_credentials"})
+		w.Header().Set("Content-Type", "application/json")
+		w.Write(responseJson)
 		return
 	}
 
-	if cookie != nil {
-		http.SetCookie(w, cookie)
+	err = bcrypt.CompareHashAndPassword(user.Password, []byte(creds.Password))
+	if err != nil {
+		responseJson, _ := json.Marshal(JsonResponse{Status: "wrong_credentials"})
+		w.Header().Set("Content-Type", "application/json")
+		w.Write(responseJson)
+		return
 	}
 
+	session := map[string]string{
+		"authenticated_user_id": user.Id,
+	}
+
+	encoded, err := globalSecureCookie.Encode("session", session)
+	if err != nil {
+		http.Error(w, "500 Internal Server Error (could not encode session cookie)", http.StatusInternalServerError)
+		return
+	}
+
+	http.SetCookie(w, &http.Cookie{
+		Name:  "session",
+		Value: encoded,
+		Path:  "/",
+		HttpOnly: true,
+	})
+
+	responseJson, err := json.Marshal(JsonResponse{Status: "success"})
 	w.Header().Set("Content-Type", "application/json")
-	w.Write(resultJson)
+	w.Write(responseJson)
 }
 
 func apiNewJobHandler(w http.ResponseWriter, r *http.Request) {
-	if !isAuthenticated(r) {
+	user := getAuthenticatedUser(r)
+	if user.Id == "" {
 		http.Error(w, "401 Unauthorized", http.StatusUnauthorized)
 		return
 	}
@@ -236,7 +320,8 @@ func apiNewJobHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func apiNewJobCreateHandler(w http.ResponseWriter, r *http.Request) {
-	if !isAuthenticated(r) {
+	user := getAuthenticatedUser(r)
+	if user.Id == "" {
 		http.Error(w, "401 Unauthorized", http.StatusUnauthorized)
 		return
 	}
@@ -305,12 +390,12 @@ func apiNewJobCreateHandler(w http.ResponseWriter, r *http.Request) {
 		cmd := exec.Command("../mendel-go/mendel-go", "-f", configFilePath)
 		stdout, err := cmd.StdoutPipe()
 		if err != nil {
-			fmt.Println(err)
+			log.Println(err)
 		}
 
 		err = cmd.Start()
 		if err != nil {
-			fmt.Println(err)
+			log.Println(err)
 		}
 
 		scanner := bufio.NewScanner(stdout)
@@ -323,7 +408,7 @@ func apiNewJobCreateHandler(w http.ResponseWriter, r *http.Request) {
 
 		err = cmd.Wait()
 		if err != nil {
-			fmt.Println(err)
+			log.Println(err)
 		}
 
 		globalRunningJobsLock.Lock()
@@ -376,7 +461,8 @@ func apiNewJobCreateHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func apiJobOutputHandler(w http.ResponseWriter, r *http.Request) {
-	if !isAuthenticated(r) {
+	user := getAuthenticatedUser(r)
+	if user.Id == "" {
 		http.Error(w, "401 Unauthorized", http.StatusUnauthorized)
 		return
 	}
@@ -425,7 +511,8 @@ func apiJobOutputHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func apiJobListHandler(w http.ResponseWriter, r *http.Request) {
-	if !isAuthenticated(r) {
+	user := getAuthenticatedUser(r)
+	if user.Id == "" {
 		http.Error(w, "401 Unauthorized", http.StatusUnauthorized)
 		return
 	}
@@ -498,7 +585,8 @@ func apiJobListHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func apiPlotAverageMutationsHandler(w http.ResponseWriter, r *http.Request) {
-	if !isAuthenticated(r) {
+	user := getAuthenticatedUser(r)
+	if user.Id == "" {
 		http.Error(w, "401 Unauthorized", http.StatusUnauthorized)
 		return
 	}
@@ -574,7 +662,8 @@ func apiPlotAverageMutationsHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func apiPlotFitnessHistoryHandler(w http.ResponseWriter, r *http.Request) {
-	if !isAuthenticated(r) {
+	user := getAuthenticatedUser(r)
+	if user.Id == "" {
 		http.Error(w, "401 Unauthorized", http.StatusUnauthorized)
 		return
 	}
@@ -648,7 +737,8 @@ func apiPlotDeleteriousMutationsHandler(w http.ResponseWriter, r *http.Request) 
 		Recessive []float64 `json:"recessive"`
 	}
 
-	if !isAuthenticated(r) {
+	user := getAuthenticatedUser(r)
+	if user.Id == "" {
 		http.Error(w, "401 Unauthorized", http.StatusUnauthorized)
 		return
 	}
@@ -707,7 +797,8 @@ func apiPlotBeneficialMutationsHandler(w http.ResponseWriter, r *http.Request) {
 		Recessive []float64 `json:"recessive"`
 	}
 
-	if !isAuthenticated(r) {
+	user := getAuthenticatedUser(r)
+	if user.Id == "" {
 		http.Error(w, "401 Unauthorized", http.StatusUnauthorized)
 		return
 	}
@@ -769,7 +860,8 @@ func apiPlotSnpFrequenciesHandler(w http.ResponseWriter, r *http.Request) {
 		FavInitialAlleles []int `json:"favInitialAlleles"`
 	}
 
-	if !isAuthenticated(r) {
+	user := getAuthenticatedUser(r)
+	if user.Id == "" {
 		http.Error(w, "401 Unauthorized", http.StatusUnauthorized)
 		return
 	}
@@ -831,7 +923,8 @@ func apiPlotMinorAlleleFrequenciesHandler(w http.ResponseWriter, r *http.Request
 		FavInitialAlleles []float64 `json:"favInitialAlleles"`
 	}
 
-	if !isAuthenticated(r) {
+	user := getAuthenticatedUser(r)
+	if user.Id == "" {
 		http.Error(w, "401 Unauthorized", http.StatusUnauthorized)
 		return
 	}
@@ -909,20 +1002,31 @@ func isValidPostJson(r *http.Request) bool {
 	return true
 }
 
-func isAuthenticated(r *http.Request) bool {
+func getAuthenticatedUser(r *http.Request) DatabaseUser {
 	cookie, err := r.Cookie("session")
 	if err != nil {
-		return false
+		return DatabaseUser{}
 	}
 
 	session := make(map[string]string)
 	err = globalSecureCookie.Decode("session", cookie.Value, &session)
 	if err != nil {
-		return false
+		return DatabaseUser{}
 	}
 
-	val, ok := session["authenticated"]
-	return ok && val == "true"
+	user_id, ok := session["authenticated_user_id"]
+	if !ok {
+		return DatabaseUser{}
+	}
+
+	globalDbLock.RLock()
+	user, ok := globalDb.Users[user_id]
+	globalDbLock.RUnlock()
+	if !ok {
+		return DatabaseUser{}
+	}
+
+	return user
 }
 
 func generateUuid() (string, error) {
@@ -939,7 +1043,7 @@ func generateUuid() (string, error) {
 func staticMtime(path string) string {
 	fileInfo, err := os.Stat(path)
 	if err != nil {
-		fmt.Println("cannot stat file", path)
+		log.Println("cannot stat file", path)
 	}
 
 	return fmt.Sprint("/", path, "?v=", fileInfo.ModTime().Unix())

@@ -28,6 +28,10 @@
     border-color: #DDD;
 }
 
+.login-view__password {
+    margin-top: 15px;
+}
+
 .login-view__submit {
     margin-top: 40px;
 }
