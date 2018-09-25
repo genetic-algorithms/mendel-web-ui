@@ -63,19 +63,23 @@ export class Component extends React.Component {
                     React.createElement('div',
                         {
                             className: 'job-listing-view__job',
-                            key: job.job_id,
-                            onClick: () => this.props.onClick(job.job_id),
+                            key: job.id,
+                            onClick: () => this.props.onClick(job.id),
                         },
                         React.createElement('div', { className: 'job-listing-view__job__title' }, job.title),
                         React.createElement('div', { className: 'job-listing-view__job__time' }, moment(job.time).fromNow()),
                         React.createElement('div', { className: 'job-listing-view__job__status' },
-                            (job.done ? 'Done' : 'Running'),
+                            capitalizeFirstLetter(job.status),
                         ),
                     )
                 )),
             ),
         );
     }
+}
+
+function capitalizeFirstLetter(s) {
+    return s[0].toUpperCase() + s.substring(1);
 }
 
 export const JobListing = ReactRedux.connect(null, mapDispatchToProps)(Component);

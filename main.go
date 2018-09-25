@@ -48,6 +48,7 @@ type DatabaseJob struct {
 	Time time.Time `json:"time"`
 	Title string `json:"title"`
 	OwnerId string `json:"owner_id"`
+	Status string `json:"status"` // running, cancelled, failed, succeeded
 }
 
 type DatabaseUser struct {
@@ -386,6 +387,18 @@ func apiNewJobCreateHandler(w http.ResponseWriter, r *http.Request) {
 	globalRunningJobsOutput[jobId] = outputBuilder
 	globalRunningJobsLock.Unlock()
 
+	job := DatabaseJob{
+		Id: jobId,
+		Time: time.Now().UTC(),
+		Title: data.Title,
+		OwnerId: user.Id,
+		Status: "running",
+	}
+
+	globalDbLock.Lock()
+	globalDb.Jobs[jobId] = job
+	globalDbLock.Unlock()
+
 	go func() {
 		cmd := exec.Command("../mendel-go/mendel-go", "-f", configFilePath)
 		stdout, err := cmd.StdoutPipe()
@@ -409,39 +422,36 @@ func apiNewJobCreateHandler(w http.ResponseWriter, r *http.Request) {
 		err = cmd.Wait()
 		if err != nil {
 			log.Println(err)
+			job.Status = "failed"
+			globalDbLock.Lock()
+			globalDb.Jobs[jobId] = job
+			err = persistDatabase()
+			globalDbLock.Unlock()
+			if err != nil {
+				http.Error(w, "500 Internal Server Error (could not persist database)", http.StatusInternalServerError)
+				return
+			}
+		}
+
+		job.Status = "succeeded"
+		globalDbLock.Lock()
+		globalDb.Jobs[jobId] = job
+		err = persistDatabase()
+		globalDbLock.Unlock()
+		if err != nil {
+			http.Error(w, "500 Internal Server Error (could not persist database)", http.StatusInternalServerError)
+			return
 		}
 
 		globalRunningJobsLock.Lock()
+		defer globalRunningJobsLock.Unlock()
 		delete(globalRunningJobsOutput, jobId)
 
 		err = ioutil.WriteFile(filepath.Join(jobDir, "mendel_go.out"), []byte(outputBuilder.String()), 0644)
 		if err != nil {
-			globalRunningJobsLock.Unlock()
 			http.Error(w, "500 Internal Server Error (could not write to mendel_go.out file)", http.StatusInternalServerError)
 			return
 		}
-
-		metaData := JobMetaData{
-			Version: 1,
-			JobId: jobId,
-			Time: time.Now().UTC(),
-			Title: data.Title,
-		}
-		metaDataJson, err := json.Marshal(metaData)
-		if err != nil {
-			globalRunningJobsLock.Unlock()
-			http.Error(w, "500 Internal Server Error (could not encode metadata json)", http.StatusInternalServerError)
-			return
-		}
-
-		err = ioutil.WriteFile(filepath.Join(jobDir, "metadata.json"), metaDataJson, 0644)
-		if err != nil {
-			globalRunningJobsLock.Unlock()
-			http.Error(w, "500 Internal Server Error (could not write to metadata.json file)", http.StatusInternalServerError)
-			return
-		}
-
-		globalRunningJobsLock.Unlock()
 	}()
 
 	result := struct {
@@ -517,61 +527,21 @@ func apiJobListHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	globalRunningJobsLock.RLock()
-	fileInfos, err := ioutil.ReadDir(globalJobsDir)
-	if err != nil {
-		globalRunningJobsLock.RUnlock()
-		http.Error(w, "500 Internal Server Error (could not read jobs directory)", http.StatusInternalServerError)
-		return
+	jobs := []DatabaseJob{}
+	globalDbLock.RLock()
+	for _, job := range globalDb.Jobs {
+		jobs = append(jobs, job)
 	}
+	globalDbLock.RUnlock()
 
-	type JobInfo struct {
-		JobId string `json:"job_id"`
-		Title string `json:"title"`
-		Time time.Time `json:"time"`
-		Done bool `json:"done"`
-	}
-
-	jobInfos := []JobInfo{}
-
-	for _, fileInfo := range fileInfos {
-		if !fileInfo.IsDir() {
-			continue
-		}
-
-		jobId := fileInfo.Name()
-		_, inProgress := globalRunningJobsOutput[jobId]
-
-		rawMetaData, err := ioutil.ReadFile(filepath.Join(globalJobsDir, jobId, "metadata.json"))
-		if err != nil {
-			log.Println("cannot read metadata.json for job:", jobId)
-			continue
-		}
-
-		var metaData JobMetaData
-		err = json.Unmarshal(rawMetaData, &metaData)
-		if err != nil {
-			log.Println("cannot parse metadata.json for job:", jobId)
-			continue
-		}
-
-		jobInfos = append(jobInfos, JobInfo{
-			JobId: metaData.JobId,
-			Title: metaData.Title,
-			Time: metaData.Time,
-			Done: !inProgress,
-		})
-
-		sort.Slice(jobInfos, func(i, j int) bool {
-			return jobInfos[i].Time.After(jobInfos[j].Time)
-		})
-	}
-	globalRunningJobsLock.RUnlock()
+	sort.Slice(jobs, func(i, j int) bool {
+		return jobs[i].Time.After(jobs[j].Time)
+	})
 
 	result := struct {
-		Jobs []JobInfo `json:"jobs"`
+		Jobs []DatabaseJob `json:"jobs"`
 	}{
-		Jobs: jobInfos,
+		Jobs: jobs,
 	}
 
 	resultJson, err := json.Marshal(result)
@@ -1047,4 +1017,13 @@ func staticMtime(path string) string {
 	}
 
 	return fmt.Sprint("/", path, "?v=", fileInfo.ModTime().Unix())
+}
+
+func persistDatabase() error {
+	dbJson, err := json.Marshal(globalDb)
+	if err != nil {
+		return err
+	}
+
+	return ioutil.WriteFile("./database/database.json", dbJson, 0644)
 }
