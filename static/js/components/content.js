@@ -16,15 +16,18 @@ function mapStateToProps(state) {
 }
 
 function getView(route) {
-    const jobDetailMatch = route.match(new RegExp('^/jobs/(\\w+)/$'));
-    const plotMatch = route.match(new RegExp('^/jobs/(\\w+)/plots/([\\w-]+)/$'));
+    const jobListingMatch = route.match(new RegExp('^/job-listing/(\\w+)/$'));
+    const jobDetailMatch = route.match(new RegExp('^/job-detail/(\\w+)/$'));
+    const plotMatch = route.match(new RegExp('^/plots/(\\w+)/([\\w-]+)/$'));
 
     if (route === '/') {
         return React.createElement(NewJob, {});
     } else if (route === '/login/') {
         return React.createElement(Login, {});
-    } else if (route === '/jobs/') {
-        return React.createElement(JobListing, {});
+    } else if (jobListingMatch) {
+        return React.createElement(JobListing, {
+            filter: jobListingMatch[1],
+        });
     } else if (jobDetailMatch) {
         return React.createElement(JobDetail, {
             jobId: jobDetailMatch[1],

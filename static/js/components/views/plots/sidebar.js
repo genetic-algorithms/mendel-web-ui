@@ -28,7 +28,7 @@ const LINKS = [
 function mapDispatchToProps(dispatch, ownProps) {
     return {
         onClick: (slug) => {
-            const url = '/jobs/' + ownProps.jobId + '/plots/' + slug + '/';
+            const url = '/plots/' + ownProps.jobId + '/' + slug + '/';
             dispatch({
                 type: 'ROUTE',
                 value: url,

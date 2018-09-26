@@ -19,7 +19,7 @@ function mapDispatchToProps(dispatch) {
                 credentials: 'same-origin',
             }).then(response => {
                 response.json().then(responseJson => {
-                    const url = '/jobs/' + responseJson.job_id + '/';
+                    const url = '/job-detail/' + responseJson.job_id + '/';
                     dispatch({
                         type: 'ROUTE',
                         value: url,

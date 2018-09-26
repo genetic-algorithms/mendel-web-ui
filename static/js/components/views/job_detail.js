@@ -8,7 +8,7 @@ function mapDispatchToProps(dispatch, ownProps) {
             history.pushState(null, null, '/login/');
         },
         onPlotsClick: () => {
-            const url = '/jobs/' + ownProps.jobId + '/plots/average-mutations/';
+            const url = '/plots/' + ownProps.jobId + '/average-mutations/';
 
             dispatch({
                 type: 'ROUTE',
@@ -24,34 +24,38 @@ export class Component extends React.Component {
         super(props);
 
         this.fetchOutput = this.fetchOutput.bind(this);
+        this.fetchController = new AbortController();
+        this.fetchTimeout = null;
+        this.outputOffset = 0;
 
         this.state = {
             output: '',
             done: false,
         };
-
-        this.mounted = false;
-        this.outputOffset = 0;
     }
 
     componentDidMount() {
-        this.mounted = true;
         this.fetchOutput();
     }
 
     componentWillUnmount() {
-        this.mounted = false;
+        this.fetchController.abort();
+        window.clearTimeout(this.fetchTimeout);
     }
 
     fetchOutput() {
-        if (!this.mounted) return;
+        this.fetchController = new AbortController();
 
         fetch('/api/job-output/?jobId=' + encodeURIComponent(this.props.jobId) + '&offset=' + encodeURIComponent(this.outputOffset), {
             credentials: 'same-origin',
+            signal: this.fetchController.signal,
         }).then(response => {
-            response.json().then(responseJson => {
-                if (!this.mounted) return;
+            if (response.status === 401) {
+                this.props.onShowLogin();
+                return;
+            }
 
+            response.json().then(responseJson => {
                 this.outputOffset += responseJson.output.length;
 
                 this.setState((prevState, props) => ({
@@ -60,7 +64,7 @@ export class Component extends React.Component {
                 }));
 
                 if (!responseJson.done) {
-                    this.timeout = setTimeout(this.fetchOutput, 1000);
+                    this.fetchTimeout = setTimeout(this.fetchOutput, 1000);
                 }
             });
         });

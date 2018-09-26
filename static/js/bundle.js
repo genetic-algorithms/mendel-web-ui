@@ -45,9 +45,9 @@
             onJobsTabClick: () => {
                 dispatch({
                     type: 'ROUTE',
-                    value: '/jobs/',
+                    value: '/job-listing/mine/',
                 });
-                history.pushState(null, null, '/jobs/');
+                history.pushState(null, null, '/job-listing/mine/');
             },
         };
     }
@@ -60,7 +60,7 @@
                     onClick: props.onNewJobTabClick,
                 }, 'New Job'),
                 React.createElement('div', {
-                    className: 'page-header__tab ' + (props.route === '/jobs/' ? 'page-header--active-tab' : ''),
+                    className: 'page-header__tab ' + (props.route.match(new RegExp('^/job-listing/(\\w+)/$')) ? 'page-header--active-tab' : ''),
                     onClick: props.onJobsTabClick,
                 }, 'Jobs'),
             ),
@@ -143,7 +143,7 @@
                     credentials: 'same-origin',
                 }).then(response => {
                     response.json().then(responseJson => {
-                        const url = '/jobs/' + responseJson.job_id + '/';
+                        const url = '/job-detail/' + responseJson.job_id + '/';
                         dispatch({
                             type: 'ROUTE',
                             value: url,
@@ -555,7 +555,7 @@
                 history.pushState(null, null, '/login/');
             },
             onPlotsClick: () => {
-                const url = '/jobs/' + ownProps.jobId + '/plots/average-mutations/';
+                const url = '/plots/' + ownProps.jobId + '/average-mutations/';
 
                 dispatch({
                     type: 'ROUTE',
@@ -571,34 +571,38 @@
             super(props);
 
             this.fetchOutput = this.fetchOutput.bind(this);
+            this.fetchController = new AbortController();
+            this.fetchTimeout = null;
+            this.outputOffset = 0;
 
             this.state = {
                 output: '',
                 done: false,
             };
-
-            this.mounted = false;
-            this.outputOffset = 0;
         }
 
         componentDidMount() {
-            this.mounted = true;
             this.fetchOutput();
         }
 
         componentWillUnmount() {
-            this.mounted = false;
+            this.fetchController.abort();
+            window.clearTimeout(this.fetchTimeout);
         }
 
         fetchOutput() {
-            if (!this.mounted) return;
+            this.fetchController = new AbortController();
 
             fetch('/api/job-output/?jobId=' + encodeURIComponent(this.props.jobId) + '&offset=' + encodeURIComponent(this.outputOffset), {
                 credentials: 'same-origin',
+                signal: this.fetchController.signal,
             }).then(response => {
-                response.json().then(responseJson => {
-                    if (!this.mounted) return;
+                if (response.status === 401) {
+                    this.props.onShowLogin();
+                    return;
+                }
 
+                response.json().then(responseJson => {
                     this.outputOffset += responseJson.output.length;
 
                     this.setState((prevState, props) => ({
@@ -607,7 +611,7 @@
                     }));
 
                     if (!responseJson.done) {
-                        this.timeout = setTimeout(this.fetchOutput, 1000);
+                        this.fetchTimeout = setTimeout(this.fetchOutput, 1000);
                     }
                 });
             });
@@ -651,7 +655,7 @@
                 history.pushState(null, null, '/login/');
             },
             onClick: (jobId) => {
-                const url = '/jobs/' + jobId + '/';
+                const url = '/job-detail/' + jobId + '/';
                 dispatch({
                     type: 'ROUTE',
                     value: url,
@@ -665,22 +669,40 @@
         constructor(props) {
             super(props);
 
+            this.onFilterChanged = this.onFilterChanged.bind(this);
+            this.fetchController = new AbortController();
+
             this.state = {
                 jobs: [],
+                all: false,
             };
-
-            this.mounted = false;
         }
 
-        componentDidMount() {
-            this.mounted = true;
+        onFilterChanged(e) {
+            const value = e.target.value;
+            const all = value === 'all';
 
-            fetch('/api/job-list/', {
+            this.fetchJobs(all);
+
+            this.setState({
+                all: all,
+            });
+        }
+
+        fetchJobs(all) {
+            this.fetchController.abort();
+            this.fetchController = new AbortController();
+
+            fetch('/api/job-list/?filter=' + (all ? 'all' : 'mine'), {
                 credentials: 'same-origin',
+                signal: this.fetchController.signal,
             }).then(response => {
-                response.json().then(responseJson => {
-                    if (!this.mounted) return;
+                if (response.status === 401) {
+                    this.props.onShowLogin();
+                    return;
+                }
 
+                response.json().then(responseJson => {
                     this.setState({
                         jobs: responseJson.jobs,
                     });
@@ -688,13 +710,26 @@
             });
         }
 
+        componentDidMount() {
+            this.fetchJobs(this.state.all);
+        }
+
         componentWillUnmount() {
-            this.mounted = false;
+            this.fetchController.abort();
         }
 
         render() {
             return React.createElement('div', { className: 'job-listing-view' },
                 React.createElement('div', { className: 'job-listing-view__title' }, 'Jobs'),
+                React.createElement('select',
+                    {
+                        className: 'job-listing-view__filter',
+                        value: this.state.all ? 'all' : 'mine',
+                        onChange: this.onFilterChanged,
+                    },
+                    React.createElement('option', { value: 'mine' }, 'My Jobs'),
+                    React.createElement('option', { value: 'all' }, 'All Jobs'),
+                ),
                 React.createElement('div', { className: 'job-listing-view__jobs' },
                     React.createElement('div', { className: 'job-listing-view__labels' },
                         React.createElement('div', { className: 'job-listing-view__labels__title' }, 'Title'),
@@ -757,7 +792,7 @@
     function mapDispatchToProps$5(dispatch, ownProps) {
         return {
             onClick: (slug) => {
-                const url = '/jobs/' + ownProps.jobId + '/plots/' + slug + '/';
+                const url = '/plots/' + ownProps.jobId + '/' + slug + '/';
                 dispatch({
                     type: 'ROUTE',
                     value: url,
@@ -789,7 +824,7 @@
 
             this.resizePlot = this.resizePlot.bind(this);
 
-            this.mounted = false;
+            this.fetchController = new AbortController();
             this.plotElement = null;
         }
 
@@ -798,12 +833,13 @@
         }
 
         componentDidMount() {
+            this.fetchController = new AbortController();
+
             fetch('/api/plot-average-mutations/?jobId=' + encodeURIComponent(this.props.jobId), {
                 credentials: 'same-origin',
+                signal: this.fetchController.signal,
             }).then(response => {
                 response.json().then(responseJson => {
-                    if (!this.mounted) return;
-
                     const data = [
                         {
                             x: responseJson.generations,
@@ -849,14 +885,12 @@
             });
 
             window.addEventListener('resize', this.resizePlot);
-
-            this.mounted = true;
         }
 
         componentWillUnmount() {
             Plotly.purge(this.plotElement);
             window.removeEventListener('resize', this.resizePlot);
-            this.mounted = false;
+            this.fetchController.abort();
         }
 
         render() {
@@ -875,7 +909,7 @@
 
             this.resizePlot = this.resizePlot.bind(this);
 
-            this.mounted = false;
+            this.fetchController = new AbortController();
             this.plotElement = null;
         }
 
@@ -884,12 +918,13 @@
         }
 
         componentDidMount() {
+            this.fetchController = new AbortController();
+
             fetch('/api/plot-fitness-history/?jobId=' + encodeURIComponent(this.props.jobId), {
                 credentials: 'same-origin',
+                signal: this.fetchController.signal,
             }).then(response => {
                 response.json().then(responseJson => {
-                    if (!this.mounted) return;
-
                     const data = [
                         {
                             x: responseJson.generations,
@@ -932,14 +967,12 @@
             });
 
             window.addEventListener('resize', this.resizePlot);
-
-            this.mounted = true;
         }
 
         componentWillUnmount() {
             Plotly.purge(this.plotElement);
             window.removeEventListener('resize', this.resizePlot);
-            this.mounted = false;
+            this.fetchController.abort();
         }
 
         render() {
@@ -959,7 +992,7 @@
             this.resizePlot = this.resizePlot.bind(this);
             this.sliderInputChange = this.sliderInputChange.bind(this);
 
-            this.mounted = false;
+            this.fetchController = new AbortController();
             this.plotElement = null;
 
             this.state = {
@@ -987,12 +1020,13 @@
         }
 
         componentDidMount() {
+            this.fetchController = new AbortController();
+
             fetch('/api/plot-deleterious-mutations/?jobId=' + encodeURIComponent(this.props.jobId), {
                 credentials: 'same-origin',
+                signal: this.fetchController.signal,
             }).then(response => {
                 response.json().then(responseJson => {
-                    if (!this.mounted) return;
-
                     let maxY = 0;
                     for (let generation of responseJson) {
                         for (let n of generation.dominant) {
@@ -1061,14 +1095,12 @@
             });
 
             window.addEventListener('resize', this.resizePlot);
-
-            this.mounted = true;
         }
 
         componentWillUnmount() {
             Plotly.purge(this.plotElement);
             window.removeEventListener('resize', this.resizePlot);
-            this.mounted = false;
+            this.fetchController.abort();
         }
 
         render() {
@@ -1101,7 +1133,7 @@
             this.resizePlot = this.resizePlot.bind(this);
             this.sliderInputChange = this.sliderInputChange.bind(this);
 
-            this.mounted = false;
+            this.fetchController = new AbortController();
             this.plotElement = null;
 
             this.state = {
@@ -1129,12 +1161,13 @@
         }
 
         componentDidMount() {
+            this.fetchController = new AbortController();
+
             fetch('/api/plot-beneficial-mutations/?jobId=' + encodeURIComponent(this.props.jobId), {
                 credentials: 'same-origin',
+                signal: this.fetchController.signal,
             }).then(response => {
                 response.json().then(responseJson => {
-                    if (!this.mounted) return;
-
                     let maxY = 0;
                     for (let generation of responseJson) {
                         for (let n of generation.dominant) {
@@ -1202,14 +1235,12 @@
             });
 
             window.addEventListener('resize', this.resizePlot);
-
-            this.mounted = true;
         }
 
         componentWillUnmount() {
             Plotly.purge(this.plotElement);
             window.removeEventListener('resize', this.resizePlot);
-            this.mounted = false;
+            this.fetchController.abort();
         }
 
         render() {
@@ -1242,7 +1273,7 @@
             this.resizePlot = this.resizePlot.bind(this);
             this.sliderInputChange = this.sliderInputChange.bind(this);
 
-            this.mounted = false;
+            this.fetchController = new AbortController();
             this.plotElement = null;
 
             this.state = {
@@ -1276,12 +1307,13 @@
         }
 
         componentDidMount() {
+            this.fetchController = new AbortController();
+
             fetch('/api/plot-snp-frequencies/?jobId=' + encodeURIComponent(this.props.jobId), {
                 credentials: 'same-origin',
+                signal: this.fetchController.signal,
             }).then(response => {
                 response.json().then(responseJson => {
-                    if (!this.mounted) return;
-
                     let maxY = 0;
                     for (let generation of responseJson) {
                         for (let n of generation.deleterious) {
@@ -1401,14 +1433,12 @@
             });
 
             window.addEventListener('resize', this.resizePlot);
-
-            this.mounted = true;
         }
 
         componentWillUnmount() {
             Plotly.purge(this.plotElement);
             window.removeEventListener('resize', this.resizePlot);
-            this.mounted = false;
+            this.fetchController.abort();
         }
 
         render() {
@@ -1441,7 +1471,7 @@
             this.resizePlot = this.resizePlot.bind(this);
             this.sliderInputChange = this.sliderInputChange.bind(this);
 
-            this.mounted = false;
+            this.fetchController = new AbortController();
             this.plotElement = null;
 
             this.state = {
@@ -1475,12 +1505,13 @@
         }
 
         componentDidMount() {
+            this.fetchController = new AbortController();
+
             fetch('/api/plot-minor-allele-frequencies/?jobId=' + encodeURIComponent(this.props.jobId), {
                 credentials: 'same-origin',
+                signal: this.fetchController.signal,
             }).then(response => {
                 response.json().then(responseJson => {
-                    if (!this.mounted) return;
-
                     const generationData = responseJson[responseJson.length - 1];
 
                     const data = [
@@ -1567,14 +1598,12 @@
             });
 
             window.addEventListener('resize', this.resizePlot);
-
-            this.mounted = true;
         }
 
         componentWillUnmount() {
             Plotly.purge(this.plotElement);
             window.removeEventListener('resize', this.resizePlot);
-            this.mounted = false;
+            this.fetchController.abort();
         }
 
         render() {
@@ -1607,15 +1636,18 @@
     }
 
     function getView(route) {
-        const jobDetailMatch = route.match(new RegExp('^/jobs/(\\w+)/$'));
-        const plotMatch = route.match(new RegExp('^/jobs/(\\w+)/plots/([\\w-]+)/$'));
+        const jobListingMatch = route.match(new RegExp('^/job-listing/(\\w+)/$'));
+        const jobDetailMatch = route.match(new RegExp('^/job-detail/(\\w+)/$'));
+        const plotMatch = route.match(new RegExp('^/plots/(\\w+)/([\\w-]+)/$'));
 
         if (route === '/') {
             return React.createElement(NewJob, {});
         } else if (route === '/login/') {
             return React.createElement(Login, {});
-        } else if (route === '/jobs/') {
-            return React.createElement(JobListing, {});
+        } else if (jobListingMatch) {
+            return React.createElement(JobListing, {
+                filter: jobListingMatch[1],
+            });
         } else if (jobDetailMatch) {
             return React.createElement(JobDetail, {
                 jobId: jobDetailMatch[1],

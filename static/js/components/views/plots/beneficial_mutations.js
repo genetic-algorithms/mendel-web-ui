@@ -7,7 +7,7 @@ export class BeneficialMutations extends React.Component {
         this.resizePlot = this.resizePlot.bind(this);
         this.sliderInputChange = this.sliderInputChange.bind(this);
 
-        this.mounted = false;
+        this.fetchController = new AbortController();
         this.plotElement = null;
 
         this.state = {
@@ -35,12 +35,13 @@ export class BeneficialMutations extends React.Component {
     }
 
     componentDidMount() {
+        this.fetchController = new AbortController();
+
         fetch('/api/plot-beneficial-mutations/?jobId=' + encodeURIComponent(this.props.jobId), {
             credentials: 'same-origin',
+            signal: this.fetchController.signal,
         }).then(response => {
             response.json().then(responseJson => {
-                if (!this.mounted) return;
-
                 let maxY = 0;
                 for (let generation of responseJson) {
                     for (let n of generation.dominant) {
@@ -108,14 +109,12 @@ export class BeneficialMutations extends React.Component {
         });
 
         window.addEventListener('resize', this.resizePlot);
-
-        this.mounted = true;
     }
 
     componentWillUnmount() {
         Plotly.purge(this.plotElement);
         window.removeEventListener('resize', this.resizePlot);
-        this.mounted = false;
+        this.fetchController.abort();
     }
 
     render() {

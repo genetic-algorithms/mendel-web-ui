@@ -5,12 +5,40 @@
     padding-bottom: 60px;
     margin-left: auto;
     margin-right: auto;
+    position: relative;
 }
 
 .job-listing-view__title {
     font-size: 30px;
     padding-top: 40px;
     padding-bottom: 40px;
+}
+
+.job-listing-view__filter {
+    position: absolute;
+    top: 40px;
+    right: 0;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    display: block;
+    border: 1px solid transparent;
+    width: 150px;
+    font-size: 14px;
+    font-family: "Roboto", sans-serif;
+    color: #333;
+    box-sizing: border-box;
+    padding: 8px 10px;
+    background-color: #FFF;
+    border-radius: 0;
+    background-image: url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0Ij4KICAgIDxwYXRoIGQ9Ik03IDEwbDUgNSA1LTV6IiBmaWxsPSIjMzMzIiAvPgo8L3N2Zz4K);
+    background-repeat: no-repeat;
+    background-position: right center;
+}
+
+.job-listing-view__filter:focus {
+    outline: none;
+    border-color: #CCC;
 }
 
 .job-listing-view__labels {

@@ -8,7 +8,7 @@ function mapDispatchToProps(dispatch) {
             history.pushState(null, null, '/login/');
         },
         onClick: (jobId) => {
-            const url = '/jobs/' + jobId + '/';
+            const url = '/job-detail/' + jobId + '/';
             dispatch({
                 type: 'ROUTE',
                 value: url,
@@ -22,22 +22,40 @@ export class Component extends React.Component {
     constructor(props) {
         super(props);
 
+        this.onFilterChanged = this.onFilterChanged.bind(this);
+        this.fetchController = new AbortController();
+
         this.state = {
             jobs: [],
+            all: false,
         };
-
-        this.mounted = false;
     }
 
-    componentDidMount() {
-        this.mounted = true;
+    onFilterChanged(e) {
+        const value = e.target.value;
+        const all = value === 'all';
 
-        fetch('/api/job-list/', {
+        this.fetchJobs(all);
+
+        this.setState({
+            all: all,
+        });
+    }
+
+    fetchJobs(all) {
+        this.fetchController.abort();
+        this.fetchController = new AbortController();
+
+        fetch('/api/job-list/?filter=' + (all ? 'all' : 'mine'), {
             credentials: 'same-origin',
+            signal: this.fetchController.signal,
         }).then(response => {
-            response.json().then(responseJson => {
-                if (!this.mounted) return;
+            if (response.status === 401) {
+                this.props.onShowLogin();
+                return;
+            }
 
+            response.json().then(responseJson => {
                 this.setState({
                     jobs: responseJson.jobs,
                 });
@@ -45,13 +63,26 @@ export class Component extends React.Component {
         });
     }
 
+    componentDidMount() {
+        this.fetchJobs(this.state.all);
+    }
+
     componentWillUnmount() {
-        this.mounted = false;
+        this.fetchController.abort();
     }
 
     render() {
         return React.createElement('div', { className: 'job-listing-view' },
             React.createElement('div', { className: 'job-listing-view__title' }, 'Jobs'),
+            React.createElement('select',
+                {
+                    className: 'job-listing-view__filter',
+                    value: this.state.all ? 'all' : 'mine',
+                    onChange: this.onFilterChanged,
+                },
+                React.createElement('option', { value: 'mine' }, 'My Jobs'),
+                React.createElement('option', { value: 'all' }, 'All Jobs'),
+            ),
             React.createElement('div', { className: 'job-listing-view__jobs' },
                 React.createElement('div', { className: 'job-listing-view__labels' },
                     React.createElement('div', { className: 'job-listing-view__labels__title' }, 'Title'),
