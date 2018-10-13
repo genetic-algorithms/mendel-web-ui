@@ -1,0 +1,61 @@
+.user-listing-view {
+    max-width: 1000px;
+    padding-left: 24px;
+    padding-right: 24px;
+    padding-bottom: 60px;
+    margin-left: auto;
+    margin-right: auto;
+    position: relative;
+}
+
+.user-listing-view__title {
+    font-size: 30px;
+    padding-top: 40px;
+    padding-bottom: 40px;
+}
+
+.user-listing-view__create-button {
+    position: absolute;
+    top: 40px;
+    right: 24px;
+}
+
+.user-listing-view__labels {
+    display: flex;
+    border-bottom: 1px solid #DDD;
+}
+
+.user-listing-view__user {
+    display: flex;
+    cursor: pointer;
+    border-bottom: 1px solid #DDD;
+}
+
+.user-listing-view__user:hover {
+    background-color: #EEE;
+}
+
+.user-listing-view__labels__username,
+.user-listing-view__labels__admin,
+.user-listing-view__user__username,
+.user-listing-view__user__admin {
+    padding: 14px 0;
+    font-size: 14px;
+}
+
+.user-listing-view__labels__username,
+.user-listing-view__labels__admin {
+    font-weight: 700;
+}
+
+.user-listing-view__labels__username,
+.user-listing-view__user__username {
+    width: calc(100% - 100px);
+    box-sizing: border-box;
+    padding-right: 20px;
+}
+
+.user-listing-view__labels__admin,
+.user-listing-view__user__admin {
+    width: 100px;
+}

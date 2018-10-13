@@ -1,7 +1,9 @@
 import { NewJob } from './views/new_job';
 import { Login } from './views/login';
-import { JobDetail } from './views/job_detail';
 import { JobListing } from './views/job_listing';
+import { UserListing } from './views/user_listing';
+import { CreateUser } from './views/create_user';
+import { JobDetail } from './views/job_detail';
 import { AverageMutations } from './views/plots/average_mutations';
 import { FitnessHistory } from './views/plots/fitness_history';
 import { DeleteriousMutations } from './views/plots/deleterious_mutations';
@@ -16,7 +18,6 @@ function mapStateToProps(state) {
 }
 
 function getView(route) {
-    const jobListingMatch = route.match(new RegExp('^/job-listing/(\\w+)/$'));
     const jobDetailMatch = route.match(new RegExp('^/job-detail/(\\w+)/$'));
     const plotMatch = route.match(new RegExp('^/plots/(\\w+)/([\\w-]+)/$'));
 
@@ -24,10 +25,12 @@ function getView(route) {
         return React.createElement(NewJob, {});
     } else if (route === '/login/') {
         return React.createElement(Login, {});
-    } else if (jobListingMatch) {
-        return React.createElement(JobListing, {
-            filter: jobListingMatch[1],
-        });
+    } else if (route === '/job-listing/') {
+        return React.createElement(JobListing);
+    } else if (route === '/user-listing/') {
+        return React.createElement(UserListing);
+    } else if (route === '/create-user/') {
+        return React.createElement(CreateUser);
     } else if (jobDetailMatch) {
         return React.createElement(JobDetail, {
             jobId: jobDetailMatch[1],

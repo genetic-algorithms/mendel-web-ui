@@ -16,9 +16,16 @@ function mapDispatchToProps(dispatch) {
         onJobsTabClick: () => {
             dispatch({
                 type: 'ROUTE',
-                value: '/job-listing/mine/',
+                value: '/job-listing/',
             });
-            history.pushState(null, null, '/job-listing/mine/');
+            history.pushState(null, null, '/job-listing/');
+        },
+        onUsersTabClick: () => {
+            dispatch({
+                type: 'ROUTE',
+                value: '/user-listing/',
+            });
+            history.pushState(null, null, '/user-listing/');
         },
     };
 }
@@ -31,9 +38,13 @@ function Component(props) {
                 onClick: props.onNewJobTabClick,
             }, 'New Job'),
             React.createElement('div', {
-                className: 'page-header__tab ' + (props.route.match(new RegExp('^/job-listing/(\\w+)/$')) ? 'page-header--active-tab' : ''),
+                className: 'page-header__tab ' + (props.route === '/job-listing/' ? 'page-header--active-tab' : ''),
                 onClick: props.onJobsTabClick,
             }, 'Jobs'),
+            React.createElement('div', {
+                className: 'page-header__tab ' + (props.route === '/user-listing/' ? 'page-header--active-tab' : ''),
+                onClick: props.onUsersTabClick,
+            }, 'Users'),
         ),
     );
 }

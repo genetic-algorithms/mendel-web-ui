@@ -17,7 +17,7 @@
 .job-listing-view__filter {
     position: absolute;
     top: 40px;
-    right: 0;
+    right: 24px;
     -webkit-appearance: none;
     -moz-appearance: none;
     appearance: none;

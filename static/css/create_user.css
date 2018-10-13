@@ -1,0 +1,82 @@
+.create-user-view {
+    max-width: 400px;
+    padding-left: 24px;
+    padding-right: 24px;
+    padding-bottom: 60px;
+    margin-left: auto;
+    margin-right: auto;
+    position: relative;
+}
+
+.create-user-view__title {
+    font-size: 30px;
+    padding-top: 40px;
+    padding-bottom: 40px;
+}
+
+.create-user-view__form label {
+    display: block;
+    font-size: 14px;
+    margin-bottom: 5px;
+}
+
+.create-user-view__form label:not(:first-child) {
+    margin-top: 25px;
+}
+
+.create-user-view__form input[type=text],
+.create-user-view__form input[type=password] {
+    display: block;
+    border: 1px solid transparent;
+    width: 100%;
+    font-size: 14px;
+    font-family: "Roboto", sans-serif;
+    color: #333;
+    box-sizing: border-box;
+    padding: 8px 10px;
+}
+
+.create-user-view__form input[type=text]:focus,
+.create-user-view__form input[type=password]:focus {
+    outline: none;
+    border-color: #CCC;
+}
+
+.create-user-view__checkbox-wrapper {
+    margin-top: 20px;
+}
+
+.create-user-view__checkbox-wrapper .checkbox {
+    display: inline-block;
+    vertical-align: middle;
+    padding: 5px;
+    margin-left: -8px;
+}
+
+.create-user-view__checkbox-wrapper .checkbox svg {
+    fill: #333;
+    display: inline-block;
+    vertical-align: top;
+}
+
+.create-user-view__checkbox-wrapper .checkbox.checkbox--checked svg {
+    fill: #00B600;
+}
+
+.create-user-view__form .create-user-view__checkbox-wrapper label {
+    display: inline-block;
+    vertical-align: middle;
+    margin-top: 0;
+    margin-bottom: 0;
+    padding-left: 5px;
+}
+
+.create-user-view__form input[type=submit] {
+    margin-top: 40px;
+}
+
+.create-user-view__error {
+    color: #F00;
+    font-size: 12px;
+    margin-top: 5px;
+}

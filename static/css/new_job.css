@@ -93,7 +93,7 @@
 .new-job-view__form .checkbox svg {
     display: inline-block;
     vertical-align: top;
-    fill: #333";
+    fill: #333;
 }
 
 .new-job-view__form .checkbox.checkbox--checked svg {

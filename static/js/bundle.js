@@ -45,9 +45,16 @@
             onJobsTabClick: () => {
                 dispatch({
                     type: 'ROUTE',
-                    value: '/job-listing/mine/',
+                    value: '/job-listing/',
                 });
-                history.pushState(null, null, '/job-listing/mine/');
+                history.pushState(null, null, '/job-listing/');
+            },
+            onUsersTabClick: () => {
+                dispatch({
+                    type: 'ROUTE',
+                    value: '/user-listing/',
+                });
+                history.pushState(null, null, '/user-listing/');
             },
         };
     }
@@ -60,9 +67,13 @@
                     onClick: props.onNewJobTabClick,
                 }, 'New Job'),
                 React.createElement('div', {
-                    className: 'page-header__tab ' + (props.route.match(new RegExp('^/job-listing/(\\w+)/$')) ? 'page-header--active-tab' : ''),
+                    className: 'page-header__tab ' + (props.route === '/job-listing/' ? 'page-header--active-tab' : ''),
                     onClick: props.onJobsTabClick,
                 }, 'Jobs'),
+                React.createElement('div', {
+                    className: 'page-header__tab ' + (props.route === '/user-listing/' ? 'page-header--active-tab' : ''),
+                    onClick: props.onUsersTabClick,
+                }, 'Users'),
             ),
         );
     }
@@ -477,9 +488,9 @@
 
             if (this.state.submitting) return;
 
-            this.setState(prevState => (Object.assign({}, prevState, {
+            this.setState({
                 submitting: true,
-            })));
+            });
 
             fetch('/api/login/', {
                 method: 'POST',
@@ -545,107 +556,7 @@
 
     const Login = ReactRedux.connect(null, mapDispatchToProps$2)(Component$2);
 
-    function mapDispatchToProps$3(dispatch, ownProps) {
-        return {
-            onShowLogin: () => {
-                dispatch({
-                    type: 'ROUTE',
-                    value: '/login/',
-                });
-                history.pushState(null, null, '/login/');
-            },
-            onPlotsClick: () => {
-                const url = '/plots/' + ownProps.jobId + '/average-mutations/';
-
-                dispatch({
-                    type: 'ROUTE',
-                    value: url,
-                });
-                history.pushState(null, null, url);
-            },
-        };
-    }
-
-    class Component$3 extends React.Component {
-        constructor(props) {
-            super(props);
-
-            this.fetchOutput = this.fetchOutput.bind(this);
-            this.fetchController = new AbortController();
-            this.fetchTimeout = null;
-            this.outputOffset = 0;
-
-            this.state = {
-                output: '',
-                done: false,
-            };
-        }
-
-        componentDidMount() {
-            this.fetchOutput();
-        }
-
-        componentWillUnmount() {
-            this.fetchController.abort();
-            window.clearTimeout(this.fetchTimeout);
-        }
-
-        fetchOutput() {
-            this.fetchController = new AbortController();
-
-            fetch('/api/job-output/?jobId=' + encodeURIComponent(this.props.jobId) + '&offset=' + encodeURIComponent(this.outputOffset), {
-                credentials: 'same-origin',
-                signal: this.fetchController.signal,
-            }).then(response => {
-                if (response.status === 401) {
-                    this.props.onShowLogin();
-                    return;
-                }
-
-                response.json().then(responseJson => {
-                    this.outputOffset += responseJson.output.length;
-
-                    this.setState((prevState, props) => ({
-                        output: prevState.output + responseJson.output,
-                        done: responseJson.done,
-                    }));
-
-                    if (!responseJson.done) {
-                        this.fetchTimeout = setTimeout(this.fetchOutput, 1000);
-                    }
-                });
-            });
-        }
-
-        render() {
-            return React.createElement('div', { className: 'job-detail-view' },
-                React.createElement('div', { className: 'job-detail-view__title' },
-                    'Job',
-                    React.createElement('span', { className: 'job-detail-view__job-id' }, this.props.jobId),
-                ),
-                React.createElement('pre', { className: 'job-detail-view__output' }, this.state.output),
-                React.createElement('div', { className: 'job-detail-view__bottom' },
-                    React.createElement('div', { className: 'job-detail-view__status' },
-                        'Status: ' + (this.state.done ? 'Done' : 'Running')
-                    ),
-                    (this.state.done ?
-                        React.createElement('div',
-                            {
-                                className: 'job-detail-view__plots-button button',
-                                onClick: this.props.onPlotsClick,
-                            },
-                            'Plots',
-                        ) :
-                        null
-                    ),
-                ),
-            );
-        }
-    }
-
-    const JobDetail = ReactRedux.connect(null, mapDispatchToProps$3)(Component$3);
-
-    function mapDispatchToProps$4(dispatch) {
+    function mapDispatchToProps$3(dispatch) {
         return {
             onShowLogin: () => {
                 dispatch({
@@ -665,7 +576,7 @@
         };
     }
 
-    class Component$4 extends React.Component {
+    class Component$3 extends React.Component {
         constructor(props) {
             super(props);
 
@@ -760,7 +671,363 @@
         return s[0].toUpperCase() + s.substring(1);
     }
 
-    const JobListing = ReactRedux.connect(null, mapDispatchToProps$4)(Component$4);
+    const JobListing = ReactRedux.connect(null, mapDispatchToProps$3)(Component$3);
+
+    function mapDispatchToProps$4(dispatch) {
+        return {
+            onShowLogin: () => {
+                dispatch({
+                    type: 'ROUTE',
+                    value: '/login/',
+                });
+                history.pushState(null, null, '/login/');
+            },
+            onClick: (userId) => {
+                const url = '/user-detail/' + userId + '/';
+                dispatch({
+                    type: 'ROUTE',
+                    value: url,
+                });
+                history.pushState(null, null, url);
+            },
+            onCreateClick: () => {
+                const url = '/create-user/';
+                dispatch({
+                    type: 'ROUTE',
+                    value: url,
+                });
+                history.pushState(null, null, url);
+            },
+        };
+    }
+
+    class Component$4 extends React.Component {
+        constructor(props) {
+            super(props);
+
+            this.fetchController = new AbortController();
+
+            this.state = {
+                users: [],
+            };
+        }
+
+        fetchUsers() {
+            this.fetchController.abort();
+            this.fetchController = new AbortController();
+
+            fetch('/api/user-list/', {
+                credentials: 'same-origin',
+                signal: this.fetchController.signal,
+            }).then(response => {
+                if (response.status === 401) {
+                    this.props.onShowLogin();
+                    return;
+                }
+
+                response.json().then(responseJson => {
+                    this.setState({
+                        users: responseJson.users,
+                    });
+                });
+            });
+        }
+
+        componentDidMount() {
+            this.fetchUsers();
+        }
+
+        componentWillUnmount() {
+            this.fetchController.abort();
+        }
+
+        render() {
+            return React.createElement('div', { className: 'user-listing-view' },
+                React.createElement('div', { className: 'user-listing-view__title' }, 'Users'),
+                React.createElement('div', {
+                    className: 'user-listing-view__create-button button',
+                    onClick: this.props.onCreateClick,
+                }, 'Create User'),
+                React.createElement('div', { className: 'user-listing-view__users' },
+                    React.createElement('div', { className: 'user-listing-view__labels' },
+                        React.createElement('div', { className: 'user-listing-view__labels__username' }, 'Username'),
+                        React.createElement('div', { className: 'user-listing-view__labels__admin' }, 'Admin'),
+                    ),
+
+                    this.state.users.map(user => (
+                        React.createElement('div',
+                            {
+                                className: 'user-listing-view__user',
+                                key: user.id,
+                                onClick: () => this.props.onClick(user.id),
+                            },
+                            React.createElement('div', { className: 'user-listing-view__user__username' }, user.username),
+                            React.createElement('div', { className: 'user-listing-view__user__admin' }, user.is_admin ? 'Admin' : ''),
+                        )
+                    )),
+                ),
+            );
+        }
+    }
+
+    const UserListing = ReactRedux.connect(null, mapDispatchToProps$4)(Component$4);
+
+    function mapDispatchToProps$5(dispatch) {
+        return {
+            setRoute: url => {
+                dispatch({
+                    type: 'ROUTE',
+                    value: url,
+                });
+                history.pushState(null, null, url);
+            },
+        };
+    }
+
+    class Component$5 extends React.Component {
+        constructor(props) {
+            super(props);
+
+            this.fetchController = new AbortController();
+
+            this.onUsernameChange = this.onUsernameChange.bind(this);
+            this.onPasswordChange = this.onPasswordChange.bind(this);
+            this.onConfirmPasswordChange = this.onConfirmPasswordChange.bind(this);
+            this.onIsAdminChange = this.onIsAdminChange.bind(this);
+            this.onSubmit = this.onSubmit.bind(this);
+
+            this.state = {
+                username: '',
+                password: '',
+                confirmPassword: '',
+                isAdmin: false,
+                submitting: false,
+                usernameExists: false,
+            };
+        }
+
+        onUsernameChange(e) {
+            this.setState({
+                username: e.target.value,
+                usernameExists: false,
+            });
+        }
+
+        onPasswordChange(e) {
+            this.setState({
+                password: e.target.value,
+            });
+        }
+
+        onConfirmPasswordChange(e) {
+            this.setState({
+                confirmPassword: e.target.value,
+            });
+        }
+
+        onIsAdminChange() {
+            this.setState(prevState => ({
+                isAdmin: !prevState.isAdmin,
+            }));
+        }
+
+        onSubmit(e) {
+            e.preventDefault();
+
+            if (this.state.submitting) return;
+
+            if (this.state.confirmPassword !== this.state.password) return;
+
+            this.setState({
+                submitting: true,
+            });
+
+            fetch('/api/create-user/', {
+                method: 'POST',
+                body: JSON.stringify({
+                    username: this.state.username,
+                    password: this.state.password,
+                    confirm_password: this.state.confirmPassword,
+                    is_admin: this.state.isAdmin,
+                }),
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                credentials: 'same-origin',
+            }).then(response => {
+                if (response.status === 401) {
+                    this.props.setRoute('/login/');
+                    return;
+                }
+
+                response.json().then(responseJson => {
+                    if (responseJson.error === 'username_exists') {
+                        this.setState({
+                            usernameExists: true,
+                            submitting: false,
+                        });
+                    } else {
+                        this.props.setRoute('/user-listing/');
+                    }
+                });
+            });
+        }
+
+        render() {
+            return React.createElement('div', { className: 'create-user-view' },
+                React.createElement('div', { className: 'create-user-view__title' }, 'Create User'),
+                React.createElement('form', { className: 'create-user-view__form', onSubmit: this.onSubmit },
+                    React.createElement('label', null, 'Username'),
+                    React.createElement('input', {
+                        type: 'text',
+                        required: true,
+                        value: this.state.username,
+                        onChange: this.onUsernameChange,
+                    }),
+                    (this.state.usernameExists ?
+                        React.createElement('div', { className: 'create-user-view__error' }, 'Username is already taken') :
+                        null
+                    ),
+
+                    React.createElement('label', null, 'Password'),
+                    React.createElement('input', {
+                        type: 'password',
+                        required: true,
+                        value: this.state.password,
+                        onChange: this.onPasswordChange,
+                    }),
+
+                    React.createElement('label', null, 'Confirm Password'),
+                    React.createElement('input', {
+                        type: 'password',
+                        required: true,
+                        value: this.state.confirmPassword,
+                        onChange: this.onConfirmPasswordChange,
+                    }),
+                    (this.state.confirmPassword !== this.state.password ?
+                        React.createElement('div', { className: 'create-user-view__error' }, 'Does not match password') :
+                        null
+                    ),
+
+                    React.createElement('div', { className: 'create-user-view__checkbox-wrapper' },
+                        React.createElement(Checkbox, {
+                            checked: this.state.isAdmin,
+                            onChange: this.onIsAdminChange,
+                        }),
+                        React.createElement('label', { onClick: this.onIsAdminChange }, 'Admin'),
+                    ),
+
+                    React.createElement('input', {
+                        className: 'button',
+                        type: 'submit',
+                        value: this.state.submitting ? 'Processing…' : 'Create',
+                    }),
+                ),
+            );
+        }
+    }
+
+    const CreateUser = ReactRedux.connect(null, mapDispatchToProps$5)(Component$5);
+
+    function mapDispatchToProps$6(dispatch, ownProps) {
+        return {
+            onShowLogin: () => {
+                dispatch({
+                    type: 'ROUTE',
+                    value: '/login/',
+                });
+                history.pushState(null, null, '/login/');
+            },
+            onPlotsClick: () => {
+                const url = '/plots/' + ownProps.jobId + '/average-mutations/';
+
+                dispatch({
+                    type: 'ROUTE',
+                    value: url,
+                });
+                history.pushState(null, null, url);
+            },
+        };
+    }
+
+    class Component$6 extends React.Component {
+        constructor(props) {
+            super(props);
+
+            this.fetchOutput = this.fetchOutput.bind(this);
+            this.fetchController = new AbortController();
+            this.fetchTimeout = null;
+            this.outputOffset = 0;
+
+            this.state = {
+                output: '',
+                done: false,
+            };
+        }
+
+        componentDidMount() {
+            this.fetchOutput();
+        }
+
+        componentWillUnmount() {
+            this.fetchController.abort();
+            window.clearTimeout(this.fetchTimeout);
+        }
+
+        fetchOutput() {
+            this.fetchController = new AbortController();
+
+            fetch('/api/job-output/?jobId=' + encodeURIComponent(this.props.jobId) + '&offset=' + encodeURIComponent(this.outputOffset), {
+                credentials: 'same-origin',
+                signal: this.fetchController.signal,
+            }).then(response => {
+                if (response.status === 401) {
+                    this.props.onShowLogin();
+                    return;
+                }
+
+                response.json().then(responseJson => {
+                    this.outputOffset += responseJson.output.length;
+
+                    this.setState((prevState, props) => ({
+                        output: prevState.output + responseJson.output,
+                        done: responseJson.done,
+                    }));
+
+                    if (!responseJson.done) {
+                        this.fetchTimeout = setTimeout(this.fetchOutput, 1000);
+                    }
+                });
+            });
+        }
+
+        render() {
+            return React.createElement('div', { className: 'job-detail-view' },
+                React.createElement('div', { className: 'job-detail-view__title' },
+                    'Job',
+                    React.createElement('span', { className: 'job-detail-view__job-id' }, this.props.jobId),
+                ),
+                React.createElement('pre', { className: 'job-detail-view__output' }, this.state.output),
+                React.createElement('div', { className: 'job-detail-view__bottom' },
+                    React.createElement('div', { className: 'job-detail-view__status' },
+                        'Status: ' + (this.state.done ? 'Done' : 'Running')
+                    ),
+                    (this.state.done ?
+                        React.createElement('div',
+                            {
+                                className: 'job-detail-view__plots-button button',
+                                onClick: this.props.onPlotsClick,
+                            },
+                            'Plots',
+                        ) :
+                        null
+                    ),
+                ),
+            );
+        }
+    }
+
+    const JobDetail = ReactRedux.connect(null, mapDispatchToProps$6)(Component$6);
 
     const LINKS = [
         {
@@ -789,7 +1056,7 @@
         },
     ];
 
-    function mapDispatchToProps$5(dispatch, ownProps) {
+    function mapDispatchToProps$7(dispatch, ownProps) {
         return {
             onClick: (slug) => {
                 const url = '/plots/' + ownProps.jobId + '/' + slug + '/';
@@ -802,7 +1069,7 @@
         };
     }
 
-    class Component$5 extends React.Component {
+    class Component$7 extends React.Component {
         render() {
             return React.createElement('div', { className: 'plots-view__sidebar' },
                 LINKS.map(link => (
@@ -816,7 +1083,7 @@
         }
     }
 
-    const Sidebar = ReactRedux.connect(null, mapDispatchToProps$5)(Component$5);
+    const Sidebar = ReactRedux.connect(null, mapDispatchToProps$7)(Component$7);
 
     class AverageMutations extends React.Component {
         constructor(props) {
@@ -1636,7 +1903,6 @@
     }
 
     function getView(route) {
-        const jobListingMatch = route.match(new RegExp('^/job-listing/(\\w+)/$'));
         const jobDetailMatch = route.match(new RegExp('^/job-detail/(\\w+)/$'));
         const plotMatch = route.match(new RegExp('^/plots/(\\w+)/([\\w-]+)/$'));
 
@@ -1644,10 +1910,12 @@
             return React.createElement(NewJob, {});
         } else if (route === '/login/') {
             return React.createElement(Login, {});
-        } else if (jobListingMatch) {
-            return React.createElement(JobListing, {
-                filter: jobListingMatch[1],
-            });
+        } else if (route === '/job-listing/') {
+            return React.createElement(JobListing);
+        } else if (route === '/user-listing/') {
+            return React.createElement(UserListing);
+        } else if (route === '/create-user/') {
+            return React.createElement(CreateUser);
         } else if (jobDetailMatch) {
             return React.createElement(JobDetail, {
                 jobId: jobDetailMatch[1],
@@ -1673,13 +1941,13 @@
         }
     }
 
-    function Component$6(props) {
+    function Component$8(props) {
         return React.createElement('div', { className: 'page-content' },
             getView(props.route),
         );
     }
 
-    const Content = ReactRedux.connect(mapStateToProps$1)(Component$6);
+    const Content = ReactRedux.connect(mapStateToProps$1)(Component$8);
 
     function init() {
         const store = Redux.createStore(reducer);

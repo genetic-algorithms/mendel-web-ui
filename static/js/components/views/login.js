@@ -47,9 +47,9 @@ export class Component extends React.Component {
 
         if (this.state.submitting) return;
 
-        this.setState(prevState => (Object.assign({}, prevState, {
+        this.setState({
             submitting: true,
-        })));
+        });
 
         fetch('/api/login/', {
             method: 'POST',

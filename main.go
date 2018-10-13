@@ -191,6 +191,8 @@ func rootHandler(w http.ResponseWriter, r *http.Request) {
 			staticMtime("static/css/new_job.css"),
 			staticMtime("static/css/job_detail.css"),
 			staticMtime("static/css/job_listing.css"),
+			staticMtime("static/css/user_listing.css"),
+			staticMtime("static/css/create_user.css"),
 			staticMtime("static/css/plots.css"),
 		},
 		JsFiles: []string{
@@ -212,6 +214,10 @@ func apiHandler(w http.ResponseWriter, r *http.Request) {
 		apiJobOutputHandler(w, r)
 	} else if r.URL.Path == "/api/job-list/" {
 		apiJobListHandler(w, r)
+	} else if r.URL.Path == "/api/user-list/" {
+		apiUserListHandler(w, r)
+	} else if r.URL.Path == "/api/create-user/" {
+		apiCreateUserHandler(w, r)
 	} else if r.URL.Path == "/api/plot-average-mutations/" {
 		apiPlotAverageMutationsHandler(w, r)
 	} else if r.URL.Path == "/api/plot-fitness-history/" {
@@ -527,10 +533,14 @@ func apiJobListHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	all := r.URL.Query().Get("filter") == "all"
+
 	jobs := []DatabaseJob{}
 	globalDbLock.RLock()
 	for _, job := range globalDb.Jobs {
-		jobs = append(jobs, job)
+		if all || user.Id == job.OwnerId {
+			jobs = append(jobs, job)
+		}
 	}
 	globalDbLock.RUnlock()
 
@@ -552,6 +562,105 @@ func apiJobListHandler(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	w.Write(resultJson)
+}
+
+func apiUserListHandler(w http.ResponseWriter, r *http.Request) {
+	user := getAuthenticatedUser(r)
+	if user.Id == "" || !user.IsAdmin {
+		http.Error(w, "401 Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	users := []DatabaseUser{}
+	globalDbLock.RLock()
+	for _, user := range globalDb.Users {
+		users = append(users, user)
+	}
+	globalDbLock.RUnlock()
+
+	sort.Slice(users, func(i, j int) bool {
+		return strings.Compare(users[i].Username, users[j].Username) < 0
+	})
+
+	result := struct {
+		Users []DatabaseUser `json:"users"`
+	}{
+		Users: users,
+	}
+
+	resultJson, err := json.Marshal(result)
+	if err != nil {
+		http.Error(w, "500 Internal Server Error (could not encode json response)", http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(resultJson)
+}
+
+func apiCreateUserHandler(w http.ResponseWriter, r *http.Request) {
+	user := getAuthenticatedUser(r)
+	if user.Id == "" || !user.IsAdmin {
+		http.Error(w, "401 Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	if !isValidPostJson(r) {
+		http.Error(w, "400 Bad Request (method or content-type)", http.StatusBadRequest)
+		return
+	}
+
+	decoder := json.NewDecoder(r.Body)
+	var newUser DatabaseUser
+	err := decoder.Decode(&newUser)
+	if err != nil {
+		http.Error(w, "400 Bad Request (parsing body)", http.StatusBadRequest)
+		return
+	}
+
+	usernameExists := false
+	globalDbLock.RLock()
+	for _, u := range globalDb.Users {
+		if u.Username == newUser.Username {
+			usernameExists = true
+			break
+		}
+	}
+	globalDbLock.RUnlock()
+
+	if usernameExists {
+		resultJson, err := json.Marshal(map[string]string{
+			"error": "username_exists",
+		})
+		if err != nil {
+			http.Error(w, "500 Internal Server Error (could not encode json response)", http.StatusInternalServerError)
+			return
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		w.Write(resultJson)
+		return
+	}
+
+	userId, err := generateUuid()
+	if err != nil {
+		http.Error(w, "500 Internal Server Error (could not generate userId)", http.StatusInternalServerError)
+		return
+	}
+
+	newUser.Id = userId
+
+	globalDbLock.Lock()
+	globalDb.Users[newUser.Id] = newUser
+	err = persistDatabase()
+	globalDbLock.Unlock()
+	if err != nil {
+		http.Error(w, "500 Internal Server Error (could not persist database)", http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.Write([]byte("{}"))
 }
 
 func apiPlotAverageMutationsHandler(w http.ResponseWriter, r *http.Request) {
