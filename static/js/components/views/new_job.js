@@ -10,7 +10,7 @@ function mapDispatchToProps(dispatch) {
             history.pushState(null, null, '/login/');
         },
         onSubmit: (data) => {
-            fetch('/api/new-job/create/', {
+            fetch('/api/create-job/', {
                 method: 'POST',
                 body: JSON.stringify(data),
                 headers: {
@@ -49,8 +49,6 @@ export class Component extends React.Component {
         this.onSubmit = this.onSubmit.bind(this);
 
         this.state = {
-            loading: true,
-            data: null,
             fieldValues: {
                 title: '',
                 pop_size: '1000',
@@ -118,142 +116,123 @@ export class Component extends React.Component {
         });
     }
 
-    componentDidMount() {
-        fetch('/api/new-job/', {
-            credentials: 'same-origin',
-        }).then(response => {
-            if (response.status === 401) {
-                this.props.onShowLogin();
-            } else {
-                response.json().then(responseJson => {
-                    this.setState({
-                        loading: false,
-                        data: responseJson,
-                    });
-                });
-            }
-        });
-    }
-
     render() {
         return React.createElement('div', { className: 'new-job-view' },
-            (this.state.loading ?
-                React.createElement('div', { className: 'new-job-view__loading' }) :
-                React.createElement('form', { className: 'new-job-view__form', onSubmit: this.onSubmit },
-                    React.createElement('div', { className: 'new-job-view__form-section-title' }, 'Metadata'),
-                    React.createElement('div', { className: 'new-job-view__field' },
-                        React.createElement('label', {}, 'Job title'),
-                        React.createElement('input', {
-                            type: 'text',
-                            value: this.state.fieldValues.title,
-                            onChange: this.fieldChangeHandlers.title,
-                        }),
-                    ),
+            React.createElement('div', { className: 'new-job-view__loading' }),
+            React.createElement('form', { className: 'new-job-view__form', onSubmit: this.onSubmit },
+                React.createElement('div', { className: 'new-job-view__form-section-title' }, 'Metadata'),
+                React.createElement('div', { className: 'new-job-view__field' },
+                    React.createElement('label', {}, 'Job title'),
+                    React.createElement('input', {
+                        type: 'text',
+                        value: this.state.fieldValues.title,
+                        onChange: this.fieldChangeHandlers.title,
+                    }),
+                ),
 
-                    React.createElement('div', { className: 'new-job-view__form-section-title' }, 'Basic'),
-                    React.createElement('div', { className: 'new-job-view__field' },
-                        React.createElement('label', {}, 'Population size (initial or fixed)'),
-                        React.createElement('input', {
-                            type: 'number',
-                            min: '2',
-                            max: '1000000',
-                            step: '1',
-                            value: this.state.fieldValues.pop_size,
-                            onChange: this.fieldChangeHandlers.pop_size,
-                        }),
-                    ),
-                    React.createElement('div', { className: 'new-job-view__field' },
-                        React.createElement('label', {}, 'Generations'),
-                        React.createElement('input', {
-                            type: 'number',
-                            min: '0',
-                            max: '1000000',
-                            step: '1',
-                            value: this.state.fieldValues.num_generations,
-                            onChange: this.fieldChangeHandlers.num_generations,
-                        }),
-                    ),
+                React.createElement('div', { className: 'new-job-view__form-section-title' }, 'Basic'),
+                React.createElement('div', { className: 'new-job-view__field' },
+                    React.createElement('label', {}, 'Population size (initial or fixed)'),
+                    React.createElement('input', {
+                        type: 'number',
+                        min: '2',
+                        max: '1000000',
+                        step: '1',
+                        value: this.state.fieldValues.pop_size,
+                        onChange: this.fieldChangeHandlers.pop_size,
+                    }),
+                ),
+                React.createElement('div', { className: 'new-job-view__field' },
+                    React.createElement('label', {}, 'Generations'),
+                    React.createElement('input', {
+                        type: 'number',
+                        min: '0',
+                        max: '1000000',
+                        step: '1',
+                        value: this.state.fieldValues.num_generations,
+                        onChange: this.fieldChangeHandlers.num_generations,
+                    }),
+                ),
 
-                    React.createElement('div', { className: 'new-job-view__form-section-title' }, 'Mutations'),
-                    React.createElement('div', { className: 'new-job-view__field' },
-                        React.createElement('label', {}, 'Total mutation rate (per individual per generation)'),
-                        React.createElement('input', {
-                            type: 'number',
-                            min: '0',
-                            max: '1000',
-                            step: 'any',
-                            value: this.state.fieldValues.mutn_rate,
-                            onChange: this.fieldChangeHandlers.mutn_rate,
-                        }),
+                React.createElement('div', { className: 'new-job-view__form-section-title' }, 'Mutations'),
+                React.createElement('div', { className: 'new-job-view__field' },
+                    React.createElement('label', {}, 'Total mutation rate (per individual per generation)'),
+                    React.createElement('input', {
+                        type: 'number',
+                        min: '0',
+                        max: '1000',
+                        step: 'any',
+                        value: this.state.fieldValues.mutn_rate,
+                        onChange: this.fieldChangeHandlers.mutn_rate,
+                    }),
+                ),
+                React.createElement('div', { className: 'new-job-view__field' },
+                    React.createElement('label', {}, 'Fitness effect model'),
+                    React.createElement('select',
+                        {
+                            value: this.state.fieldValues.fitness_effect_model,
+                            onChange: this.fieldChangeHandlers.fitness_effect_model,
+                        },
+                        React.createElement('option', { value: 'fixed' }, 'Fixed'),
+                        React.createElement('option', { value: 'uniform' }, 'Uniform'),
+                        React.createElement('option', { value: 'weibull' }, 'Weibull (default)'),
                     ),
-                    React.createElement('div', { className: 'new-job-view__field' },
-                        React.createElement('label', {}, 'Fitness effect model'),
-                        React.createElement('select',
-                            {
-                                value: this.state.fieldValues.fitness_effect_model,
-                                onChange: this.fieldChangeHandlers.fitness_effect_model,
-                            },
-                            React.createElement('option', { value: 'fixed' }, 'Fixed'),
-                            React.createElement('option', { value: 'uniform' }, 'Uniform'),
-                            React.createElement('option', { value: 'weibull' }, 'Weibull (default)'),
-                        ),
-                    ),
-                    React.createElement('div', { className: 'new-job-view__field new-job-view--indented' },
-                        React.createElement('label', {}, 'For fixed: effect for each deleterious mutation'),
-                        React.createElement('input', {
-                            type: 'number',
-                            min: '0',
-                            max: '0.1',
-                            step: 'any',
-                            disabled: this.state.fieldValues.fitness_effect_model !== 'fixed',
-                            value: this.state.fieldValues.uniform_fitness_effect_del,
-                            onChange: this.fieldChangeHandlers.uniform_fitness_effect_del,
-                        }),
-                    ),
-                    React.createElement('div', { className: 'new-job-view__field new-job-view--indented' },
-                        React.createElement('label', {}, 'For fixed: effect for each beneficial mutation'),
-                        React.createElement('input', {
-                            type: 'number',
-                            min: '0',
-                            max: '0.1',
-                            step: 'any',
-                            disabled: this.state.fieldValues.fitness_effect_model !== 'fixed',
-                            value: this.state.fieldValues.uniform_fitness_effect_fav,
-                            onChange: this.fieldChangeHandlers.uniform_fitness_effect_fav,
-                        }),
-                    ),
+                ),
+                React.createElement('div', { className: 'new-job-view__field new-job-view--indented' },
+                    React.createElement('label', {}, 'For fixed: effect for each deleterious mutation'),
+                    React.createElement('input', {
+                        type: 'number',
+                        min: '0',
+                        max: '0.1',
+                        step: 'any',
+                        disabled: this.state.fieldValues.fitness_effect_model !== 'fixed',
+                        value: this.state.fieldValues.uniform_fitness_effect_del,
+                        onChange: this.fieldChangeHandlers.uniform_fitness_effect_del,
+                    }),
+                ),
+                React.createElement('div', { className: 'new-job-view__field new-job-view--indented' },
+                    React.createElement('label', {}, 'For fixed: effect for each beneficial mutation'),
+                    React.createElement('input', {
+                        type: 'number',
+                        min: '0',
+                        max: '0.1',
+                        step: 'any',
+                        disabled: this.state.fieldValues.fitness_effect_model !== 'fixed',
+                        value: this.state.fieldValues.uniform_fitness_effect_fav,
+                        onChange: this.fieldChangeHandlers.uniform_fitness_effect_fav,
+                    }),
+                ),
 
-                    React.createElement('div', { className: 'new-job-view__form-section-title' }, 'Output Files'),
-                    React.createElement('div', { className: 'new-job-view__field' },
-                        React.createElement('label', {}, 'mendel.fit'),
-                        React.createElement('div', { className: 'new-job-view__checkbox-wrapper' },
-                            React.createElement(Checkbox, {
-                                checked: this.state.fieldValues.files_to_output_fit,
-                                onChange: this.fieldChangeHandlers.files_to_output_fit,
-                            }),
-                        ),
+                React.createElement('div', { className: 'new-job-view__form-section-title' }, 'Output Files'),
+                React.createElement('div', { className: 'new-job-view__field' },
+                    React.createElement('label', {}, 'mendel.fit'),
+                    React.createElement('div', { className: 'new-job-view__checkbox-wrapper' },
+                        React.createElement(Checkbox, {
+                            checked: this.state.fieldValues.files_to_output_fit,
+                            onChange: this.fieldChangeHandlers.files_to_output_fit,
+                        }),
                     ),
-                    React.createElement('div', { className: 'new-job-view__field' },
-                        React.createElement('label', {}, 'mendel.hst'),
-                        React.createElement('div', { className: 'new-job-view__checkbox-wrapper' },
-                            React.createElement(Checkbox, {
-                                checked: this.state.fieldValues.files_to_output_hst,
-                                onChange: this.fieldChangeHandlers.files_to_output_hst,
-                            }),
-                        ),
+                ),
+                React.createElement('div', { className: 'new-job-view__field' },
+                    React.createElement('label', {}, 'mendel.hst'),
+                    React.createElement('div', { className: 'new-job-view__checkbox-wrapper' },
+                        React.createElement(Checkbox, {
+                            checked: this.state.fieldValues.files_to_output_hst,
+                            onChange: this.fieldChangeHandlers.files_to_output_hst,
+                        }),
                     ),
-                    React.createElement('div', { className: 'new-job-view__field' },
-                        React.createElement('label', {}, 'Allele bin and distribution files'),
-                        React.createElement('div', { className: 'new-job-view__checkbox-wrapper' },
-                            React.createElement(Checkbox, {
-                                checked: this.state.fieldValues.files_to_output_allele_bins,
-                                onChange: this.fieldChangeHandlers.files_to_output_allele_bins,
-                            }),
-                        ),
+                ),
+                React.createElement('div', { className: 'new-job-view__field' },
+                    React.createElement('label', {}, 'Allele bin and distribution files'),
+                    React.createElement('div', { className: 'new-job-view__checkbox-wrapper' },
+                        React.createElement(Checkbox, {
+                            checked: this.state.fieldValues.files_to_output_allele_bins,
+                            onChange: this.fieldChangeHandlers.files_to_output_allele_bins,
+                        }),
                     ),
+                ),
 
-                    React.createElement('input', { className: 'button', type: 'submit', value: 'Submit' }),
-                )
+                React.createElement('input', { className: 'button', type: 'submit', value: 'Submit' }),
             )
         );
     }

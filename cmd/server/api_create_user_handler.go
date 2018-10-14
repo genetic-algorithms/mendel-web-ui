@@ -36,16 +36,9 @@ func apiCreateUserHandler(w http.ResponseWriter, r *http.Request) {
 	globalDbLock.RUnlock()
 
 	if usernameExists {
-		resultJson, err := json.Marshal(map[string]string{
+		writeJsonResponse(w, map[string]string{
 			"error": "username_exists",
 		})
-		if err != nil {
-			http.Error(w, "500 Internal Server Error (could not encode json response)", http.StatusInternalServerError)
-			return
-		}
-
-		w.Header().Set("Content-Type", "application/json")
-		w.Write(resultJson)
 		return
 	}
 
@@ -66,6 +59,5 @@ func apiCreateUserHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	w.Write([]byte("{}"))
+	writeJsonResponse(w, map[string]string{})
 }
