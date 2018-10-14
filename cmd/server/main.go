@@ -21,12 +21,7 @@ import (
 	"golang.org/x/crypto/bcrypt"
 	"github.com/gorilla/securecookie"
 	"github.com/BurntSushi/toml"
-	"github.com/genetic-algorithms/mendel-web-example/templates"
 )
-
-type templateStore struct {
-	base *template.Template
-}
 
 type JobMetaData struct {
 	Version int `json:"version"`
@@ -58,7 +53,7 @@ type DatabaseUser struct {
 	IsAdmin bool `json:"is_admin"`
 }
 
-var globalTemplateStore templateStore
+var globalBaseTemplateParsed *template.Template
 var globalDb Database
 var globalDbLock sync.RWMutex
 var globalSecureCookie *securecookie.SecureCookie
@@ -70,7 +65,7 @@ var globalJobsDir string = "./output/jobs"
 func main() {
 	globalRunningJobsOutput = make(map[string]*strings.Builder)
 
-	globalTemplateStore = loadTemplates()
+	globalBaseTemplateParsed = template.Must(template.New("base").Parse(baseTemplate))
 	globalDb = loadDatabase()
 
 	globalSecureCookie = securecookie.New(globalDb.CookieHashKey, globalDb.CookieBlockKey)
@@ -168,14 +163,6 @@ func loadDatabase() Database {
 	return db
 }
 
-func loadTemplates() templateStore {
-	base := template.Must(template.New("base").Parse(templates.Base))
-
-	return templateStore{
-		base: base,
-	}
-}
-
 func rootHandler(w http.ResponseWriter, r *http.Request) {
 	type Context struct {
 		CssFiles []string
@@ -200,7 +187,7 @@ func rootHandler(w http.ResponseWriter, r *http.Request) {
 		},
 	}
 
-	globalTemplateStore.base.Execute(w, context)
+	globalBaseTemplateParsed.Execute(w, context)
 }
 
 func apiHandler(w http.ResponseWriter, r *http.Request) {
@@ -233,97 +220,6 @@ func apiHandler(w http.ResponseWriter, r *http.Request) {
 	} else {
 		http.Error(w, "404 Not Found", http.StatusNotFound)
 	}
-}
-
-func apiLoginHandler(w http.ResponseWriter, r *http.Request) {
-	type JsonResponse struct {
-		Status string `json:"status"`
-	}
-
-	if !isValidPostJson(r) {
-		http.Error(w, "400 Bad Request (method or content-type)", http.StatusBadRequest)
-		return
-	}
-
-	decoder := json.NewDecoder(r.Body)
-	var creds struct {
-		Username string `json:"username"`
-		Password string `json:"password"`
-	}
-	err := decoder.Decode(&creds)
-	if err != nil {
-		http.Error(w, "400 Bad Request (parsing body)", http.StatusBadRequest)
-		return
-	}
-
-	globalDbLock.RLock()
-	user := DatabaseUser{}
-	for _, u := range globalDb.Users {
-		if u.Username == creds.Username {
-			user = u
-			break
-		}
-	}
-	globalDbLock.RUnlock()
-
-	if user.Id == "" {
-		responseJson, _ := json.Marshal(JsonResponse{Status: "wrong_credentials"})
-		w.Header().Set("Content-Type", "application/json")
-		w.Write(responseJson)
-		return
-	}
-
-	err = bcrypt.CompareHashAndPassword(user.Password, []byte(creds.Password))
-	if err != nil {
-		responseJson, _ := json.Marshal(JsonResponse{Status: "wrong_credentials"})
-		w.Header().Set("Content-Type", "application/json")
-		w.Write(responseJson)
-		return
-	}
-
-	session := map[string]string{
-		"authenticated_user_id": user.Id,
-	}
-
-	encoded, err := globalSecureCookie.Encode("session", session)
-	if err != nil {
-		http.Error(w, "500 Internal Server Error (could not encode session cookie)", http.StatusInternalServerError)
-		return
-	}
-
-	http.SetCookie(w, &http.Cookie{
-		Name:  "session",
-		Value: encoded,
-		Path:  "/",
-		HttpOnly: true,
-	})
-
-	responseJson, err := json.Marshal(JsonResponse{Status: "success"})
-	w.Header().Set("Content-Type", "application/json")
-	w.Write(responseJson)
-}
-
-func apiNewJobHandler(w http.ResponseWriter, r *http.Request) {
-	user := getAuthenticatedUser(r)
-	if user.Id == "" {
-		http.Error(w, "401 Unauthorized", http.StatusUnauthorized)
-		return
-	}
-
-	result := struct {
-		Status string `json:"status"`
-	}{
-		Status: "success",
-	}
-
-	resultJson, err := json.Marshal(result)
-	if err != nil {
-		http.Error(w, "500 Internal Server Error (could not encode json response)", http.StatusInternalServerError)
-		return
-	}
-
-	w.Header().Set("Content-Type", "application/json")
-	w.Write(resultJson)
 }
 
 func apiNewJobCreateHandler(w http.ResponseWriter, r *http.Request) {
@@ -596,71 +492,6 @@ func apiUserListHandler(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	w.Write(resultJson)
-}
-
-func apiCreateUserHandler(w http.ResponseWriter, r *http.Request) {
-	user := getAuthenticatedUser(r)
-	if user.Id == "" || !user.IsAdmin {
-		http.Error(w, "401 Unauthorized", http.StatusUnauthorized)
-		return
-	}
-
-	if !isValidPostJson(r) {
-		http.Error(w, "400 Bad Request (method or content-type)", http.StatusBadRequest)
-		return
-	}
-
-	decoder := json.NewDecoder(r.Body)
-	var newUser DatabaseUser
-	err := decoder.Decode(&newUser)
-	if err != nil {
-		http.Error(w, "400 Bad Request (parsing body)", http.StatusBadRequest)
-		return
-	}
-
-	usernameExists := false
-	globalDbLock.RLock()
-	for _, u := range globalDb.Users {
-		if u.Username == newUser.Username {
-			usernameExists = true
-			break
-		}
-	}
-	globalDbLock.RUnlock()
-
-	if usernameExists {
-		resultJson, err := json.Marshal(map[string]string{
-			"error": "username_exists",
-		})
-		if err != nil {
-			http.Error(w, "500 Internal Server Error (could not encode json response)", http.StatusInternalServerError)
-			return
-		}
-
-		w.Header().Set("Content-Type", "application/json")
-		w.Write(resultJson)
-		return
-	}
-
-	userId, err := generateUuid()
-	if err != nil {
-		http.Error(w, "500 Internal Server Error (could not generate userId)", http.StatusInternalServerError)
-		return
-	}
-
-	newUser.Id = userId
-
-	globalDbLock.Lock()
-	globalDb.Users[newUser.Id] = newUser
-	err = persistDatabase()
-	globalDbLock.Unlock()
-	if err != nil {
-		http.Error(w, "500 Internal Server Error (could not persist database)", http.StatusInternalServerError)
-		return
-	}
-
-	w.Header().Set("Content-Type", "application/json")
-	w.Write([]byte("{}"))
 }
 
 func apiPlotAverageMutationsHandler(w http.ResponseWriter, r *http.Request) {

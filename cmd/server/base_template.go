@@ -1,6 +1,6 @@
-package templates
+package main
 
-var Base = `
+var baseTemplate = `
 	<!DOCTYPE html>
 	<html lang="en">
 		<head>
