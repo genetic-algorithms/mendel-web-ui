@@ -8,7 +8,7 @@ function mapDispatchToProps(dispatch) {
             history.pushState(null, null, '/login/');
         },
         onClick: (userId) => {
-            const url = '/user-detail/' + userId + '/';
+            const url = '/edit-user/' + userId + '/';
             dispatch({
                 type: 'ROUTE',
                 value: url,

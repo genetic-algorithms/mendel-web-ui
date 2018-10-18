@@ -52,7 +52,8 @@
 .user-listing-view__user__username {
     width: calc(100% - 100px);
     box-sizing: border-box;
-    padding-right: 20px;
+    padding-right: 14px;
+    padding-left: 14px;
 }
 
 .user-listing-view__labels__admin,

@@ -101,9 +101,36 @@ export class Component extends React.Component {
         });
     }
 
+    componentDidMount() {
+        this.fetchController.abort();
+        this.fetchController = new AbortController();
+
+        fetch('/api/get-user/?userId=' + encodeURIComponent(this.props.userId), {
+            credentials: 'same-origin',
+            signal: this.fetchController.signal,
+        }).then(response => {
+            if (response.status === 401) {
+                this.props.setRoute('/login/');
+                return;
+            }
+
+            response.json().then(responseJson => {
+                this.setState({
+                    username: responseJson.username,
+                    isAdmin: responseJson.is_admin,
+                });
+            });
+        });
+    }
+
+    componentWillUnmount() {
+        this.fetchController.abort();
+    }
+
     render() {
         return React.createElement('div', { className: 'create-edit-user-view' },
-            React.createElement('div', { className: 'create-edit-user-view__title' }, 'Create User'),
+            React.createElement('div', { className: 'create-edit-user-view__title' }, 'Edit User'),
+            React.createElement('div', { className: 'create-edit-user-view__delete-button button' }, 'Delete'),
             React.createElement('form', { className: 'create-edit-user-view__form', onSubmit: this.onSubmit },
                 React.createElement('label', null, 'Username'),
                 React.createElement('input', {
@@ -148,11 +175,11 @@ export class Component extends React.Component {
                 React.createElement('input', {
                     className: 'button',
                     type: 'submit',
-                    value: this.state.submitting ? 'Processing…' : 'Create',
+                    value: this.state.submitting ? 'Processing…' : 'Save',
                 }),
             ),
         );
     }
 }
 
-export const CreateUser = ReactRedux.connect(null, mapDispatchToProps)(Component);
+export const EditUser = ReactRedux.connect(null, mapDispatchToProps)(Component);

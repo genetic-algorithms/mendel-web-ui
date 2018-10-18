@@ -3,6 +3,7 @@ import { Login } from './views/login';
 import { JobListing } from './views/job_listing';
 import { UserListing } from './views/user_listing';
 import { CreateUser } from './views/create_user';
+import { EditUser } from './views/edit_user';
 import { JobDetail } from './views/job_detail';
 import { AverageMutations } from './views/plots/average_mutations';
 import { FitnessHistory } from './views/plots/fitness_history';
@@ -19,6 +20,7 @@ function mapStateToProps(state) {
 
 function getView(route) {
     const jobDetailMatch = route.match(new RegExp('^/job-detail/(\\w+)/$'));
+    const editUserMatch = route.match(new RegExp('^/edit-user/(\\w+)/$'));
     const plotMatch = route.match(new RegExp('^/plots/(\\w+)/([\\w-]+)/$'));
 
     if (route === '/') {
@@ -31,6 +33,10 @@ function getView(route) {
         return React.createElement(UserListing);
     } else if (route === '/create-user/') {
         return React.createElement(CreateUser);
+    } else if (editUserMatch) {
+        return React.createElement(EditUser, {
+            userId: editUserMatch[1],
+        });
     } else if (jobDetailMatch) {
         return React.createElement(JobDetail, {
             jobId: jobDetailMatch[1],

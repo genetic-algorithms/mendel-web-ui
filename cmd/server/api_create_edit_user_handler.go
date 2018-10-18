@@ -5,7 +5,7 @@ import (
 	"net/http"
 )
 
-func apiCreateUserHandler(w http.ResponseWriter, r *http.Request) {
+func apiCreateEditUserHandler(w http.ResponseWriter, r *http.Request) {
 	user := getAuthenticatedUser(r)
 	if user.Id == "" || !user.IsAdmin {
 		http.Error(w, "401 Unauthorized", http.StatusUnauthorized)

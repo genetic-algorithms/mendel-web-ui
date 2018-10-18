@@ -1,4 +1,4 @@
-.create-user-view {
+.create-edit-user-view {
     max-width: 400px;
     padding-left: 24px;
     padding-right: 24px;
@@ -8,24 +8,31 @@
     position: relative;
 }
 
-.create-user-view__title {
+.create-edit-user-view__title {
     font-size: 30px;
     padding-top: 40px;
     padding-bottom: 40px;
 }
 
-.create-user-view__form label {
+.create-edit-user-view__delete-button {
+    position: absolute;
+    top: 40px;
+    right: 24px;
+    background-color: #F00;
+}
+
+.create-edit-user-view__form label {
     display: block;
     font-size: 14px;
     margin-bottom: 5px;
 }
 
-.create-user-view__form label:not(:first-child) {
+.create-edit-user-view__form label:not(:first-child) {
     margin-top: 25px;
 }
 
-.create-user-view__form input[type=text],
-.create-user-view__form input[type=password] {
+.create-edit-user-view__form input[type=text],
+.create-edit-user-view__form input[type=password] {
     display: block;
     border: 1px solid transparent;
     width: 100%;
@@ -36,34 +43,34 @@
     padding: 8px 10px;
 }
 
-.create-user-view__form input[type=text]:focus,
-.create-user-view__form input[type=password]:focus {
+.create-edit-user-view__form input[type=text]:focus,
+.create-edit-user-view__form input[type=password]:focus {
     outline: none;
     border-color: #CCC;
 }
 
-.create-user-view__checkbox-wrapper {
+.create-edit-user-view__checkbox-wrapper {
     margin-top: 20px;
 }
 
-.create-user-view__checkbox-wrapper .checkbox {
+.create-edit-user-view__checkbox-wrapper .checkbox {
     display: inline-block;
     vertical-align: middle;
     padding: 5px;
     margin-left: -8px;
 }
 
-.create-user-view__checkbox-wrapper .checkbox svg {
+.create-edit-user-view__checkbox-wrapper .checkbox svg {
     fill: #333;
     display: inline-block;
     vertical-align: top;
 }
 
-.create-user-view__checkbox-wrapper .checkbox.checkbox--checked svg {
+.create-edit-user-view__checkbox-wrapper .checkbox.checkbox--checked svg {
     fill: #00B600;
 }
 
-.create-user-view__form .create-user-view__checkbox-wrapper label {
+.create-edit-user-view__form .create-edit-user-view__checkbox-wrapper label {
     display: inline-block;
     vertical-align: middle;
     margin-top: 0;
@@ -71,11 +78,11 @@
     padding-left: 5px;
 }
 
-.create-user-view__form input[type=submit] {
+.create-edit-user-view__form input[type=submit] {
     margin-top: 40px;
 }
 
-.create-user-view__error {
+.create-edit-user-view__error {
     color: #F00;
     font-size: 12px;
     margin-top: 5px;
