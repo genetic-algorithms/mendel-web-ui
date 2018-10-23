@@ -652,17 +652,74 @@
 
     const JobListing = ReactRedux.connect(null, mapDispatchToProps$3)(Component$3);
 
+    class DeleteIcon extends React.PureComponent {
+        render() {
+            return React.createElement(
+                'svg',
+                {
+                    width: this.props.width.toString(),
+                    height: this.props.height.toString(),
+                    viewBox: '0 0 24 24',
+                    xmlns: 'http://www.w3.org/2000/svg',
+                },
+                React.createElement('path', { d: 'M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z' }),
+            );
+        }
+    }
+
+    let rootElement = null;
+
+    function open(title, description, actionCallback) {
+        if (rootElement !== null) {
+            close();
+        }
+
+        const cancelButton = createElement('div', 'confirmation-dialog__button', [document.createTextNode('Cancel')]);
+        const actionButton = createElement('div', 'confirmation-dialog__button', [document.createTextNode('Ok')]);
+        const overlay = createElement('div', 'confirmation-dialog__overlay', []);
+
+        rootElement = createElement('div', 'confirmation-dialog', [
+            overlay,
+            createElement('div', 'confirmation-dialog__content', [
+                createElement('div', 'confirmation-dialog__title', [document.createTextNode(title)]),
+                createElement('div', 'confirmation-dialog__description', [document.createTextNode(description)]),
+                createElement('div', 'confirmation-dialog__buttons', [
+                    cancelButton,
+                    actionButton,
+                ]),
+            ]),
+        ]);
+
+        cancelButton.addEventListener('click', close);
+        overlay.addEventListener('click', close);
+        actionButton.addEventListener('click', () => {
+            close();
+            actionCallback();
+        });
+
+        document.body.appendChild(rootElement);
+    }
+
+    function close() {
+        if (rootElement === null) return;
+        rootElement.parentNode.removeChild(rootElement);
+        rootElement = null;
+    }
+
+    function createElement(tagName, className, children) {
+        const element = document.createElement(tagName);
+        element.className = className;
+
+        for (let i = 0; i < children.length; ++i) {
+            element.appendChild(children[i]);
+        }
+
+        return element;
+    }
+
     function mapDispatchToProps$4(dispatch) {
         return {
-            onShowLogin: () => {
-                dispatch({
-                    type: 'ROUTE',
-                    value: '/login/',
-                });
-                history.pushState(null, null, '/login/');
-            },
-            onClick: (userId) => {
-                const url = '/edit-user/' + userId + '/';
+            setRoute: url => {
                 dispatch({
                     type: 'ROUTE',
                     value: url,
@@ -684,7 +741,8 @@
         constructor(props) {
             super(props);
 
-            this.fetchController = new AbortController();
+            this.fetchUsersController = new AbortController();
+            this.fetchDeleteUserController = new AbortController();
 
             this.state = {
                 users: [],
@@ -692,15 +750,15 @@
         }
 
         fetchUsers() {
-            this.fetchController.abort();
-            this.fetchController = new AbortController();
+            this.fetchUsersController.abort();
+            this.fetchUsersController = new AbortController();
 
             fetch('/api/user-list/', {
                 credentials: 'same-origin',
-                signal: this.fetchController.signal,
+                signal: this.fetchUsersController.signal,
             }).then(response => {
                 if (response.status === 401) {
-                    this.props.onShowLogin();
+                    this.props.setRoute('/login/');
                     return;
                 }
 
@@ -712,12 +770,45 @@
             });
         }
 
+        fetchDeleteUser(userId) {
+            this.fetchDeleteUserController.abort();
+            this.fetchDeleteUserController = new AbortController();
+
+            fetch('/api/delete-user/', {
+                method: 'POST',
+                body: JSON.stringify({
+                    id: userId,
+                }),
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                credentials: 'same-origin',
+                signal: this.fetchDeleteUserController.signal,
+            }).then(response => {
+                if (response.status === 401) {
+                    this.props.setRoute('/login/');
+                    return;
+                }
+
+                this.fetchUsers();
+            });
+        }
+
+        onDeleteClick(userId) {
+            open(
+                'Delete user?',
+                'The user will be deleted, but jobs run by the user will be kept.',
+                () => this.fetchDeleteUser(userId),
+            );
+        }
+
         componentDidMount() {
             this.fetchUsers();
         }
 
         componentWillUnmount() {
-            this.fetchController.abort();
+            this.fetchUsersController.abort();
+            this.fetchDeleteUserController.abort();
         }
 
         render() {
@@ -728,20 +819,23 @@
                     onClick: this.props.onCreateClick,
                 }, 'Create User'),
                 React.createElement('div', { className: 'user-listing-view__users' },
-                    React.createElement('div', { className: 'user-listing-view__labels' },
-                        React.createElement('div', { className: 'user-listing-view__labels__username' }, 'Username'),
-                        React.createElement('div', { className: 'user-listing-view__labels__admin' }, 'Admin'),
-                    ),
-
                     this.state.users.map(user => (
-                        React.createElement('div',
-                            {
-                                className: 'user-listing-view__user',
-                                key: user.id,
-                                onClick: () => this.props.onClick(user.id),
-                            },
-                            React.createElement('div', { className: 'user-listing-view__user__username' }, user.username),
-                            React.createElement('div', { className: 'user-listing-view__user__admin' }, user.is_admin ? 'Admin' : ''),
+                        React.createElement('div', { className: 'user-listing-view__user', key: user.id },
+                            React.createElement('div',
+                                {
+                                    className: 'user-listing-view__user__title',
+                                    onClick: () => this.props.setRoute('/edit-user/' + userId + '/'),
+                                },
+                                React.createElement('div', { className: 'user-listing-view__user__username' }, user.username),
+                                (user.is_admin ? React.createElement('div', { className: 'user-listing-view__user__admin' }, 'Admin') : null),
+                            ),
+                            React.createElement('div',
+                                {
+                                    className: 'user-listing-view__user__delete-button',
+                                    onClick: () => this.onDeleteClick(user.id),
+                                },
+                                React.createElement(DeleteIcon, { width: 24, height: 24 }),
+                            ),
                         )
                     )),
                 ),
@@ -981,9 +1075,9 @@
             fetch('/api/create-edit-user/', {
                 method: 'POST',
                 body: JSON.stringify({
+                    id: this.props.userId,
                     username: this.state.username,
                     password: this.state.password,
-                    confirm_password: this.state.confirmPassword,
                     is_admin: this.state.isAdmin,
                 }),
                 headers: {
@@ -1038,7 +1132,6 @@
         render() {
             return React.createElement('div', { className: 'create-edit-user-view' },
                 React.createElement('div', { className: 'create-edit-user-view__title' }, 'Edit User'),
-                React.createElement('div', { className: 'create-edit-user-view__delete-button button' }, 'Delete'),
                 React.createElement('form', { className: 'create-edit-user-view__form', onSubmit: this.onSubmit },
                     React.createElement('label', null, 'Username'),
                     React.createElement('input', {
@@ -1055,7 +1148,6 @@
                     React.createElement('label', null, 'Password'),
                     React.createElement('input', {
                         type: 'password',
-                        required: true,
                         value: this.state.password,
                         onChange: this.onPasswordChange,
                     }),
@@ -1063,7 +1155,6 @@
                     React.createElement('label', null, 'Confirm Password'),
                     React.createElement('input', {
                         type: 'password',
-                        required: true,
                         value: this.state.confirmPassword,
                         onChange: this.onConfirmPasswordChange,
                     }),

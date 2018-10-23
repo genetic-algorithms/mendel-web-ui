@@ -175,6 +175,7 @@ func rootHandler(w http.ResponseWriter, r *http.Request) {
 			staticMtime("static/css/user_listing.css"),
 			staticMtime("static/css/create_edit_user.css"),
 			staticMtime("static/css/plots.css"),
+			staticMtime("static/css/confirmation_dialog.css"),
 		},
 		JsFiles: []string{
 			staticMtime("static/js/bundle.js"),
@@ -197,6 +198,8 @@ func apiHandler(w http.ResponseWriter, r *http.Request) {
 		apiUserListHandler(w, r)
 	} else if r.URL.Path == "/api/create-edit-user/" {
 		apiCreateEditUserHandler(w, r)
+	} else if r.URL.Path == "/api/delete-user/" {
+		apiDeleteUserHandler(w, r)
 	} else if r.URL.Path == "/api/get-user/" {
 		apiGetUserHandler(w, r)
 	} else if r.URL.Path == "/api/plot-average-mutations/" {

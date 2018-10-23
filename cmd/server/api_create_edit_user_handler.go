@@ -3,9 +3,17 @@ package main
 import (
 	"encoding/json"
 	"net/http"
+	"golang.org/x/crypto/bcrypt"
 )
 
 func apiCreateEditUserHandler(w http.ResponseWriter, r *http.Request) {
+	type PostUser struct {
+		Id string `json:"id"`
+		Username string `json:"username"`
+		Password string `json:"password"`
+		IsAdmin bool `json:"is_admin"`
+	}
+
 	user := getAuthenticatedUser(r)
 	if user.Id == "" || !user.IsAdmin {
 		http.Error(w, "401 Unauthorized", http.StatusUnauthorized)
@@ -18,8 +26,8 @@ func apiCreateEditUserHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	decoder := json.NewDecoder(r.Body)
-	var newUser DatabaseUser
-	err := decoder.Decode(&newUser)
+	var postUser PostUser
+	err := decoder.Decode(&postUser)
 	if err != nil {
 		http.Error(w, "400 Bad Request (parsing body)", http.StatusBadRequest)
 		return
@@ -28,7 +36,7 @@ func apiCreateEditUserHandler(w http.ResponseWriter, r *http.Request) {
 	usernameExists := false
 	globalDbLock.RLock()
 	for _, u := range globalDb.Users {
-		if u.Username == newUser.Username {
+		if u.Username == postUser.Username && u.Id != postUser.Id {
 			usernameExists = true
 			break
 		}
@@ -42,13 +50,50 @@ func apiCreateEditUserHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	userId, err := generateUuid()
-	if err != nil {
-		http.Error(w, "500 Internal Server Error (could not generate userId)", http.StatusInternalServerError)
-		return
+	hashedPassword := []byte{}
+	if postUser.Password != "" {
+		hashedPassword, err = bcrypt.GenerateFromPassword([]byte(postUser.Password), bcrypt.DefaultCost)
+		if err != nil {
+			http.Error(w, "500 Internal Server Error (could not hash password)", http.StatusInternalServerError)
+			return
+		}
 	}
 
-	newUser.Id = userId
+	var newUser DatabaseUser
+	if postUser.Id == "" {
+		// Create user
+
+		userId, err := generateUuid()
+		if err != nil {
+			http.Error(w, "500 Internal Server Error (could not generate userId)", http.StatusInternalServerError)
+			return
+		}
+
+		newUser = DatabaseUser{
+			Id: userId,
+			Username: postUser.Username,
+			Password: hashedPassword,
+			IsAdmin: postUser.IsAdmin,
+		}
+	} else {
+		// Edit user
+
+		globalDbLock.RLock()
+		var ok bool
+		newUser, ok = globalDb.Users[postUser.Id]
+		globalDbLock.RUnlock()
+
+		if !ok {
+			http.Error(w, "400 Bad Request (user does not exist)", http.StatusBadRequest)
+			return
+		}
+
+		newUser.Username = postUser.Username
+		newUser.IsAdmin = postUser.IsAdmin
+		if postUser.Password != "" {
+			newUser.Password = hashedPassword
+		}
+	}
 
 	globalDbLock.Lock()
 	globalDb.Users[newUser.Id] = newUser

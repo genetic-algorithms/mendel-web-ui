@@ -73,9 +73,9 @@ export class Component extends React.Component {
         fetch('/api/create-edit-user/', {
             method: 'POST',
             body: JSON.stringify({
+                id: this.props.userId,
                 username: this.state.username,
                 password: this.state.password,
-                confirm_password: this.state.confirmPassword,
                 is_admin: this.state.isAdmin,
             }),
             headers: {
@@ -130,7 +130,6 @@ export class Component extends React.Component {
     render() {
         return React.createElement('div', { className: 'create-edit-user-view' },
             React.createElement('div', { className: 'create-edit-user-view__title' }, 'Edit User'),
-            React.createElement('div', { className: 'create-edit-user-view__delete-button button' }, 'Delete'),
             React.createElement('form', { className: 'create-edit-user-view__form', onSubmit: this.onSubmit },
                 React.createElement('label', null, 'Username'),
                 React.createElement('input', {
@@ -147,7 +146,6 @@ export class Component extends React.Component {
                 React.createElement('label', null, 'Password'),
                 React.createElement('input', {
                     type: 'password',
-                    required: true,
                     value: this.state.password,
                     onChange: this.onPasswordChange,
                 }),
@@ -155,7 +153,6 @@ export class Component extends React.Component {
                 React.createElement('label', null, 'Confirm Password'),
                 React.createElement('input', {
                     type: 'password',
-                    required: true,
                     value: this.state.confirmPassword,
                     onChange: this.onConfirmPasswordChange,
                 }),

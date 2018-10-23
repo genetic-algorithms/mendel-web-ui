@@ -14,13 +14,6 @@
     padding-bottom: 40px;
 }
 
-.create-edit-user-view__delete-button {
-    position: absolute;
-    top: 40px;
-    right: 24px;
-    background-color: #F00;
-}
-
 .create-edit-user-view__form label {
     display: block;
     font-size: 14px;
