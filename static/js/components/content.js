@@ -18,7 +18,7 @@ function mapStateToProps(state) {
     };
 }
 
-function getView(route) {
+function getView(route, setRoute, loadingIndicator) {
     const jobDetailMatch = route.match(new RegExp('^/job-detail/(\\w+)/$'));
     const editUserMatch = route.match(new RegExp('^/edit-user/(\\w+)/$'));
     const plotMatch = route.match(new RegExp('^/plots/(\\w+)/([\\w-]+)/$'));
@@ -30,7 +30,10 @@ function getView(route) {
     } else if (route === '/job-listing/') {
         return React.createElement(JobListing);
     } else if (route === '/user-listing/') {
-        return React.createElement(UserListing);
+        return React.createElement(UserListing, {
+            setRoute: setRoute,
+            loadingIndicator: loadingIndicator,
+        });
     } else if (route === '/create-user/') {
         return React.createElement(CreateUser);
     } else if (editUserMatch) {
@@ -64,7 +67,7 @@ function getView(route) {
 
 function Component(props) {
     return React.createElement('div', { className: 'page-content' },
-        getView(props.route),
+        getView(props.route, props.setRoute, props.loadingIndicator),
     );
 }
 

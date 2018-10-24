@@ -33,52 +33,40 @@
         };
     }
 
-    function mapDispatchToProps(dispatch) {
-        return {
-            onNewJobTabClick: () => {
-                dispatch({
-                    type: 'ROUTE',
-                    value: '/',
-                });
-                history.pushState(null, null, '/');
-            },
-            onJobsTabClick: () => {
-                dispatch({
-                    type: 'ROUTE',
-                    value: '/job-listing/',
-                });
-                history.pushState(null, null, '/job-listing/');
-            },
-            onUsersTabClick: () => {
-                dispatch({
-                    type: 'ROUTE',
-                    value: '/user-listing/',
-                });
-                history.pushState(null, null, '/user-listing/');
-            },
-        };
+    class Component extends React.Component {
+        constructor(props) {
+            super(props);
+
+            this.onNewJobTabClick = () => this.props.setRoute('/');
+            this.onJobsTabClick = () => this.props.setRoute('/job-listing/');
+            this.onUsersTabClick = () => this.props.setRoute('/user-listing/');
+        }
+
+        render() {
+            return React.createElement('div', { className: 'page-header' },
+                React.createElement('div', { className: 'page-header__tabs' },
+                    React.createElement('div', {
+                        className: 'page-header__tab ' + (this.props.route === '/' ? 'page-header--active-tab' : ''),
+                        onClick: this.onNewJobTabClick,
+                    }, 'New Job'),
+                    React.createElement('div', {
+                        className: 'page-header__tab ' + (this.props.route === '/job-listing/' ? 'page-header--active-tab' : ''),
+                        onClick: this.onJobsTabClick,
+                    }, 'Jobs'),
+                    React.createElement('div', {
+                        className: 'page-header__tab ' + (this.props.route === '/user-listing/' ? 'page-header--active-tab' : ''),
+                        onClick: this.onUsersTabClick,
+                    }, 'Users'),
+                ),
+                (this.props.loading ?
+                    React.createElement('div', { className: 'page-header__loading-indicator' }) :
+                    null
+                ),
+            );
+        }
     }
 
-    function Component(props) {
-        return React.createElement('div', { className: 'page-header' },
-            React.createElement('div', { className: 'page-header__tabs' },
-                React.createElement('div', {
-                    className: 'page-header__tab ' + (props.route === '/' ? 'page-header--active-tab' : ''),
-                    onClick: props.onNewJobTabClick,
-                }, 'New Job'),
-                React.createElement('div', {
-                    className: 'page-header__tab ' + (props.route === '/job-listing/' ? 'page-header--active-tab' : ''),
-                    onClick: props.onJobsTabClick,
-                }, 'Jobs'),
-                React.createElement('div', {
-                    className: 'page-header__tab ' + (props.route === '/user-listing/' ? 'page-header--active-tab' : ''),
-                    onClick: props.onUsersTabClick,
-                }, 'Users'),
-            ),
-        );
-    }
-
-    const Header = ReactRedux.connect(mapStateToProps, mapDispatchToProps)(Component);
+    const Header = ReactRedux.connect(mapStateToProps, null)(Component);
 
     class CheckboxCheckedIcon extends React.PureComponent {
         render() {
@@ -135,7 +123,7 @@
         }
     }
 
-    function mapDispatchToProps$1(dispatch) {
+    function mapDispatchToProps(dispatch) {
         return {
             onShowLogin: () => {
                 dispatch({
@@ -416,9 +404,9 @@
         return '"' + s + '"';
     }
 
-    const NewJob = ReactRedux.connect(null, mapDispatchToProps$1)(Component$1);
+    const NewJob = ReactRedux.connect(null, mapDispatchToProps)(Component$1);
 
-    function mapDispatchToProps$2(dispatch) {
+    function mapDispatchToProps$1(dispatch) {
         return {
             onShowHome: () => {
                 dispatch({
@@ -533,9 +521,9 @@
         }
     }
 
-    const Login = ReactRedux.connect(null, mapDispatchToProps$2)(Component$2);
+    const Login = ReactRedux.connect(null, mapDispatchToProps$1)(Component$2);
 
-    function mapDispatchToProps$3(dispatch) {
+    function mapDispatchToProps$2(dispatch) {
         return {
             onShowLogin: () => {
                 dispatch({
@@ -650,7 +638,7 @@
         return s[0].toUpperCase() + s.substring(1);
     }
 
-    const JobListing = ReactRedux.connect(null, mapDispatchToProps$3)(Component$3);
+    const JobListing = ReactRedux.connect(null, mapDispatchToProps$2)(Component$3);
 
     class DeleteIcon extends React.PureComponent {
         render() {
@@ -717,7 +705,7 @@
         return element;
     }
 
-    function mapDispatchToProps$4(dispatch) {
+    function mapDispatchToProps$3(dispatch) {
         return {
             setRoute: url => {
                 dispatch({
@@ -737,12 +725,68 @@
         };
     }
 
+    function fetchGetSmart(url, setRoute, loadingIndicator, onSuccess) {
+        const abortController = new AbortController();
+        loadingIndicator.increment();
+
+        fetch(url, {
+            credentials: 'same-origin',
+            signal: abortController.signal,
+        }).then(response => {
+            loadingIndicator.decrement();
+
+            if (response.status === 401) {
+                setRoute('/login/');
+                return;
+            }
+
+            response.json().then(responseJson => {
+                onSuccess(responseJson);
+            });
+        }).catch(err => {
+            loadingIndicator.decrement();
+            console.error(err);
+        });
+
+        return abortController;
+    }
+
+    function fetchPost(url, body) {
+        return fetch(url, {
+            method: 'POST',
+            body: JSON.stringify(body),
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            credentials: 'same-origin',
+        });
+    }
+
+    function fetchPostSmart(url, body, setRoute, loadingIndicator, onSuccess) {
+        loadingIndicator.increment();
+
+        return fetchPost(url, body).then(response => {
+            loadingIndicator.decrement();
+
+            if (response.status === 401) {
+                setRoute('/login/');
+                return;
+            }
+
+            response.json().then(responseJson => {
+                onSuccess(responseJson);
+            });
+        }).catch(err => {
+            loadingIndicator.decrement();
+            console.error(err);
+        });
+    }
+
     class Component$4 extends React.Component {
         constructor(props) {
             super(props);
 
             this.fetchUsersController = new AbortController();
-            this.fetchDeleteUserController = new AbortController();
 
             this.state = {
                 users: [],
@@ -751,47 +795,31 @@
 
         fetchUsers() {
             this.fetchUsersController.abort();
-            this.fetchUsersController = new AbortController();
 
-            fetch('/api/user-list/', {
-                credentials: 'same-origin',
-                signal: this.fetchUsersController.signal,
-            }).then(response => {
-                if (response.status === 401) {
-                    this.props.setRoute('/login/');
-                    return;
-                }
-
-                response.json().then(responseJson => {
+            this.fetchUsersController = fetchGetSmart(
+                '/api/user-list/',
+                this.props.setRoute,
+                this.props.loadingIndicator,
+                response => {
                     this.setState({
-                        users: responseJson.users,
+                        users: response.users,
                     });
-                });
-            });
+                }
+            );
         }
 
         fetchDeleteUser(userId) {
-            this.fetchDeleteUserController.abort();
-            this.fetchDeleteUserController = new AbortController();
-
-            fetch('/api/delete-user/', {
-                method: 'POST',
-                body: JSON.stringify({
+            fetchPostSmart(
+                '/api/delete-user/',
+                {
                     id: userId,
-                }),
-                headers: {
-                    'Content-Type': 'application/json'
                 },
-                credentials: 'same-origin',
-                signal: this.fetchDeleteUserController.signal,
-            }).then(response => {
-                if (response.status === 401) {
-                    this.props.setRoute('/login/');
-                    return;
-                }
-
-                this.fetchUsers();
-            });
+                this.props.setRoute,
+                this.props.loadingIndicator,
+                () => {
+                    this.fetchUsers();
+                },
+            );
         }
 
         onDeleteClick(userId) {
@@ -808,7 +836,6 @@
 
         componentWillUnmount() {
             this.fetchUsersController.abort();
-            this.fetchDeleteUserController.abort();
         }
 
         render() {
@@ -843,9 +870,9 @@
         }
     }
 
-    const UserListing = ReactRedux.connect(null, mapDispatchToProps$4)(Component$4);
+    const UserListing = ReactRedux.connect(null, mapDispatchToProps$3)(Component$4);
 
-    function mapDispatchToProps$5(dispatch) {
+    function mapDispatchToProps$4(dispatch) {
         return {
             setRoute: url => {
                 dispatch({
@@ -1000,9 +1027,9 @@
         }
     }
 
-    const CreateUser = ReactRedux.connect(null, mapDispatchToProps$5)(Component$5);
+    const CreateUser = ReactRedux.connect(null, mapDispatchToProps$4)(Component$5);
 
-    function mapDispatchToProps$6(dispatch) {
+    function mapDispatchToProps$5(dispatch) {
         return {
             setRoute: url => {
                 dispatch({
@@ -1181,9 +1208,9 @@
         }
     }
 
-    const EditUser = ReactRedux.connect(null, mapDispatchToProps$6)(Component$6);
+    const EditUser = ReactRedux.connect(null, mapDispatchToProps$5)(Component$6);
 
-    function mapDispatchToProps$7(dispatch, ownProps) {
+    function mapDispatchToProps$6(dispatch, ownProps) {
         return {
             onShowLogin: () => {
                 dispatch({
@@ -1281,7 +1308,7 @@
         }
     }
 
-    const JobDetail = ReactRedux.connect(null, mapDispatchToProps$7)(Component$7);
+    const JobDetail = ReactRedux.connect(null, mapDispatchToProps$6)(Component$7);
 
     const LINKS = [
         {
@@ -1310,7 +1337,7 @@
         },
     ];
 
-    function mapDispatchToProps$8(dispatch, ownProps) {
+    function mapDispatchToProps$7(dispatch, ownProps) {
         return {
             onClick: (slug) => {
                 const url = '/plots/' + ownProps.jobId + '/' + slug + '/';
@@ -1337,7 +1364,7 @@
         }
     }
 
-    const Sidebar = ReactRedux.connect(null, mapDispatchToProps$8)(Component$8);
+    const Sidebar = ReactRedux.connect(null, mapDispatchToProps$7)(Component$8);
 
     class AverageMutations extends React.Component {
         constructor(props) {
@@ -2156,7 +2183,7 @@
         };
     }
 
-    function getView(route) {
+    function getView(route, setRoute, loadingIndicator) {
         const jobDetailMatch = route.match(new RegExp('^/job-detail/(\\w+)/$'));
         const editUserMatch = route.match(new RegExp('^/edit-user/(\\w+)/$'));
         const plotMatch = route.match(new RegExp('^/plots/(\\w+)/([\\w-]+)/$'));
@@ -2168,7 +2195,10 @@
         } else if (route === '/job-listing/') {
             return React.createElement(JobListing);
         } else if (route === '/user-listing/') {
-            return React.createElement(UserListing);
+            return React.createElement(UserListing, {
+                setRoute: setRoute,
+                loadingIndicator: loadingIndicator,
+            });
         } else if (route === '/create-user/') {
             return React.createElement(CreateUser);
         } else if (editUserMatch) {
@@ -2202,20 +2232,67 @@
 
     function Component$9(props) {
         return React.createElement('div', { className: 'page-content' },
-            getView(props.route),
+            getView(props.route, props.setRoute, props.loadingIndicator),
         );
     }
 
     const Content = ReactRedux.connect(mapStateToProps$1)(Component$9);
 
+    function mapDispatchToProps$8(dispatch) {
+        return {
+            setRoute: url => {
+                dispatch({
+                    type: 'ROUTE',
+                    value: url,
+                });
+                history.pushState(null, null, url);
+            },
+        };
+    }
+
+    class Component$a extends React.Component {
+        constructor(props) {
+            super(props);
+
+            this.state = {
+                loadingIndicatorCount: 0,
+            };
+
+            this.loadingIndicator = {
+                increment: () => {
+                    this.setState(prevState => ({
+                        loadingIndicatorCount: prevState.loadingIndicatorCount + 1,
+                    }));
+                },
+                decrement: () => {
+                    this.setState(prevState => ({
+                        loadingIndicatorCount: Math.max(prevState.loadingIndicatorCount - 1, 0),
+                    }));
+                },
+            };
+        }
+
+        render() {
+            return React.createElement('div', null,
+                React.createElement(Header, {
+                    setRoute: this.props.setRoute,
+                    loading: this.state.loadingIndicatorCount !== 0,
+                }),
+                React.createElement(Content, {
+                    setRoute: this.props.setRoute,
+                    loadingIndicator: this.loadingIndicator,
+                }),
+            );
+        }
+    }
+
+    const Root = ReactRedux.connect(null, mapDispatchToProps$8)(Component$a);
+
     function init() {
         const store = Redux.createStore(reducer);
 
         const root = React.createElement(ReactRedux.Provider, { store: store },
-            React.createElement('div', null,
-                React.createElement(Header, {}),
-                React.createElement(Content, {}),
-            ),
+            React.createElement(Root, null),
         );
 
         ReactDOM.render(root, document.getElementById('react-root'));

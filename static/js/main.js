@@ -1,15 +1,11 @@
 import { reducer } from './reducer';
-import { Header } from './components/header';
-import { Content } from './components/content';
+import { Root } from './components/root';
 
 function init() {
     const store = Redux.createStore(reducer);
 
     const root = React.createElement(ReactRedux.Provider, { store: store },
-        React.createElement('div', null,
-            React.createElement(Header, {}),
-            React.createElement(Content, {}),
-        ),
+        React.createElement(Root, null),
     );
 
     ReactDOM.render(root, document.getElementById('react-root'));

@@ -4,49 +4,37 @@ function mapStateToProps(state) {
     };
 }
 
-function mapDispatchToProps(dispatch) {
-    return {
-        onNewJobTabClick: () => {
-            dispatch({
-                type: 'ROUTE',
-                value: '/',
-            });
-            history.pushState(null, null, '/');
-        },
-        onJobsTabClick: () => {
-            dispatch({
-                type: 'ROUTE',
-                value: '/job-listing/',
-            });
-            history.pushState(null, null, '/job-listing/');
-        },
-        onUsersTabClick: () => {
-            dispatch({
-                type: 'ROUTE',
-                value: '/user-listing/',
-            });
-            history.pushState(null, null, '/user-listing/');
-        },
-    };
+export class Component extends React.Component {
+    constructor(props) {
+        super(props);
+
+        this.onNewJobTabClick = () => this.props.setRoute('/');
+        this.onJobsTabClick = () => this.props.setRoute('/job-listing/');
+        this.onUsersTabClick = () => this.props.setRoute('/user-listing/');
+    }
+
+    render() {
+        return React.createElement('div', { className: 'page-header' },
+            React.createElement('div', { className: 'page-header__tabs' },
+                React.createElement('div', {
+                    className: 'page-header__tab ' + (this.props.route === '/' ? 'page-header--active-tab' : ''),
+                    onClick: this.onNewJobTabClick,
+                }, 'New Job'),
+                React.createElement('div', {
+                    className: 'page-header__tab ' + (this.props.route === '/job-listing/' ? 'page-header--active-tab' : ''),
+                    onClick: this.onJobsTabClick,
+                }, 'Jobs'),
+                React.createElement('div', {
+                    className: 'page-header__tab ' + (this.props.route === '/user-listing/' ? 'page-header--active-tab' : ''),
+                    onClick: this.onUsersTabClick,
+                }, 'Users'),
+            ),
+            (this.props.loading ?
+                React.createElement('div', { className: 'page-header__loading-indicator' }) :
+                null
+            ),
+        );
+    }
 }
 
-function Component(props) {
-    return React.createElement('div', { className: 'page-header' },
-        React.createElement('div', { className: 'page-header__tabs' },
-            React.createElement('div', {
-                className: 'page-header__tab ' + (props.route === '/' ? 'page-header--active-tab' : ''),
-                onClick: props.onNewJobTabClick,
-            }, 'New Job'),
-            React.createElement('div', {
-                className: 'page-header__tab ' + (props.route === '/job-listing/' ? 'page-header--active-tab' : ''),
-                onClick: props.onJobsTabClick,
-            }, 'Jobs'),
-            React.createElement('div', {
-                className: 'page-header__tab ' + (props.route === '/user-listing/' ? 'page-header--active-tab' : ''),
-                onClick: props.onUsersTabClick,
-            }, 'Users'),
-        ),
-    );
-}
-
-export const Header = ReactRedux.connect(mapStateToProps, mapDispatchToProps)(Component);
+export const Header = ReactRedux.connect(mapStateToProps, null)(Component);

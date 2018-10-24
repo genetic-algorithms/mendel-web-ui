@@ -21,45 +21,61 @@ function mapDispatchToProps(dispatch) {
     };
 }
 
-class ApiPost {
-    constructor(url, setRoute, setInProgress) {
-        this.url = url;
-        this.setRoute = setRoute;
-        this.setInProgress = setInProgress;
-        this.abortController = new AbortController();
-    }
+function fetchGetSmart(url, setRoute, loadingIndicator, onSuccess) {
+    const abortController = new AbortController();
+    loadingIndicator.increment();
 
-    fetch(body, callback) {
-        this.abortController.abort();
-        this.abortController = new AbortController();
+    fetch(url, {
+        credentials: 'same-origin',
+        signal: abortController.signal,
+    }).then(response => {
+        loadingIndicator.decrement();
 
-        this.setInProgress(true);
+        if (response.status === 401) {
+            setRoute('/login/');
+            return;
+        }
 
-        fetch(this.url, {
-            method: 'POST',
-            body: JSON.stringify(body),
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            credentials: 'same-origin',
-            signal: this.abortController.signal,
-        }).then(response => {
-            this.setInProgress(false);
-
-            if (response.status === 401) {
-                this.setRoute('/login/');
-                return;
-            }
-
-            callback(response);
-        }).catch(err => {
-            this.setInProgress(false);
+        response.json().then(responseJson => {
+            onSuccess(responseJson);
         });
-    }
+    }).catch(err => {
+        loadingIndicator.decrement();
+        console.error(err);
+    });
 
-    abort() {
-        this.abortController.abort();
-    }
+    return abortController;
+}
+
+function fetchPost(url, body) {
+    return fetch(url, {
+        method: 'POST',
+        body: JSON.stringify(body),
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        credentials: 'same-origin',
+    });
+}
+
+function fetchPostSmart(url, body, setRoute, loadingIndicator, onSuccess) {
+    loadingIndicator.increment();
+
+    return fetchPost(url, body).then(response => {
+        loadingIndicator.decrement();
+
+        if (response.status === 401) {
+            setRoute('/login/');
+            return;
+        }
+
+        response.json().then(responseJson => {
+            onSuccess(responseJson);
+        });
+    }).catch(err => {
+        loadingIndicator.decrement();
+        console.error(err);
+    });
 }
 
 export class Component extends React.Component {
@@ -67,7 +83,6 @@ export class Component extends React.Component {
         super(props);
 
         this.fetchUsersController = new AbortController();
-        this.fetchDeleteUserController = new AbortController();
 
         this.state = {
             users: [],
@@ -76,47 +91,31 @@ export class Component extends React.Component {
 
     fetchUsers() {
         this.fetchUsersController.abort();
-        this.fetchUsersController = new AbortController();
 
-        fetch('/api/user-list/', {
-            credentials: 'same-origin',
-            signal: this.fetchUsersController.signal,
-        }).then(response => {
-            if (response.status === 401) {
-                this.props.setRoute('/login/');
-                return;
-            }
-
-            response.json().then(responseJson => {
+        this.fetchUsersController = fetchGetSmart(
+            '/api/user-list/',
+            this.props.setRoute,
+            this.props.loadingIndicator,
+            response => {
                 this.setState({
-                    users: responseJson.users,
+                    users: response.users,
                 });
-            });
-        });
+            }
+        );
     }
 
     fetchDeleteUser(userId) {
-        this.fetchDeleteUserController.abort();
-        this.fetchDeleteUserController = new AbortController();
-
-        fetch('/api/delete-user/', {
-            method: 'POST',
-            body: JSON.stringify({
+        fetchPostSmart(
+            '/api/delete-user/',
+            {
                 id: userId,
-            }),
-            headers: {
-                'Content-Type': 'application/json'
             },
-            credentials: 'same-origin',
-            signal: this.fetchDeleteUserController.signal,
-        }).then(response => {
-            if (response.status === 401) {
-                this.props.setRoute('/login/');
-                return;
-            }
-
-            this.fetchUsers();
-        });
+            this.props.setRoute,
+            this.props.loadingIndicator,
+            () => {
+                this.fetchUsers();
+            },
+        );
     }
 
     onDeleteClick(userId) {
@@ -133,7 +132,6 @@ export class Component extends React.Component {
 
     componentWillUnmount() {
         this.fetchUsersController.abort();
-        this.fetchDeleteUserController.abort();
     }
 
     render() {
