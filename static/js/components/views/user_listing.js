@@ -1,105 +1,45 @@
 import { DeleteIcon } from '../icons/delete';
 import * as confirmationDialog from '../../confirmation_dialog';
+import { setRoute, fetchGetSmart, fetchPostSmart } from '../../util';
+
+function mapStateToProps(state) {
+    return {
+        users: state.user_listing.users,
+    };
+}
 
 function mapDispatchToProps(dispatch) {
     return {
-        setRoute: url => {
+        setRoute: url => setRoute(dispatch, url),
+        onCreateClick: () => setRoute(dispatch, '/create-user/'),
+        updateUsers: users => {
             dispatch({
-                type: 'ROUTE',
-                value: url,
+                type: 'user_listing.USERS',
+                value: users,
             });
-            history.pushState(null, null, url);
         },
-        onCreateClick: () => {
-            const url = '/create-user/';
+        loadingIndicatorIncrement: () => {
             dispatch({
-                type: 'ROUTE',
-                value: url,
+                type: 'LOADING_INDICATOR_INCREMENT',
             });
-            history.pushState(null, null, url);
+        },
+        loadingIndicatorDecrement: () => {
+            dispatch({
+                type: 'LOADING_INDICATOR_DECREMENT',
+            });
         },
     };
 }
 
-function fetchGetSmart(url, setRoute, loadingIndicator, onSuccess) {
-    const abortController = new AbortController();
-    loadingIndicator.increment();
-
-    fetch(url, {
-        credentials: 'same-origin',
-        signal: abortController.signal,
-    }).then(response => {
-        loadingIndicator.decrement();
-
-        if (response.status === 401) {
-            setRoute('/login/');
-            return;
-        }
-
-        response.json().then(responseJson => {
-            onSuccess(responseJson);
-        });
-    }).catch(err => {
-        loadingIndicator.decrement();
-        console.error(err);
-    });
-
-    return abortController;
-}
-
-function fetchPost(url, body) {
-    return fetch(url, {
-        method: 'POST',
-        body: JSON.stringify(body),
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        credentials: 'same-origin',
-    });
-}
-
-function fetchPostSmart(url, body, setRoute, loadingIndicator, onSuccess) {
-    loadingIndicator.increment();
-
-    return fetchPost(url, body).then(response => {
-        loadingIndicator.decrement();
-
-        if (response.status === 401) {
-            setRoute('/login/');
-            return;
-        }
-
-        response.json().then(responseJson => {
-            onSuccess(responseJson);
-        });
-    }).catch(err => {
-        loadingIndicator.decrement();
-        console.error(err);
-    });
-}
-
 export class Component extends React.Component {
-    constructor(props) {
-        super(props);
-
-        this.fetchUsersController = new AbortController();
-
-        this.state = {
-            users: [],
-        };
-    }
-
     fetchUsers() {
-        this.fetchUsersController.abort();
-
-        this.fetchUsersController = fetchGetSmart(
+        fetchGetSmart(
             '/api/user-list/',
             this.props.setRoute,
-            this.props.loadingIndicator,
+            this.props.loadingIndicatorIncrement,
+            this.props.loadingIndicatorDecrement,
             response => {
-                this.setState({
-                    users: response.users,
-                });
+                this.props.updateUsers(response.users);
             }
         );
     }
@@ -111,7 +51,8 @@ export class Component extends React.Component {
                 id: userId,
             },
             this.props.setRoute,
-            this.props.loadingIndicator,
+            this.props.loadingIndicatorIncrement,
+            this.props.loadingIndicatorDecrement,
             () => {
                 this.fetchUsers();
             },
@@ -130,10 +71,6 @@ export class Component extends React.Component {
         this.fetchUsers();
     }
 
-    componentWillUnmount() {
-        this.fetchUsersController.abort();
-    }
-
     render() {
         return React.createElement('div', { className: 'user-listing-view' },
             React.createElement('div', { className: 'user-listing-view__title' }, 'Users'),
@@ -142,12 +79,12 @@ export class Component extends React.Component {
                 onClick: this.props.onCreateClick,
             }, 'Create User'),
             React.createElement('div', { className: 'user-listing-view__users' },
-                this.state.users.map(user => (
+                this.props.users.map(user => (
                     React.createElement('div', { className: 'user-listing-view__user', key: user.id },
                         React.createElement('div',
                             {
                                 className: 'user-listing-view__user__title',
-                                onClick: () => this.props.setRoute('/edit-user/' + userId + '/'),
+                                onClick: () => this.props.setRoute('/edit-user/' + user.id + '/'),
                             },
                             React.createElement('div', { className: 'user-listing-view__user__username' }, user.username),
                             (user.is_admin ? React.createElement('div', { className: 'user-listing-view__user__admin' }, 'Admin') : null),
@@ -166,4 +103,4 @@ export class Component extends React.Component {
     }
 }
 
-export const UserListing = ReactRedux.connect(null, mapDispatchToProps)(Component);
+export const UserListing = ReactRedux.connect(mapStateToProps, mapDispatchToProps)(Component);

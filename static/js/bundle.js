@@ -8,6 +8,10 @@
                 page_data: {},
                 authenticated: false,
                 route: location.pathname,
+                loading_indicator_count: 0,
+                user_listing: {
+                    users: [],
+                },
             };
         }
 
@@ -22,40 +26,114 @@
                 return immer.default(state, draft => {
                     draft.route = action.value;
                 });
+            case 'LOADING_INDICATOR_INCREMENT':
+                return immer.default(state, draft => {
+                    draft.loading_indicator_count += 1;
+                });
+            case 'LOADING_INDICATOR_DECREMENT':
+                return immer.default(state, draft => {
+                    draft.loading_indicator_count = Math.max(draft.loading_indicator_count - 1, 0);
+                });
+            case 'user_listing.USERS':
+                return immer.default(state, draft => {
+                    draft.user_listing.users = action.value;
+                });
             default:
                 return state;
         }
     }
 
+    function setRoute(dispatch, url) {
+        dispatch({
+            type: 'ROUTE',
+            value: url,
+        });
+        history.pushState(null, null, url);
+    }
+
+    function fetchGetSmart(url, setRoute, loadingIndicatorIncrement, loadingIndicatorDecrement, onSuccess) {
+        loadingIndicatorIncrement();
+
+        fetch(url, {
+            credentials: 'same-origin',
+        }).then(response => {
+            loadingIndicatorDecrement();
+
+            if (response.status === 401) {
+                setRoute('/login/');
+                return;
+            }
+
+            response.json().then(responseJson => {
+                onSuccess(responseJson);
+            });
+        }).catch(err => {
+            loadingIndicatorDecrement();
+            console.error(err);
+        });
+    }
+
+    function fetchPost(url, body) {
+        return fetch(url, {
+            method: 'POST',
+            body: JSON.stringify(body),
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            credentials: 'same-origin',
+        });
+    }
+
+    function fetchPostSmart(url, body, setRoute, loadingIndicatorIncrement, loadingIndicatorDecrement, onSuccess) {
+        loadingIndicatorIncrement();
+
+        return fetchPost(url, body).then(response => {
+            loadingIndicatorDecrement();
+
+            if (response.status === 401) {
+                setRoute('/login/');
+                return;
+            }
+
+            response.json().then(responseJson => {
+                onSuccess(responseJson);
+            });
+        }).catch(err => {
+            loadingIndicatorDecrement();
+            console.error(err);
+        });
+    }
+
     function mapStateToProps(state) {
         return {
             route: state.route,
+            loading: state.loading_indicator_count !== 0,
+        };
+    }
+
+    function mapDispatchToProps(dispatch) {
+        return {
+            onNewJobTabClick: () => setRoute(dispatch, '/'),
+            onJobsTabClick: () => setRoute(dispatch, '/job-listing/'),
+            onUsersTabClick: () => setRoute(dispatch, '/user-listing/'),
         };
     }
 
     class Component extends React.Component {
-        constructor(props) {
-            super(props);
-
-            this.onNewJobTabClick = () => this.props.setRoute('/');
-            this.onJobsTabClick = () => this.props.setRoute('/job-listing/');
-            this.onUsersTabClick = () => this.props.setRoute('/user-listing/');
-        }
-
         render() {
             return React.createElement('div', { className: 'page-header' },
                 React.createElement('div', { className: 'page-header__tabs' },
                     React.createElement('div', {
                         className: 'page-header__tab ' + (this.props.route === '/' ? 'page-header--active-tab' : ''),
-                        onClick: this.onNewJobTabClick,
+                        onClick: this.props.onNewJobTabClick,
                     }, 'New Job'),
                     React.createElement('div', {
                         className: 'page-header__tab ' + (this.props.route === '/job-listing/' ? 'page-header--active-tab' : ''),
-                        onClick: this.onJobsTabClick,
+                        onClick: this.props.onJobsTabClick,
                     }, 'Jobs'),
                     React.createElement('div', {
                         className: 'page-header__tab ' + (this.props.route === '/user-listing/' ? 'page-header--active-tab' : ''),
-                        onClick: this.onUsersTabClick,
+                        onClick: this.props.onUsersTabClick,
                     }, 'Users'),
                 ),
                 (this.props.loading ?
@@ -66,7 +144,7 @@
         }
     }
 
-    const Header = ReactRedux.connect(mapStateToProps, null)(Component);
+    const Header = ReactRedux.connect(mapStateToProps, mapDispatchToProps)(Component);
 
     class CheckboxCheckedIcon extends React.PureComponent {
         render() {
@@ -123,7 +201,7 @@
         }
     }
 
-    function mapDispatchToProps(dispatch) {
+    function mapDispatchToProps$1(dispatch) {
         return {
             onShowLogin: () => {
                 dispatch({
@@ -404,9 +482,9 @@
         return '"' + s + '"';
     }
 
-    const NewJob = ReactRedux.connect(null, mapDispatchToProps)(Component$1);
+    const NewJob = ReactRedux.connect(null, mapDispatchToProps$1)(Component$1);
 
-    function mapDispatchToProps$1(dispatch) {
+    function mapDispatchToProps$2(dispatch) {
         return {
             onShowHome: () => {
                 dispatch({
@@ -521,9 +599,9 @@
         }
     }
 
-    const Login = ReactRedux.connect(null, mapDispatchToProps$1)(Component$2);
+    const Login = ReactRedux.connect(null, mapDispatchToProps$2)(Component$2);
 
-    function mapDispatchToProps$2(dispatch) {
+    function mapDispatchToProps$3(dispatch) {
         return {
             onShowLogin: () => {
                 dispatch({
@@ -638,7 +716,7 @@
         return s[0].toUpperCase() + s.substring(1);
     }
 
-    const JobListing = ReactRedux.connect(null, mapDispatchToProps$2)(Component$3);
+    const JobListing = ReactRedux.connect(null, mapDispatchToProps$3)(Component$3);
 
     class DeleteIcon extends React.PureComponent {
         render() {
@@ -705,105 +783,44 @@
         return element;
     }
 
-    function mapDispatchToProps$3(dispatch) {
+    function mapStateToProps$1(state) {
         return {
-            setRoute: url => {
+            users: state.user_listing.users,
+        };
+    }
+
+    function mapDispatchToProps$4(dispatch) {
+        return {
+            setRoute: url => setRoute(dispatch, url),
+            onCreateClick: () => setRoute(dispatch, '/create-user/'),
+            updateUsers: users => {
                 dispatch({
-                    type: 'ROUTE',
-                    value: url,
+                    type: 'user_listing.USERS',
+                    value: users,
                 });
-                history.pushState(null, null, url);
             },
-            onCreateClick: () => {
-                const url = '/create-user/';
+            loadingIndicatorIncrement: () => {
                 dispatch({
-                    type: 'ROUTE',
-                    value: url,
+                    type: 'LOADING_INDICATOR_INCREMENT',
                 });
-                history.pushState(null, null, url);
+            },
+            loadingIndicatorDecrement: () => {
+                dispatch({
+                    type: 'LOADING_INDICATOR_DECREMENT',
+                });
             },
         };
     }
 
-    function fetchGetSmart(url, setRoute, loadingIndicator, onSuccess) {
-        const abortController = new AbortController();
-        loadingIndicator.increment();
-
-        fetch(url, {
-            credentials: 'same-origin',
-            signal: abortController.signal,
-        }).then(response => {
-            loadingIndicator.decrement();
-
-            if (response.status === 401) {
-                setRoute('/login/');
-                return;
-            }
-
-            response.json().then(responseJson => {
-                onSuccess(responseJson);
-            });
-        }).catch(err => {
-            loadingIndicator.decrement();
-            console.error(err);
-        });
-
-        return abortController;
-    }
-
-    function fetchPost(url, body) {
-        return fetch(url, {
-            method: 'POST',
-            body: JSON.stringify(body),
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            credentials: 'same-origin',
-        });
-    }
-
-    function fetchPostSmart(url, body, setRoute, loadingIndicator, onSuccess) {
-        loadingIndicator.increment();
-
-        return fetchPost(url, body).then(response => {
-            loadingIndicator.decrement();
-
-            if (response.status === 401) {
-                setRoute('/login/');
-                return;
-            }
-
-            response.json().then(responseJson => {
-                onSuccess(responseJson);
-            });
-        }).catch(err => {
-            loadingIndicator.decrement();
-            console.error(err);
-        });
-    }
-
     class Component$4 extends React.Component {
-        constructor(props) {
-            super(props);
-
-            this.fetchUsersController = new AbortController();
-
-            this.state = {
-                users: [],
-            };
-        }
-
         fetchUsers() {
-            this.fetchUsersController.abort();
-
-            this.fetchUsersController = fetchGetSmart(
+            fetchGetSmart(
                 '/api/user-list/',
                 this.props.setRoute,
-                this.props.loadingIndicator,
+                this.props.loadingIndicatorIncrement,
+                this.props.loadingIndicatorDecrement,
                 response => {
-                    this.setState({
-                        users: response.users,
-                    });
+                    this.props.updateUsers(response.users);
                 }
             );
         }
@@ -815,7 +832,8 @@
                     id: userId,
                 },
                 this.props.setRoute,
-                this.props.loadingIndicator,
+                this.props.loadingIndicatorIncrement,
+                this.props.loadingIndicatorDecrement,
                 () => {
                     this.fetchUsers();
                 },
@@ -834,10 +852,6 @@
             this.fetchUsers();
         }
 
-        componentWillUnmount() {
-            this.fetchUsersController.abort();
-        }
-
         render() {
             return React.createElement('div', { className: 'user-listing-view' },
                 React.createElement('div', { className: 'user-listing-view__title' }, 'Users'),
@@ -846,12 +860,12 @@
                     onClick: this.props.onCreateClick,
                 }, 'Create User'),
                 React.createElement('div', { className: 'user-listing-view__users' },
-                    this.state.users.map(user => (
+                    this.props.users.map(user => (
                         React.createElement('div', { className: 'user-listing-view__user', key: user.id },
                             React.createElement('div',
                                 {
                                     className: 'user-listing-view__user__title',
-                                    onClick: () => this.props.setRoute('/edit-user/' + userId + '/'),
+                                    onClick: () => this.props.setRoute('/edit-user/' + user.id + '/'),
                                 },
                                 React.createElement('div', { className: 'user-listing-view__user__username' }, user.username),
                                 (user.is_admin ? React.createElement('div', { className: 'user-listing-view__user__admin' }, 'Admin') : null),
@@ -870,9 +884,9 @@
         }
     }
 
-    const UserListing = ReactRedux.connect(null, mapDispatchToProps$3)(Component$4);
+    const UserListing = ReactRedux.connect(mapStateToProps$1, mapDispatchToProps$4)(Component$4);
 
-    function mapDispatchToProps$4(dispatch) {
+    function mapDispatchToProps$5(dispatch) {
         return {
             setRoute: url => {
                 dispatch({
@@ -1027,9 +1041,9 @@
         }
     }
 
-    const CreateUser = ReactRedux.connect(null, mapDispatchToProps$4)(Component$5);
+    const CreateUser = ReactRedux.connect(null, mapDispatchToProps$5)(Component$5);
 
-    function mapDispatchToProps$5(dispatch) {
+    function mapDispatchToProps$6(dispatch) {
         return {
             setRoute: url => {
                 dispatch({
@@ -1208,9 +1222,9 @@
         }
     }
 
-    const EditUser = ReactRedux.connect(null, mapDispatchToProps$5)(Component$6);
+    const EditUser = ReactRedux.connect(null, mapDispatchToProps$6)(Component$6);
 
-    function mapDispatchToProps$6(dispatch, ownProps) {
+    function mapDispatchToProps$7(dispatch, ownProps) {
         return {
             onShowLogin: () => {
                 dispatch({
@@ -1308,7 +1322,7 @@
         }
     }
 
-    const JobDetail = ReactRedux.connect(null, mapDispatchToProps$6)(Component$7);
+    const JobDetail = ReactRedux.connect(null, mapDispatchToProps$7)(Component$7);
 
     const LINKS = [
         {
@@ -1337,7 +1351,7 @@
         },
     ];
 
-    function mapDispatchToProps$7(dispatch, ownProps) {
+    function mapDispatchToProps$8(dispatch, ownProps) {
         return {
             onClick: (slug) => {
                 const url = '/plots/' + ownProps.jobId + '/' + slug + '/';
@@ -1364,7 +1378,7 @@
         }
     }
 
-    const Sidebar = ReactRedux.connect(null, mapDispatchToProps$7)(Component$8);
+    const Sidebar = ReactRedux.connect(null, mapDispatchToProps$8)(Component$8);
 
     class AverageMutations extends React.Component {
         constructor(props) {
@@ -2177,30 +2191,27 @@
         }
     }
 
-    function mapStateToProps$1(state) {
+    function mapStateToProps$2(state) {
         return {
             route: state.route,
         };
     }
 
-    function getView(route, setRoute, loadingIndicator) {
+    function getView(route) {
         const jobDetailMatch = route.match(new RegExp('^/job-detail/(\\w+)/$'));
         const editUserMatch = route.match(new RegExp('^/edit-user/(\\w+)/$'));
         const plotMatch = route.match(new RegExp('^/plots/(\\w+)/([\\w-]+)/$'));
 
         if (route === '/') {
-            return React.createElement(NewJob, {});
+            return React.createElement(NewJob, null);
         } else if (route === '/login/') {
-            return React.createElement(Login, {});
+            return React.createElement(Login, null);
         } else if (route === '/job-listing/') {
-            return React.createElement(JobListing);
+            return React.createElement(JobListing, null);
         } else if (route === '/user-listing/') {
-            return React.createElement(UserListing, {
-                setRoute: setRoute,
-                loadingIndicator: loadingIndicator,
-            });
+            return React.createElement(UserListing, null);
         } else if (route === '/create-user/') {
-            return React.createElement(CreateUser);
+            return React.createElement(CreateUser, null);
         } else if (editUserMatch) {
             return React.createElement(EditUser, {
                 userId: editUserMatch[1],
@@ -2232,61 +2243,20 @@
 
     function Component$9(props) {
         return React.createElement('div', { className: 'page-content' },
-            getView(props.route, props.setRoute, props.loadingIndicator),
+            getView(props.route),
         );
     }
 
-    const Content = ReactRedux.connect(mapStateToProps$1)(Component$9);
+    const Content = ReactRedux.connect(mapStateToProps$2)(Component$9);
 
-    function mapDispatchToProps$8(dispatch) {
-        return {
-            setRoute: url => {
-                dispatch({
-                    type: 'ROUTE',
-                    value: url,
-                });
-                history.pushState(null, null, url);
-            },
-        };
-    }
-
-    class Component$a extends React.Component {
-        constructor(props) {
-            super(props);
-
-            this.state = {
-                loadingIndicatorCount: 0,
-            };
-
-            this.loadingIndicator = {
-                increment: () => {
-                    this.setState(prevState => ({
-                        loadingIndicatorCount: prevState.loadingIndicatorCount + 1,
-                    }));
-                },
-                decrement: () => {
-                    this.setState(prevState => ({
-                        loadingIndicatorCount: Math.max(prevState.loadingIndicatorCount - 1, 0),
-                    }));
-                },
-            };
-        }
-
+    class Root extends React.PureComponent {
         render() {
             return React.createElement('div', null,
-                React.createElement(Header, {
-                    setRoute: this.props.setRoute,
-                    loading: this.state.loadingIndicatorCount !== 0,
-                }),
-                React.createElement(Content, {
-                    setRoute: this.props.setRoute,
-                    loadingIndicator: this.loadingIndicator,
-                }),
+                React.createElement(Header, null),
+                React.createElement(Content, null),
             );
         }
     }
-
-    const Root = ReactRedux.connect(null, mapDispatchToProps$8)(Component$a);
 
     function init() {
         const store = Redux.createStore(reducer);
