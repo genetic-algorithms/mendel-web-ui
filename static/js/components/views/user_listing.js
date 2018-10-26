@@ -9,66 +9,47 @@ function mapStateToProps(state) {
 }
 
 function mapDispatchToProps(dispatch) {
-    return {
-        setRoute: url => setRoute(dispatch, url),
-        onCreateClick: () => setRoute(dispatch, '/create-user/'),
-        updateUsers: users => {
-            dispatch({
-                type: 'user_listing.USERS',
-                value: users,
-            });
-        },
-        loadingIndicatorIncrement: () => {
-            dispatch({
-                type: 'LOADING_INDICATOR_INCREMENT',
-            });
-        },
-        loadingIndicatorDecrement: () => {
-            dispatch({
-                type: 'LOADING_INDICATOR_DECREMENT',
-            });
-        },
-    };
-}
-
-export class Component extends React.Component {
-    fetchUsers() {
+    function fetchUsers() {
         fetchGetSmart(
             '/api/user-list/',
-            this.props.setRoute,
-            this.props.loadingIndicatorIncrement,
-            this.props.loadingIndicatorDecrement,
+            dispatch,
             response => {
-                this.props.updateUsers(response.users);
+                dispatch({
+                    type: 'user_listing.USERS',
+                    value: response.users,
+                });
             }
         );
     }
 
-    fetchDeleteUser(userId) {
-        fetchPostSmart(
-            '/api/delete-user/',
-            {
-                id: userId,
-            },
-            this.props.setRoute,
-            this.props.loadingIndicatorIncrement,
-            this.props.loadingIndicatorDecrement,
-            () => {
-                this.fetchUsers();
-            },
-        );
-    }
+    return {
+        setRoute: url => setRoute(dispatch, url),
+        onCreateClick: () => setRoute(dispatch, '/create-user/'),
+        fetchUsers: fetchUsers,
+        fetchDeleteUser: userId => {
+            fetchPostSmart(
+                '/api/delete-user/',
+                {
+                    id: userId,
+                },
+                dispatch,
+                fetchUsers,
+            );
+        }
+    };
+}
 
+export class Component extends React.Component {
     onDeleteClick(userId) {
         confirmationDialog.open(
             'Delete user?',
             'The user will be deleted, but jobs run by the user will be kept.',
-            () => this.fetchDeleteUser(userId),
+            () => this.props.fetchDeleteUser(userId),
         );
     }
 
     componentDidMount() {
-        this.fetchUsers();
+        this.props.fetchUsers();
     }
 
     render() {

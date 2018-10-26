@@ -1,9 +1,9 @@
 function mapDispatchToProps(dispatch) {
     return {
-        onShowHome: () => {
+        onLogin: user => {
             dispatch({
-                type: 'ROUTE',
-                value: '/',
+                type: 'LOGIN',
+                user: user,
             });
             history.pushState(null, null, '/');
         },
@@ -65,7 +65,7 @@ export class Component extends React.Component {
             response => response.json()
         ).then(responseJson => {
             if (responseJson.status === 'success') {
-                this.props.onShowHome();
+                this.props.onLogin(responseJson.user);
             } else if (responseJson.status === 'wrong_credentials') {
                 this.setState({
                     username: '',

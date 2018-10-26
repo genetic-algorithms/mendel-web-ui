@@ -4,9 +4,7 @@
     function reducer(state, action) {
         if (state === undefined) {
             return {
-                page_loaded: false,
-                page_data: {},
-                authenticated: false,
+                user: null,
                 route: location.pathname,
                 loading_indicator_count: 0,
                 user_listing: {
@@ -16,11 +14,19 @@
         }
 
         switch (action.type) {
-            case 'PAGE_LOADED':
+            case 'USER':
                 return immer.default(state, draft => {
-                    draft.page_loaded = true;
-                    draft.page_data = action.page_data;
-                    draft.authenticated = action.authenticated;
+                    draft.user = action.value;
+                });
+            case 'LOGIN':
+                return immer.default(state, draft => {
+                    draft.route = '/';
+                    draft.user = action.user;
+                });
+            case 'LOGOUT':
+                return immer.default(state, draft => {
+                    draft.route = '/login/';
+                    draft.user = null;
                 });
             case 'ROUTE':
                 return immer.default(state, draft => {
@@ -51,16 +57,29 @@
         history.pushState(null, null, url);
     }
 
-    function fetchGetSmart(url, setRoute, loadingIndicatorIncrement, loadingIndicatorDecrement, onSuccess) {
-        loadingIndicatorIncrement();
+
+    function loadingIndicatorIncrement(dispatch) {
+        dispatch({
+            type: 'LOADING_INDICATOR_INCREMENT',
+        });
+    }
+
+    function loadingIndicatorDecrement(dispatch) {
+        dispatch({
+            type: 'LOADING_INDICATOR_DECREMENT',
+        });
+    }
+
+    function fetchGetSmart(url, dispatch, onSuccess) {
+        loadingIndicatorIncrement(dispatch);
 
         fetch(url, {
             credentials: 'same-origin',
         }).then(response => {
-            loadingIndicatorDecrement();
+            loadingIndicatorDecrement(dispatch);
 
             if (response.status === 401) {
-                setRoute('/login/');
+                setRoute(dispatch, '/login/');
                 return;
             }
 
@@ -68,7 +87,7 @@
                 onSuccess(responseJson);
             });
         }).catch(err => {
-            loadingIndicatorDecrement();
+            loadingIndicatorDecrement(dispatch);
             console.error(err);
         });
     }
@@ -84,14 +103,14 @@
         });
     }
 
-    function fetchPostSmart(url, body, setRoute, loadingIndicatorIncrement, loadingIndicatorDecrement, onSuccess) {
-        loadingIndicatorIncrement();
+    function fetchPostSmart(url, body, dispatch, onSuccess) {
+        loadingIndicatorIncrement(dispatch);
 
         return fetchPost(url, body).then(response => {
-            loadingIndicatorDecrement();
+            loadingIndicatorDecrement(dispatch);
 
             if (response.status === 401) {
-                setRoute('/login/');
+                setRoute(dispatch, '/login/');
                 return;
             }
 
@@ -99,13 +118,29 @@
                 onSuccess(responseJson);
             });
         }).catch(err => {
-            loadingIndicatorDecrement();
+            loadingIndicatorDecrement(dispatch);
             console.error(err);
         });
     }
 
+    class AccountIcon extends React.PureComponent {
+        render() {
+            return React.createElement(
+                'svg',
+                {
+                    width: this.props.width.toString(),
+                    height: this.props.height.toString(),
+                    viewBox: '0 0 24 24',
+                    xmlns: 'http://www.w3.org/2000/svg',
+                },
+                React.createElement('path', { d: 'M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z' }),
+            );
+        }
+    }
+
     function mapStateToProps(state) {
         return {
+            user: state.user,
             route: state.route,
             loading: state.loading_indicator_count !== 0,
         };
@@ -116,10 +151,55 @@
             onNewJobTabClick: () => setRoute(dispatch, '/'),
             onJobsTabClick: () => setRoute(dispatch, '/job-listing/'),
             onUsersTabClick: () => setRoute(dispatch, '/user-listing/'),
+            onLogoutClick: () => {
+                fetchPostSmart(
+                    '/api/logout/',
+                    {},
+                    dispatch,
+                    () => {
+                        dispatch({
+                            type: 'LOGOUT',
+                        });
+                        history.pushState(null, null, '/login/');
+                    },
+                );
+            },
         };
     }
 
     class Component extends React.Component {
+        constructor(props) {
+            super(props);
+
+            this.menuButtonElement = React.createRef();
+
+            this.state = {
+                menuOpen: false,
+            };
+
+            this.onDocumentClick = e => {
+                if (this.state.menuOpen) {
+                    this.setState({
+                        menuOpen: false,
+                    });
+                } else {
+                    if (this.menuButtonElement.current && this.menuButtonElement.current.contains(e.target)) {
+                        this.setState({
+                            menuOpen: true,
+                        });
+                    }
+                }
+            };
+        }
+
+        componentDidMount() {
+            document.addEventListener('click', this.onDocumentClick);
+        }
+
+        componentWillUnmount() {
+            document.removeEventListener('click', this.onDocumentClick);
+        }
+
         render() {
             return React.createElement('div', { className: 'page-header' },
                 React.createElement('div', { className: 'page-header__tabs' },
@@ -131,13 +211,39 @@
                         className: 'page-header__tab ' + (this.props.route === '/job-listing/' ? 'page-header--active-tab' : ''),
                         onClick: this.props.onJobsTabClick,
                     }, 'Jobs'),
-                    React.createElement('div', {
-                        className: 'page-header__tab ' + (this.props.route === '/user-listing/' ? 'page-header--active-tab' : ''),
-                        onClick: this.props.onUsersTabClick,
-                    }, 'Users'),
+                    (this.props.user && this.props.user.is_admin ?
+                        React.createElement('div', {
+                            className: 'page-header__tab ' + (this.props.route === '/user-listing/' ? 'page-header--active-tab' : ''),
+                            onClick: this.props.onUsersTabClick,
+                        }, 'Users') :
+                        null
+                    ),
                 ),
                 (this.props.loading ?
                     React.createElement('div', { className: 'page-header__loading-indicator' }) :
+                    null
+                ),
+                (this.props.user ?
+                    React.createElement('div',
+                        {
+                            className: 'page-header__account-menu-button',
+                            ref: this.menuButtonElement,
+                        },
+                        React.createElement(AccountIcon, { width: 24, height: 24 }),
+                    ) :
+                    null
+                ),
+                (this.props.user ?
+                    React.createElement('div',
+                        {
+                            className: 'page-header__account-menu ' + (this.state.menuOpen ? 'page-header--account-menu-open' : '' ),
+                        },
+                        React.createElement('div', { className: 'page-header__account-menu-item' }, 'My Account'),
+                        React.createElement('div', {
+                            className: 'page-header__account-menu-item',
+                            onClick: this.props.onLogoutClick,
+                        }, 'Logout'),
+                    ) :
                     null
                 ),
             );
@@ -486,10 +592,10 @@
 
     function mapDispatchToProps$2(dispatch) {
         return {
-            onShowHome: () => {
+            onLogin: user => {
                 dispatch({
-                    type: 'ROUTE',
-                    value: '/',
+                    type: 'LOGIN',
+                    user: user,
                 });
                 history.pushState(null, null, '/');
             },
@@ -551,7 +657,7 @@
                 response => response.json()
             ).then(responseJson => {
                 if (responseJson.status === 'success') {
-                    this.props.onShowHome();
+                    this.props.onLogin(responseJson.user);
                 } else if (responseJson.status === 'wrong_credentials') {
                     this.setState({
                         username: '',
@@ -790,66 +896,47 @@
     }
 
     function mapDispatchToProps$4(dispatch) {
-        return {
-            setRoute: url => setRoute(dispatch, url),
-            onCreateClick: () => setRoute(dispatch, '/create-user/'),
-            updateUsers: users => {
-                dispatch({
-                    type: 'user_listing.USERS',
-                    value: users,
-                });
-            },
-            loadingIndicatorIncrement: () => {
-                dispatch({
-                    type: 'LOADING_INDICATOR_INCREMENT',
-                });
-            },
-            loadingIndicatorDecrement: () => {
-                dispatch({
-                    type: 'LOADING_INDICATOR_DECREMENT',
-                });
-            },
-        };
-    }
-
-    class Component$4 extends React.Component {
-        fetchUsers() {
+        function fetchUsers() {
             fetchGetSmart(
                 '/api/user-list/',
-                this.props.setRoute,
-                this.props.loadingIndicatorIncrement,
-                this.props.loadingIndicatorDecrement,
+                dispatch,
                 response => {
-                    this.props.updateUsers(response.users);
+                    dispatch({
+                        type: 'user_listing.USERS',
+                        value: response.users,
+                    });
                 }
             );
         }
 
-        fetchDeleteUser(userId) {
-            fetchPostSmart(
-                '/api/delete-user/',
-                {
-                    id: userId,
-                },
-                this.props.setRoute,
-                this.props.loadingIndicatorIncrement,
-                this.props.loadingIndicatorDecrement,
-                () => {
-                    this.fetchUsers();
-                },
-            );
-        }
+        return {
+            setRoute: url => setRoute(dispatch, url),
+            onCreateClick: () => setRoute(dispatch, '/create-user/'),
+            fetchUsers: fetchUsers,
+            fetchDeleteUser: userId => {
+                fetchPostSmart(
+                    '/api/delete-user/',
+                    {
+                        id: userId,
+                    },
+                    dispatch,
+                    fetchUsers,
+                );
+            }
+        };
+    }
 
+    class Component$4 extends React.Component {
         onDeleteClick(userId) {
             open(
                 'Delete user?',
                 'The user will be deleted, but jobs run by the user will be kept.',
-                () => this.fetchDeleteUser(userId),
+                () => this.props.fetchDeleteUser(userId),
             );
         }
 
         componentDidMount() {
-            this.fetchUsers();
+            this.props.fetchUsers();
         }
 
         render() {
@@ -2249,14 +2336,44 @@
 
     const Content = ReactRedux.connect(mapStateToProps$2)(Component$9);
 
-    class Root extends React.PureComponent {
+    function mapStateToProps$3(state) {
+        return {
+            route: state.route,
+        };
+    }
+
+    function mapDispatchToProps$9(dispatch) {
+        return {
+            fetchCurrentUser: () => {
+                fetchGetSmart(
+                    '/api/get-current-user/',
+                    dispatch,
+                    response => {
+                        dispatch({
+                            type: 'USER',
+                            value: response,
+                        });
+                    }
+                );
+            },
+        };
+    }
+
+    class Component$a extends React.Component {
+        componentDidMount() {
+            this.props.fetchCurrentUser();
+        }
+
         render() {
             return React.createElement('div', null,
-                React.createElement(Header, null),
+                (this.props.route == '/login/' ? null : React.createElement('div', { className: 'page-header__spacer' })),
+                (this.props.route == '/login/' ? null : React.createElement(Header, null)),
                 React.createElement(Content, null),
             );
         }
     }
+
+    const Root = ReactRedux.connect(mapStateToProps$3, mapDispatchToProps$9)(Component$a);
 
     function init() {
         const store = Redux.createStore(reducer);

@@ -65,7 +65,13 @@ func apiLoginHandler(w http.ResponseWriter, r *http.Request) {
 		HttpOnly: true,
 	})
 
-	responseJson, err := json.Marshal(map[string]string{"status": "success"})
+	responseJson, err := json.Marshal(map[string]interface{}{
+		"status": "success",
+		"user": map[string]interface{}{
+			"username": user.Username,
+			"is_admin": user.IsAdmin,
+		},
+	})
 	w.Header().Set("Content-Type", "application/json")
 	w.Write(responseJson)
 }

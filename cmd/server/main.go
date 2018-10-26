@@ -188,6 +188,10 @@ func rootHandler(w http.ResponseWriter, r *http.Request) {
 func apiHandler(w http.ResponseWriter, r *http.Request) {
 	if r.URL.Path == "/api/login/" {
 		apiLoginHandler(w, r)
+	} else if r.URL.Path == "/api/logout/" {
+		apiLogoutHandler(w, r)
+	} else if r.URL.Path == "/api/get-current-user/" {
+		apiGetCurrentUserHandler(w, r)
 	} else if r.URL.Path == "/api/create-job/" {
 		apiCreateJobHandler(w, r)
 	} else if r.URL.Path == "/api/job-output/" {

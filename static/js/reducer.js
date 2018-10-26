@@ -1,9 +1,7 @@
 export function reducer(state, action) {
     if (state === undefined) {
         return {
-            page_loaded: false,
-            page_data: {},
-            authenticated: false,
+            user: null,
             route: location.pathname,
             loading_indicator_count: 0,
             user_listing: {
@@ -13,11 +11,19 @@ export function reducer(state, action) {
     }
 
     switch (action.type) {
-        case 'PAGE_LOADED':
+        case 'USER':
             return immer.default(state, draft => {
-                draft.page_loaded = true;
-                draft.page_data = action.page_data;
-                draft.authenticated = action.authenticated;
+                draft.user = action.value;
+            });
+        case 'LOGIN':
+            return immer.default(state, draft => {
+                draft.route = '/';
+                draft.user = action.user;
+            });
+        case 'LOGOUT':
+            return immer.default(state, draft => {
+                draft.route = '/login/';
+                draft.user = null;
             });
         case 'ROUTE':
             return immer.default(state, draft => {

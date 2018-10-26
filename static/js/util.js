@@ -6,16 +6,29 @@ export function setRoute(dispatch, url) {
     history.pushState(null, null, url);
 }
 
-export function fetchGetSmart(url, setRoute, loadingIndicatorIncrement, loadingIndicatorDecrement, onSuccess) {
-    loadingIndicatorIncrement();
+
+function loadingIndicatorIncrement(dispatch) {
+    dispatch({
+        type: 'LOADING_INDICATOR_INCREMENT',
+    });
+}
+
+function loadingIndicatorDecrement(dispatch) {
+    dispatch({
+        type: 'LOADING_INDICATOR_DECREMENT',
+    });
+}
+
+export function fetchGetSmart(url, dispatch, onSuccess) {
+    loadingIndicatorIncrement(dispatch);
 
     fetch(url, {
         credentials: 'same-origin',
     }).then(response => {
-        loadingIndicatorDecrement();
+        loadingIndicatorDecrement(dispatch);
 
         if (response.status === 401) {
-            setRoute('/login/');
+            setRoute(dispatch, '/login/');
             return;
         }
 
@@ -23,7 +36,7 @@ export function fetchGetSmart(url, setRoute, loadingIndicatorIncrement, loadingI
             onSuccess(responseJson);
         });
     }).catch(err => {
-        loadingIndicatorDecrement();
+        loadingIndicatorDecrement(dispatch);
         console.error(err);
     });
 }
@@ -39,14 +52,14 @@ export function fetchPost(url, body) {
     });
 }
 
-export function fetchPostSmart(url, body, setRoute, loadingIndicatorIncrement, loadingIndicatorDecrement, onSuccess) {
-    loadingIndicatorIncrement();
+export function fetchPostSmart(url, body, dispatch, onSuccess) {
+    loadingIndicatorIncrement(dispatch);
 
     return fetchPost(url, body).then(response => {
-        loadingIndicatorDecrement();
+        loadingIndicatorDecrement(dispatch);
 
         if (response.status === 401) {
-            setRoute('/login/');
+            setRoute(dispatch, '/login/');
             return;
         }
 
@@ -54,7 +67,7 @@ export function fetchPostSmart(url, body, setRoute, loadingIndicatorIncrement, l
             onSuccess(responseJson);
         });
     }).catch(err => {
-        loadingIndicatorDecrement();
+        loadingIndicatorDecrement(dispatch);
         console.error(err);
     });
 }
