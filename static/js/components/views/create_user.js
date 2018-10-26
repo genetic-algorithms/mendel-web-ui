@@ -1,22 +1,12 @@
 import { Checkbox } from '../checkbox';
-
-function mapDispatchToProps(dispatch) {
-    return {
-        setRoute: url => {
-            dispatch({
-                type: 'ROUTE',
-                value: url,
-            });
-            history.pushState(null, null, url);
-        },
-    };
-}
+import { setRoute, fetchPostSmart } from '../../util';
 
 export class Component extends React.Component {
     constructor(props) {
         super(props);
 
-        this.fetchController = new AbortController();
+        this.mounted = false;
+        this.submitting = false;
 
         this.onUsernameChange = this.onUsernameChange.bind(this);
         this.onPasswordChange = this.onPasswordChange.bind(this);
@@ -29,9 +19,12 @@ export class Component extends React.Component {
             password: '',
             confirmPassword: '',
             isAdmin: false,
-            submitting: false,
             usernameExists: false,
         };
+    }
+
+    setRoute(url) {
+        setRoute(this.props.dispatch, url);
     }
 
     onUsernameChange(e) {
@@ -62,43 +55,41 @@ export class Component extends React.Component {
     onSubmit(e) {
         e.preventDefault();
 
-        if (this.state.submitting) return;
+        if (this.submitting) return;
 
         if (this.state.confirmPassword !== this.state.password) return;
 
-        this.setState({
-            submitting: true,
-        });
+        this.submitting = true;
 
-        fetch('/api/create-edit-user/', {
-            method: 'POST',
-            body: JSON.stringify({
+        fetchPostSmart(
+            '/api/create-edit-user/',
+            {
                 username: this.state.username,
                 password: this.state.password,
                 confirm_password: this.state.confirmPassword,
                 is_admin: this.state.isAdmin,
-            }),
-            headers: {
-                'Content-Type': 'application/json'
             },
-            credentials: 'same-origin',
-        }).then(response => {
-            if (response.status === 401) {
-                this.props.setRoute('/login/');
-                return;
-            }
+            this.props.dispatch,
+        ).then(response => {
+            if (!this.mounted) return;
 
-            response.json().then(responseJson => {
-                if (responseJson.error === 'username_exists') {
-                    this.setState({
-                        usernameExists: true,
-                        submitting: false,
-                    });
-                } else {
-                    this.props.setRoute('/user-listing/');
-                }
-            });
+            if (response.error === 'username_exists') {
+                this.submitting = false;
+                this.setState({
+                    usernameExists: true,
+                });
+            } else {
+                this.setRoute('/user-listing/');
+            }
         });
+    }
+
+    componentDidMount() {
+        this.mounted = true;
+    }
+
+    componentWillUnmount() {
+        this.mounted = false;
     }
 
     render() {
@@ -148,11 +139,11 @@ export class Component extends React.Component {
                 React.createElement('input', {
                     className: 'button',
                     type: 'submit',
-                    value: this.state.submitting ? 'Processing…' : 'Create',
+                    value: 'Create',
                 }),
             ),
         );
     }
 }
 
-export const CreateUser = ReactRedux.connect(null, mapDispatchToProps)(Component);
+export const CreateUser = ReactRedux.connect(null, null)(Component);

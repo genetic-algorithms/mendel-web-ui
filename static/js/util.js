@@ -19,25 +19,29 @@ function loadingIndicatorDecrement(dispatch) {
     });
 }
 
-export function fetchGetSmart(url, dispatch, onSuccess) {
+export function fetchGetSmart(url, dispatch) {
     loadingIndicatorIncrement(dispatch);
 
-    fetch(url, {
-        credentials: 'same-origin',
-    }).then(response => {
-        loadingIndicatorDecrement(dispatch);
+    return new Promise((resolve, reject) => {
+        fetch(url, {
+            credentials: 'same-origin',
+        }).then(response => {
+            loadingIndicatorDecrement(dispatch);
 
-        if (response.status === 401) {
-            setRoute(dispatch, '/login/');
-            return;
-        }
+            if (response.status === 401) {
+                setRoute(dispatch, '/login/');
+                reject();
+                return;
+            }
 
-        response.json().then(responseJson => {
-            onSuccess(responseJson);
+            response.json().then(responseJson => {
+                resolve(responseJson);
+            });
+        }).catch(err => {
+            loadingIndicatorDecrement(dispatch);
+            console.error(err);
+            reject(err);
         });
-    }).catch(err => {
-        loadingIndicatorDecrement(dispatch);
-        console.error(err);
     });
 }
 
@@ -52,22 +56,26 @@ export function fetchPost(url, body) {
     });
 }
 
-export function fetchPostSmart(url, body, dispatch, onSuccess) {
+export function fetchPostSmart(url, body, dispatch) {
     loadingIndicatorIncrement(dispatch);
 
-    return fetchPost(url, body).then(response => {
-        loadingIndicatorDecrement(dispatch);
+    return new Promise((resolve, reject) => {
+        fetchPost(url, body).then(response => {
+            loadingIndicatorDecrement(dispatch);
 
-        if (response.status === 401) {
-            setRoute(dispatch, '/login/');
-            return;
-        }
+            if (response.status === 401) {
+                setRoute(dispatch, '/login/');
+                reject();
+                return;
+            }
 
-        response.json().then(responseJson => {
-            onSuccess(responseJson);
+            response.json().then(responseJson => {
+                resolve(responseJson);
+            });
+        }).catch(err => {
+            loadingIndicatorDecrement(dispatch);
+            console.error(err);
+            reject(err);
         });
-    }).catch(err => {
-        loadingIndicatorDecrement(dispatch);
-        console.error(err);
     });
 }

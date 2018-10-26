@@ -13,41 +13,37 @@ function mapDispatchToProps(dispatch) {
         fetchGetSmart(
             '/api/user-list/',
             dispatch,
-            response => {
-                dispatch({
-                    type: 'user_listing.USERS',
-                    value: response.users,
-                });
-            }
-        );
+        ).then(response => {
+            dispatch({
+                type: 'user_listing.USERS',
+                value: response.users,
+            });
+        });
     }
 
     return {
         setRoute: url => setRoute(dispatch, url),
         onCreateClick: () => setRoute(dispatch, '/create-user/'),
         fetchUsers: fetchUsers,
-        fetchDeleteUser: userId => {
-            fetchPostSmart(
-                '/api/delete-user/',
-                {
-                    id: userId,
+        onDeleteClick: userId => {
+            confirmationDialog.open(
+                'Delete user?',
+                'The user will be deleted, but jobs run by the user will be kept.',
+                () => {
+                    fetchPostSmart(
+                        '/api/delete-user/',
+                        {
+                            id: userId,
+                        },
+                        dispatch,
+                    ).then(fetchUsers);
                 },
-                dispatch,
-                fetchUsers,
             );
-        }
+        },
     };
 }
 
 export class Component extends React.Component {
-    onDeleteClick(userId) {
-        confirmationDialog.open(
-            'Delete user?',
-            'The user will be deleted, but jobs run by the user will be kept.',
-            () => this.props.fetchDeleteUser(userId),
-        );
-    }
-
     componentDidMount() {
         this.props.fetchUsers();
     }
@@ -73,7 +69,7 @@ export class Component extends React.Component {
                         React.createElement('div',
                             {
                                 className: 'user-listing-view__user__delete-button',
-                                onClick: () => this.onDeleteClick(user.id),
+                                onClick: () => this.props.onDeleteClick(user.id),
                             },
                             React.createElement(DeleteIcon, { width: 24, height: 24 }),
                         ),

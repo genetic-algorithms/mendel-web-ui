@@ -19,13 +19,12 @@ function mapDispatchToProps(dispatch) {
                 '/api/logout/',
                 {},
                 dispatch,
-                () => {
-                    dispatch({
-                        type: 'LOGOUT',
-                    });
-                    history.pushState(null, null, '/login/');
-                },
-            );
+            ).then(() => {
+                dispatch({
+                    type: 'LOGOUT',
+                });
+                history.pushState(null, null, '/login/');
+            });
         },
     };
 }

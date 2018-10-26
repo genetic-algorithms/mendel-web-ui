@@ -14,13 +14,12 @@ function mapDispatchToProps(dispatch) {
             fetchGetSmart(
                 '/api/get-current-user/',
                 dispatch,
-                response => {
-                    dispatch({
-                        type: 'USER',
-                        value: response,
-                    });
-                }
-            );
+            ).then(response => {
+                dispatch({
+                    type: 'USER',
+                    value: response,
+                });
+            });
         },
     };
 }

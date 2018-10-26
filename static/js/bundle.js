@@ -70,25 +70,29 @@
         });
     }
 
-    function fetchGetSmart(url, dispatch, onSuccess) {
+    function fetchGetSmart(url, dispatch) {
         loadingIndicatorIncrement(dispatch);
 
-        fetch(url, {
-            credentials: 'same-origin',
-        }).then(response => {
-            loadingIndicatorDecrement(dispatch);
+        return new Promise((resolve, reject) => {
+            fetch(url, {
+                credentials: 'same-origin',
+            }).then(response => {
+                loadingIndicatorDecrement(dispatch);
 
-            if (response.status === 401) {
-                setRoute(dispatch, '/login/');
-                return;
-            }
+                if (response.status === 401) {
+                    setRoute(dispatch, '/login/');
+                    reject();
+                    return;
+                }
 
-            response.json().then(responseJson => {
-                onSuccess(responseJson);
+                response.json().then(responseJson => {
+                    resolve(responseJson);
+                });
+            }).catch(err => {
+                loadingIndicatorDecrement(dispatch);
+                console.error(err);
+                reject(err);
             });
-        }).catch(err => {
-            loadingIndicatorDecrement(dispatch);
-            console.error(err);
         });
     }
 
@@ -103,23 +107,27 @@
         });
     }
 
-    function fetchPostSmart(url, body, dispatch, onSuccess) {
+    function fetchPostSmart(url, body, dispatch) {
         loadingIndicatorIncrement(dispatch);
 
-        return fetchPost(url, body).then(response => {
-            loadingIndicatorDecrement(dispatch);
+        return new Promise((resolve, reject) => {
+            fetchPost(url, body).then(response => {
+                loadingIndicatorDecrement(dispatch);
 
-            if (response.status === 401) {
-                setRoute(dispatch, '/login/');
-                return;
-            }
+                if (response.status === 401) {
+                    setRoute(dispatch, '/login/');
+                    reject();
+                    return;
+                }
 
-            response.json().then(responseJson => {
-                onSuccess(responseJson);
+                response.json().then(responseJson => {
+                    resolve(responseJson);
+                });
+            }).catch(err => {
+                loadingIndicatorDecrement(dispatch);
+                console.error(err);
+                reject(err);
             });
-        }).catch(err => {
-            loadingIndicatorDecrement(dispatch);
-            console.error(err);
         });
     }
 
@@ -156,13 +164,12 @@
                     '/api/logout/',
                     {},
                     dispatch,
-                    () => {
-                        dispatch({
-                            type: 'LOGOUT',
-                        });
-                        history.pushState(null, null, '/login/');
-                    },
-                );
+                ).then(() => {
+                    dispatch({
+                        type: 'LOGOUT',
+                    });
+                    history.pushState(null, null, '/login/');
+                });
             },
         };
     }
@@ -900,41 +907,37 @@
             fetchGetSmart(
                 '/api/user-list/',
                 dispatch,
-                response => {
-                    dispatch({
-                        type: 'user_listing.USERS',
-                        value: response.users,
-                    });
-                }
-            );
+            ).then(response => {
+                dispatch({
+                    type: 'user_listing.USERS',
+                    value: response.users,
+                });
+            });
         }
 
         return {
             setRoute: url => setRoute(dispatch, url),
             onCreateClick: () => setRoute(dispatch, '/create-user/'),
             fetchUsers: fetchUsers,
-            fetchDeleteUser: userId => {
-                fetchPostSmart(
-                    '/api/delete-user/',
-                    {
-                        id: userId,
+            onDeleteClick: userId => {
+                open(
+                    'Delete user?',
+                    'The user will be deleted, but jobs run by the user will be kept.',
+                    () => {
+                        fetchPostSmart(
+                            '/api/delete-user/',
+                            {
+                                id: userId,
+                            },
+                            dispatch,
+                        ).then(fetchUsers);
                     },
-                    dispatch,
-                    fetchUsers,
                 );
-            }
+            },
         };
     }
 
     class Component$4 extends React.Component {
-        onDeleteClick(userId) {
-            open(
-                'Delete user?',
-                'The user will be deleted, but jobs run by the user will be kept.',
-                () => this.props.fetchDeleteUser(userId),
-            );
-        }
-
         componentDidMount() {
             this.props.fetchUsers();
         }
@@ -960,7 +963,7 @@
                             React.createElement('div',
                                 {
                                     className: 'user-listing-view__user__delete-button',
-                                    onClick: () => this.onDeleteClick(user.id),
+                                    onClick: () => this.props.onDeleteClick(user.id),
                                 },
                                 React.createElement(DeleteIcon, { width: 24, height: 24 }),
                             ),
@@ -973,23 +976,12 @@
 
     const UserListing = ReactRedux.connect(mapStateToProps$1, mapDispatchToProps$4)(Component$4);
 
-    function mapDispatchToProps$5(dispatch) {
-        return {
-            setRoute: url => {
-                dispatch({
-                    type: 'ROUTE',
-                    value: url,
-                });
-                history.pushState(null, null, url);
-            },
-        };
-    }
-
     class Component$5 extends React.Component {
         constructor(props) {
             super(props);
 
-            this.fetchController = new AbortController();
+            this.mounted = false;
+            this.submitting = false;
 
             this.onUsernameChange = this.onUsernameChange.bind(this);
             this.onPasswordChange = this.onPasswordChange.bind(this);
@@ -1002,9 +994,12 @@
                 password: '',
                 confirmPassword: '',
                 isAdmin: false,
-                submitting: false,
                 usernameExists: false,
             };
+        }
+
+        setRoute(url) {
+            setRoute(this.props.dispatch, url);
         }
 
         onUsernameChange(e) {
@@ -1035,43 +1030,41 @@
         onSubmit(e) {
             e.preventDefault();
 
-            if (this.state.submitting) return;
+            if (this.submitting) return;
 
             if (this.state.confirmPassword !== this.state.password) return;
 
-            this.setState({
-                submitting: true,
-            });
+            this.submitting = true;
 
-            fetch('/api/create-edit-user/', {
-                method: 'POST',
-                body: JSON.stringify({
+            fetchPostSmart(
+                '/api/create-edit-user/',
+                {
                     username: this.state.username,
                     password: this.state.password,
                     confirm_password: this.state.confirmPassword,
                     is_admin: this.state.isAdmin,
-                }),
-                headers: {
-                    'Content-Type': 'application/json'
                 },
-                credentials: 'same-origin',
-            }).then(response => {
-                if (response.status === 401) {
-                    this.props.setRoute('/login/');
-                    return;
-                }
+                this.props.dispatch,
+            ).then(response => {
+                if (!this.mounted) return;
 
-                response.json().then(responseJson => {
-                    if (responseJson.error === 'username_exists') {
-                        this.setState({
-                            usernameExists: true,
-                            submitting: false,
-                        });
-                    } else {
-                        this.props.setRoute('/user-listing/');
-                    }
-                });
+                if (response.error === 'username_exists') {
+                    this.submitting = false;
+                    this.setState({
+                        usernameExists: true,
+                    });
+                } else {
+                    this.setRoute('/user-listing/');
+                }
             });
+        }
+
+        componentDidMount() {
+            this.mounted = true;
+        }
+
+        componentWillUnmount() {
+            this.mounted = false;
         }
 
         render() {
@@ -1121,16 +1114,16 @@
                     React.createElement('input', {
                         className: 'button',
                         type: 'submit',
-                        value: this.state.submitting ? 'Processing…' : 'Create',
+                        value: 'Create',
                     }),
                 ),
             );
         }
     }
 
-    const CreateUser = ReactRedux.connect(null, mapDispatchToProps$5)(Component$5);
+    const CreateUser = ReactRedux.connect(null, null)(Component$5);
 
-    function mapDispatchToProps$6(dispatch) {
+    function mapDispatchToProps$5(dispatch) {
         return {
             setRoute: url => {
                 dispatch({
@@ -1309,9 +1302,9 @@
         }
     }
 
-    const EditUser = ReactRedux.connect(null, mapDispatchToProps$6)(Component$6);
+    const EditUser = ReactRedux.connect(null, mapDispatchToProps$5)(Component$6);
 
-    function mapDispatchToProps$7(dispatch, ownProps) {
+    function mapDispatchToProps$6(dispatch, ownProps) {
         return {
             onShowLogin: () => {
                 dispatch({
@@ -1409,7 +1402,7 @@
         }
     }
 
-    const JobDetail = ReactRedux.connect(null, mapDispatchToProps$7)(Component$7);
+    const JobDetail = ReactRedux.connect(null, mapDispatchToProps$6)(Component$7);
 
     const LINKS = [
         {
@@ -1438,7 +1431,7 @@
         },
     ];
 
-    function mapDispatchToProps$8(dispatch, ownProps) {
+    function mapDispatchToProps$7(dispatch, ownProps) {
         return {
             onClick: (slug) => {
                 const url = '/plots/' + ownProps.jobId + '/' + slug + '/';
@@ -1465,7 +1458,7 @@
         }
     }
 
-    const Sidebar = ReactRedux.connect(null, mapDispatchToProps$8)(Component$8);
+    const Sidebar = ReactRedux.connect(null, mapDispatchToProps$7)(Component$8);
 
     class AverageMutations extends React.Component {
         constructor(props) {
@@ -2342,19 +2335,18 @@
         };
     }
 
-    function mapDispatchToProps$9(dispatch) {
+    function mapDispatchToProps$8(dispatch) {
         return {
             fetchCurrentUser: () => {
                 fetchGetSmart(
                     '/api/get-current-user/',
                     dispatch,
-                    response => {
-                        dispatch({
-                            type: 'USER',
-                            value: response,
-                        });
-                    }
-                );
+                ).then(response => {
+                    dispatch({
+                        type: 'USER',
+                        value: response,
+                    });
+                });
             },
         };
     }
@@ -2373,7 +2365,7 @@
         }
     }
 
-    const Root = ReactRedux.connect(mapStateToProps$3, mapDispatchToProps$9)(Component$a);
+    const Root = ReactRedux.connect(mapStateToProps$3, mapDispatchToProps$8)(Component$a);
 
     function init() {
         const store = Redux.createStore(reducer);
