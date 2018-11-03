@@ -4,8 +4,15 @@
   "private": true,
   "license": "ISC",
   "devDependencies": {
-    "browser-sync": "^2.24.5",
-    "rollup": "^0.62.0"
+    "@types/plotly.js": "^1.38.13",
+    "@types/react": "^16.4.18",
+    "@types/react-dom": "^16.0.9",
+    "@types/react-redux": "^6.0.9",
+    "browser-sync": "^2.26.3",
+    "immer": "^1.5.0",
+    "moment": "^2.22.2",
+    "rollup": "^0.66.6",
+    "typescript": "^3.1.4"
   },
   "dependencies": {}
 }

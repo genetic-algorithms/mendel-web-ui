@@ -1,5 +1,5 @@
 export default {
-    input: './static/js/main.js',
+    input: './static/typescript/out/main.js',
     output: {
         file: './static/js/bundle.js',
         format: 'iife',
@@ -10,6 +10,8 @@ export default {
             'redux': 'Redux',
             'react-redux': 'ReactRedux',
             'immer': 'immer',
+            'moment': 'moment',
+            'plotly.js': 'Plotly',
         },
     },
     external: [
@@ -18,5 +20,14 @@ export default {
         'redux',
         'react-redux',
         'immer',
+        'moment',
+        'plotly.js',
     ],
+    onwarn: function (warning) {
+        if (warning.code === 'THIS_IS_UNDEFINED') return;
+        console.error(warning.message);
+    },
+    watch: {
+        clearScreen: false,
+    },
 }

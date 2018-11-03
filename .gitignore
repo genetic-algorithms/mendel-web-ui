@@ -2,3 +2,5 @@
 /vendor/
 /output/
 /database/
+/.vscode/
+/static/typescript/out/
