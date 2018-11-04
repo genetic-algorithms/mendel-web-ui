@@ -23,7 +23,7 @@ export default {
         'moment',
         'plotly.js',
     ],
-    onwarn: function (warning) {
+    onwarn: warning => {
         if (warning.code === 'THIS_IS_UNDEFINED') return;
         console.error(warning.message);
     },
