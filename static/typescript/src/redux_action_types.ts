@@ -1,11 +1,11 @@
-import { UserWithId } from './user_types';
+import { User } from './user_types';
 
 export type ReduxAction = {
     type: 'USER';
-    value: UserWithId;
+    value: User;
 } | {
     type: 'LOGIN';
-    user: UserWithId;
+    user: User;
 } | {
     type: 'LOGOUT';
 } | {
@@ -17,5 +17,5 @@ export type ReduxAction = {
     type: 'LOADING_INDICATOR_DECREMENT';
 } | {
     type: 'user_listing.USERS';
-    value: UserWithId[];
+    value: User[];
 };

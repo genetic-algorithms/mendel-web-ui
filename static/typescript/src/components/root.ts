@@ -6,7 +6,7 @@ import { Header } from './header';
 import { Content } from './content';
 import { ReduxState } from '../redux_state_types';
 import { ReduxAction } from '../redux_action_types';
-import { UserWithId } from '../user_types';
+import { User } from '../user_types';
 
 type Props = {
     route: string;
@@ -25,7 +25,7 @@ function mapDispatchToProps(dispatch: Redux.Dispatch<ReduxAction>) {
             fetchGetSmart(
                 '/api/get-current-user/',
                 dispatch,
-            ).then((response: UserWithId) => {
+            ).then((response: User) => {
                 dispatch({
                     type: 'USER',
                     value: response,

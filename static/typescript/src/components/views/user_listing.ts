@@ -6,10 +6,10 @@ import { DeleteIcon } from '../icons/delete';
 import * as confirmationDialog from '../../confirmation_dialog';
 import { setRoute, fetchGetSmart, fetchPostSmart } from '../../util';
 import { ReduxState } from '../../redux_state_types';
-import { UserWithId } from '../../user_types';
+import { User } from '../../user_types';
 
 type Props = {
-    users: UserWithId[],
+    users: User[],
     setRoute: (url: string) => void;
     onCreateClick: () => void;
     fetchUsers: () => void;

@@ -5,10 +5,10 @@ import * as ReactRedux from 'react-redux';
 import { ReduxAction } from '../../redux_action_types';
 import { ReduxState } from '../../redux_state_types';
 import { assertNotNull } from '../../util';
-import { UserWithId } from '../../user_types';
+import { User } from '../../user_types';
 
 type Props = {
-    user: UserWithId;
+    user: User;
     setRoute: (url: string) => void;
 };
 

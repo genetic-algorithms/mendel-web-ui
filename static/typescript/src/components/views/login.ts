@@ -2,15 +2,15 @@ import * as React from 'react';
 import * as Redux from 'redux';
 import * as ReactRedux from 'react-redux';
 import { ReduxAction } from '../../redux_action_types';
-import { UserWithId } from '../../user_types';
+import { User } from '../../user_types';
 
 type ApiResponse = {
     status: 'success' | 'wrong_credentials';
-    user: UserWithId,
+    user: User,
 };
 
 type Props = {
-    onLogin: (user: UserWithId) => void;
+    onLogin: (user: User) => void;
 };
 
 type State = {
@@ -22,7 +22,7 @@ type State = {
 
 function mapDispatchToProps(dispatch: Redux.Dispatch<ReduxAction>) {
     return {
-        onLogin: (user: UserWithId) => {
+        onLogin: (user: User) => {
             dispatch({
                 type: 'LOGIN',
                 user: user,
