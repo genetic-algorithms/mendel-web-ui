@@ -38,7 +38,7 @@ function mapDispatchToProps(dispatch: Redux.Dispatch<ReduxAction>, ownProps: Own
     };
 }
 
-export class Component extends React.Component<Props, State> {
+class Component extends React.Component<Props, State> {
     fetchController: AbortController;
     fetchTimeout: number | undefined;
     outputOffset: number;

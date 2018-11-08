@@ -1,12 +1,15 @@
 import { Checkbox } from '../checkbox';
-import { setRoute, fetchPostSmart } from '../../util';
 import * as React from 'react';
 import * as Redux from 'redux';
 import * as ReactRedux from 'react-redux';
 import { ReduxAction } from '../../redux_action_types';
+import { ReduxState } from '../../redux_state_types';
+import { assertNotNull } from '../../util';
+import { UserWithId } from '../../user_types';
 
 type Props = {
-    dispatch: Redux.Dispatch<ReduxAction>;
+    user: UserWithId;
+    setRoute: (url: string) => void;
 };
 
 type State = {
@@ -14,18 +17,35 @@ type State = {
     password: string;
     confirmPassword: string;
     isAdmin: boolean;
+    submitting: boolean;
     usernameExists: boolean;
 };
 
+function mapStateToProps(state: ReduxState) {
+    return {
+        user: assertNotNull(state.user),
+    };
+}
+
+function mapDispatchToProps(dispatch: Redux.Dispatch<ReduxAction>) {
+    return {
+        setRoute: (url: string) => {
+            dispatch({
+                type: 'ROUTE',
+                value: url,
+            });
+            history.pushState(null, '', url);
+        },
+    };
+}
+
 class Component extends React.Component<Props, State> {
-    mounted: boolean;
-    submitting: boolean;
+    fetchController: AbortController;
 
     constructor(props: Props) {
         super(props);
 
-        this.mounted = false;
-        this.submitting = false;
+        this.fetchController = new AbortController();
 
         this.onUsernameChange = this.onUsernameChange.bind(this);
         this.onPasswordChange = this.onPasswordChange.bind(this);
@@ -38,12 +58,9 @@ class Component extends React.Component<Props, State> {
             password: '',
             confirmPassword: '',
             isAdmin: false,
+            submitting: false,
             usernameExists: false,
         };
-    }
-
-    setRoute(url: string) {
-        setRoute(this.props.dispatch, url);
     }
 
     onUsernameChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -74,46 +91,74 @@ class Component extends React.Component<Props, State> {
     onSubmit(e: React.FormEvent<HTMLFormElement>) {
         e.preventDefault();
 
-        if (this.submitting) return;
+        if (this.state.submitting) return;
 
         if (this.state.confirmPassword !== this.state.password) return;
 
-        this.submitting = true;
+        this.setState({
+            submitting: true,
+        });
 
-        fetchPostSmart(
-            '/api/create-edit-user/',
-            {
+        fetch('/api/create-edit-user/', {
+            method: 'POST',
+            body: JSON.stringify({
+                id: this.props.user.id,
                 username: this.state.username,
                 password: this.state.password,
-                confirm_password: this.state.confirmPassword,
                 is_admin: this.state.isAdmin,
+            }),
+            headers: {
+                'Content-Type': 'application/json'
             },
-            this.props.dispatch,
-        ).then(response => {
-            if (!this.mounted) return;
-
-            if (response.error === 'username_exists') {
-                this.submitting = false;
-                this.setState({
-                    usernameExists: true,
-                });
-            } else {
-                this.setRoute('/user-listing/');
+            credentials: 'same-origin',
+        }).then(response => {
+            if (response.status === 401) {
+                this.props.setRoute('/login/');
+                return;
             }
+
+            response.json().then(responseJson => {
+                if (responseJson.error === 'username_exists') {
+                    this.setState({
+                        usernameExists: true,
+                        submitting: false,
+                    });
+                } else {
+                    this.props.setRoute('/user-listing/');
+                }
+            });
         });
     }
 
     componentDidMount() {
-        this.mounted = true;
+        this.fetchController.abort();
+        this.fetchController = new AbortController();
+
+        fetch('/api/get-user/?userId=' + encodeURIComponent(this.props.user.id), {
+            credentials: 'same-origin',
+            signal: this.fetchController.signal,
+        }).then(response => {
+            if (response.status === 401) {
+                this.props.setRoute('/login/');
+                return;
+            }
+
+            response.json().then(responseJson => {
+                this.setState({
+                    username: responseJson.username,
+                    isAdmin: responseJson.is_admin,
+                });
+            });
+        });
     }
 
     componentWillUnmount() {
-        this.mounted = false;
+        this.fetchController.abort();
     }
 
     render() {
         return React.createElement('div', { className: 'create-edit-user-view' },
-            React.createElement('div', { className: 'create-edit-user-view__title' }, 'Create User'),
+            React.createElement('div', { className: 'create-edit-user-view__title' }, 'Edit User'),
             React.createElement('form', { className: 'create-edit-user-view__form', onSubmit: this.onSubmit },
                 React.createElement('label', null, 'Username'),
                 React.createElement('input', {
@@ -130,7 +175,6 @@ class Component extends React.Component<Props, State> {
                 React.createElement('label', null, 'Password'),
                 React.createElement('input', {
                     type: 'password',
-                    required: true,
                     value: this.state.password,
                     onChange: this.onPasswordChange,
                 }),
@@ -138,7 +182,6 @@ class Component extends React.Component<Props, State> {
                 React.createElement('label', null, 'Confirm Password'),
                 React.createElement('input', {
                     type: 'password',
-                    required: true,
                     value: this.state.confirmPassword,
                     onChange: this.onConfirmPasswordChange,
                 }),
@@ -158,11 +201,11 @@ class Component extends React.Component<Props, State> {
                 React.createElement('input', {
                     className: 'button',
                     type: 'submit',
-                    value: 'Create',
+                    value: this.state.submitting ? 'Processing…' : 'Save',
                 }),
             ),
         );
     }
 }
 
-export const CreateUser = ReactRedux.connect(null, null)(Component);
+export const MyAccount = ReactRedux.connect(mapStateToProps, mapDispatchToProps)(Component);

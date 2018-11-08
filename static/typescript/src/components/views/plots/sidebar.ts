@@ -52,7 +52,7 @@ function mapDispatchToProps(dispatch: Redux.Dispatch<ReduxAction>, ownProps: Own
     };
 }
 
-export class Component extends React.Component<Props> {
+class Component extends React.Component<Props> {
     render() {
         return React.createElement('div', { className: 'plots-view__sidebar' },
             LINKS.map(link => (

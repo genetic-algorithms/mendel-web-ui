@@ -30,7 +30,7 @@ function mapDispatchToProps(dispatch: Redux.Dispatch<ReduxAction>) {
     };
 }
 
-export class Component extends React.Component<Props, State> {
+class Component extends React.Component<Props, State> {
     fetchController: AbortController;
 
     constructor(props: Props) {
@@ -54,20 +54,20 @@ export class Component extends React.Component<Props, State> {
         };
     }
 
-    onUsernameChange(e: React.FormEvent<HTMLInputElement>) {
+    onUsernameChange(e: React.ChangeEvent<HTMLInputElement>) {
         this.setState({
             username: e.currentTarget.value,
             usernameExists: false,
         });
     }
 
-    onPasswordChange(e: React.FormEvent<HTMLInputElement>) {
+    onPasswordChange(e: React.ChangeEvent<HTMLInputElement>) {
         this.setState({
             password: e.currentTarget.value,
         });
     }
 
-    onConfirmPasswordChange(e: React.FormEvent<HTMLInputElement>) {
+    onConfirmPasswordChange(e: React.ChangeEvent<HTMLInputElement>) {
         this.setState({
             confirmPassword: e.currentTarget.value,
         });

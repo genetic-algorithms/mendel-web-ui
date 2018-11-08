@@ -1,11 +1,11 @@
-import { User, UserWithId } from './user_types';
+import { UserWithId } from './user_types';
 
 export type ReduxAction = {
     type: 'USER';
-    value: User;
+    value: UserWithId;
 } | {
     type: 'LOGIN';
-    user: User;
+    user: UserWithId;
 } | {
     type: 'LOGOUT';
 } | {

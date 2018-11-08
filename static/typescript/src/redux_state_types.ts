@@ -1,7 +1,7 @@
-import { User, UserWithId } from './user_types';
+import { UserWithId } from './user_types';
 
 export type ReduxState = {
-    user: User | null;
+    user: UserWithId | null;
     route: string;
     loading_indicator_count: number;
     user_listing: {

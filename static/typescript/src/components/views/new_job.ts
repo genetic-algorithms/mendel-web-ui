@@ -60,15 +60,15 @@ function mapDispatchToProps(dispatch: Redux.Dispatch<ReduxAction>) {
     };
 }
 
-export class Component extends React.Component<Props, State> {
+class Component extends React.Component<Props, State> {
     fieldChangeHandlers: {
-        title: (e: React.FormEvent<HTMLInputElement>) => void;
-        pop_size: (e: React.FormEvent<HTMLInputElement>) => void;
-        num_generations: (e: React.FormEvent<HTMLInputElement>) => void;
-        mutn_rate: (e: React.FormEvent<HTMLInputElement>) => void;
-        fitness_effect_model: (e: React.FormEvent<HTMLSelectElement>) => void;
-        uniform_fitness_effect_del: (e: React.FormEvent<HTMLInputElement>) => void;
-        uniform_fitness_effect_fav: (e: React.FormEvent<HTMLInputElement>) => void;
+        title: (e: React.ChangeEvent<HTMLInputElement>) => void;
+        pop_size: (e: React.ChangeEvent<HTMLInputElement>) => void;
+        num_generations: (e: React.ChangeEvent<HTMLInputElement>) => void;
+        mutn_rate: (e: React.ChangeEvent<HTMLInputElement>) => void;
+        fitness_effect_model: (e: React.ChangeEvent<HTMLSelectElement>) => void;
+        uniform_fitness_effect_del: (e: React.ChangeEvent<HTMLInputElement>) => void;
+        uniform_fitness_effect_fav: (e: React.ChangeEvent<HTMLInputElement>) => void;
         files_to_output_fit: (checked: boolean) => void;
         files_to_output_hst: (checked: boolean) => void;
         files_to_output_allele_bins: (checked: boolean) => void;
@@ -136,7 +136,7 @@ export class Component extends React.Component<Props, State> {
         });
     }
 
-    simpleFieldChanged(id: keyof State['fieldValues'], e: React.FormEvent<HTMLInputElement | HTMLSelectElement>) {
+    simpleFieldChanged(id: keyof State['fieldValues'], e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) {
         const value = e.currentTarget.value;
 
         this.setState(prevState => {

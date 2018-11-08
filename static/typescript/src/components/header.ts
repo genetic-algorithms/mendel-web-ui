@@ -14,6 +14,7 @@ type Props = {
     onNewJobTabClick: () => void;
     onJobsTabClick: () => void;
     onUsersTabClick: () => void;
+    onMyAccountClick: () => void;
     onLogoutClick: () => void;
 };
 
@@ -34,6 +35,7 @@ function mapDispatchToProps(dispatch: Redux.Dispatch<ReduxAction>) {
         onNewJobTabClick: () => setRoute(dispatch, '/'),
         onJobsTabClick: () => setRoute(dispatch, '/job-listing/'),
         onUsersTabClick: () => setRoute(dispatch, '/user-listing/'),
+        onMyAccountClick: () => setRoute(dispatch, '/my-account/'),
         onLogoutClick: () => {
             fetchPostSmart(
                 '/api/logout/',
@@ -49,7 +51,7 @@ function mapDispatchToProps(dispatch: Redux.Dispatch<ReduxAction>) {
     };
 }
 
-export class Component extends React.Component<Props, State> {
+class Component extends React.Component<Props, State> {
     menuButtonElement: React.RefObject<HTMLElement>;
 
     constructor(props: Props) {
@@ -126,7 +128,10 @@ export class Component extends React.Component<Props, State> {
                     {
                         className: 'page-header__account-menu ' + (this.state.menuOpen ? 'page-header--account-menu-open' : '' ),
                     },
-                    React.createElement('div', { className: 'page-header__account-menu-item' }, 'My Account'),
+                    React.createElement('div', {
+                        className: 'page-header__account-menu-item',
+                        onClick: this.props.onMyAccountClick,
+                    }, 'My Account'),
                     React.createElement('div', {
                         className: 'page-header__account-menu-item',
                         onClick: this.props.onLogoutClick,

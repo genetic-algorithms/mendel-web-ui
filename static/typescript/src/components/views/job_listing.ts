@@ -41,7 +41,7 @@ function mapDispatchToProps(dispatch: Redux.Dispatch<ReduxAction>) {
     };
 }
 
-export class Component extends React.Component<Props, State> {
+class Component extends React.Component<Props, State> {
     fetchController: AbortController;
 
     constructor(props: Props) {
@@ -56,7 +56,7 @@ export class Component extends React.Component<Props, State> {
         };
     }
 
-    onFilterChanged(e: React.FormEvent<HTMLSelectElement>) {
+    onFilterChanged(e: React.ChangeEvent<HTMLSelectElement>) {
         const value = e.currentTarget.value;
         const all = value === 'all';
 

@@ -6,6 +6,7 @@ import { JobListing } from './views/job_listing';
 import { UserListing } from './views/user_listing';
 import { CreateUser } from './views/create_user';
 import { EditUser } from './views/edit_user';
+import { MyAccount } from './views/my_account';
 import { JobDetail } from './views/job_detail';
 import { AverageMutations } from './views/plots/average_mutations';
 import { FitnessHistory } from './views/plots/fitness_history';
@@ -44,6 +45,8 @@ function getView(route: string) {
         return React.createElement(EditUser, {
             userId: editUserMatch[1],
         });
+    } else if (route === '/my-account/') {
+        return React.createElement(MyAccount, null);
     } else if (jobDetailMatch) {
         return React.createElement(JobDetail, {
             jobId: jobDetailMatch[1],

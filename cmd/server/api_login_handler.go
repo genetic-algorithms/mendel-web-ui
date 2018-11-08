@@ -68,6 +68,7 @@ func apiLoginHandler(w http.ResponseWriter, r *http.Request) {
 	responseJson, err := json.Marshal(map[string]interface{}{
 		"status": "success",
 		"user": map[string]interface{}{
+			"id": user.Id,
 			"username": user.Username,
 			"is_admin": user.IsAdmin,
 		},

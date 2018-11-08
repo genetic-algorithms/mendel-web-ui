@@ -183,6 +183,7 @@
             onNewJobTabClick: function () { return setRoute(dispatch, '/'); },
             onJobsTabClick: function () { return setRoute(dispatch, '/job-listing/'); },
             onUsersTabClick: function () { return setRoute(dispatch, '/user-listing/'); },
+            onMyAccountClick: function () { return setRoute(dispatch, '/my-account/'); },
             onLogoutClick: function () {
                 fetchPostSmart('/api/logout/', {}, dispatch).then(function () {
                     dispatch({
@@ -247,7 +248,10 @@
                 null), (this.props.user ?
                 React.createElement('div', {
                     className: 'page-header__account-menu ' + (this.state.menuOpen ? 'page-header--account-menu-open' : ''),
-                }, React.createElement('div', { className: 'page-header__account-menu-item' }, 'My Account'), React.createElement('div', {
+                }, React.createElement('div', {
+                    className: 'page-header__account-menu-item',
+                    onClick: this.props.onMyAccountClick,
+                }, 'My Account'), React.createElement('div', {
                     className: 'page-header__account-menu-item',
                     onClick: this.props.onLogoutClick,
                 }, 'Logout')) :
@@ -1195,7 +1199,171 @@
             d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
         };
     })();
-    function mapDispatchToProps$6(dispatch, ownProps) {
+    function mapStateToProps$2(state) {
+        return {
+            user: assertNotNull(state.user),
+        };
+    }
+    function mapDispatchToProps$6(dispatch) {
+        return {
+            setRoute: function (url) {
+                dispatch({
+                    type: 'ROUTE',
+                    value: url,
+                });
+                history.pushState(null, '', url);
+            },
+        };
+    }
+    var Component$7 = (function (_super) {
+        __extends$c(Component, _super);
+        function Component(props) {
+            var _this = _super.call(this, props) || this;
+            _this.fetchController = new AbortController();
+            _this.onUsernameChange = _this.onUsernameChange.bind(_this);
+            _this.onPasswordChange = _this.onPasswordChange.bind(_this);
+            _this.onConfirmPasswordChange = _this.onConfirmPasswordChange.bind(_this);
+            _this.onIsAdminChange = _this.onIsAdminChange.bind(_this);
+            _this.onSubmit = _this.onSubmit.bind(_this);
+            _this.state = {
+                username: '',
+                password: '',
+                confirmPassword: '',
+                isAdmin: false,
+                submitting: false,
+                usernameExists: false,
+            };
+            return _this;
+        }
+        Component.prototype.onUsernameChange = function (e) {
+            this.setState({
+                username: e.currentTarget.value,
+                usernameExists: false,
+            });
+        };
+        Component.prototype.onPasswordChange = function (e) {
+            this.setState({
+                password: e.currentTarget.value,
+            });
+        };
+        Component.prototype.onConfirmPasswordChange = function (e) {
+            this.setState({
+                confirmPassword: e.currentTarget.value,
+            });
+        };
+        Component.prototype.onIsAdminChange = function () {
+            this.setState(function (prevState) { return ({
+                isAdmin: !prevState.isAdmin,
+            }); });
+        };
+        Component.prototype.onSubmit = function (e) {
+            var _this = this;
+            e.preventDefault();
+            if (this.state.submitting)
+                return;
+            if (this.state.confirmPassword !== this.state.password)
+                return;
+            this.setState({
+                submitting: true,
+            });
+            fetch('/api/create-edit-user/', {
+                method: 'POST',
+                body: JSON.stringify({
+                    id: this.props.user.id,
+                    username: this.state.username,
+                    password: this.state.password,
+                    is_admin: this.state.isAdmin,
+                }),
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                credentials: 'same-origin',
+            }).then(function (response) {
+                if (response.status === 401) {
+                    _this.props.setRoute('/login/');
+                    return;
+                }
+                response.json().then(function (responseJson) {
+                    if (responseJson.error === 'username_exists') {
+                        _this.setState({
+                            usernameExists: true,
+                            submitting: false,
+                        });
+                    }
+                    else {
+                        _this.props.setRoute('/user-listing/');
+                    }
+                });
+            });
+        };
+        Component.prototype.componentDidMount = function () {
+            var _this = this;
+            this.fetchController.abort();
+            this.fetchController = new AbortController();
+            fetch('/api/get-user/?userId=' + encodeURIComponent(this.props.user.id), {
+                credentials: 'same-origin',
+                signal: this.fetchController.signal,
+            }).then(function (response) {
+                if (response.status === 401) {
+                    _this.props.setRoute('/login/');
+                    return;
+                }
+                response.json().then(function (responseJson) {
+                    _this.setState({
+                        username: responseJson.username,
+                        isAdmin: responseJson.is_admin,
+                    });
+                });
+            });
+        };
+        Component.prototype.componentWillUnmount = function () {
+            this.fetchController.abort();
+        };
+        Component.prototype.render = function () {
+            return React.createElement('div', { className: 'create-edit-user-view' }, React.createElement('div', { className: 'create-edit-user-view__title' }, 'Edit User'), React.createElement('form', { className: 'create-edit-user-view__form', onSubmit: this.onSubmit }, React.createElement('label', null, 'Username'), React.createElement('input', {
+                type: 'text',
+                required: true,
+                value: this.state.username,
+                onChange: this.onUsernameChange,
+            }), (this.state.usernameExists ?
+                React.createElement('div', { className: 'create-edit-user-view__error' }, 'Username is already taken') :
+                null), React.createElement('label', null, 'Password'), React.createElement('input', {
+                type: 'password',
+                value: this.state.password,
+                onChange: this.onPasswordChange,
+            }), React.createElement('label', null, 'Confirm Password'), React.createElement('input', {
+                type: 'password',
+                value: this.state.confirmPassword,
+                onChange: this.onConfirmPasswordChange,
+            }), (this.state.confirmPassword !== this.state.password ?
+                React.createElement('div', { className: 'create-edit-user-view__error' }, 'Does not match password') :
+                null), React.createElement('div', { className: 'create-edit-user-view__checkbox-wrapper' }, React.createElement(Checkbox, {
+                checked: this.state.isAdmin,
+                onChange: this.onIsAdminChange,
+            }), React.createElement('label', { onClick: this.onIsAdminChange }, 'Admin')), React.createElement('input', {
+                className: 'button',
+                type: 'submit',
+                value: this.state.submitting ? 'Processing…' : 'Save',
+            })));
+        };
+        return Component;
+    }(React.Component));
+    var MyAccount = ReactRedux.connect(mapStateToProps$2, mapDispatchToProps$6)(Component$7);
+
+    var __extends$d = (undefined && undefined.__extends) || (function () {
+        var extendStatics = function (d, b) {
+            extendStatics = Object.setPrototypeOf ||
+                ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+                function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+            return extendStatics(d, b);
+        };
+        return function (d, b) {
+            extendStatics(d, b);
+            function __() { this.constructor = d; }
+            d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+        };
+    })();
+    function mapDispatchToProps$7(dispatch, ownProps) {
         return {
             onShowLogin: function () {
                 dispatch({
@@ -1214,8 +1382,8 @@
             },
         };
     }
-    var Component$7 = (function (_super) {
-        __extends$c(Component, _super);
+    var Component$8 = (function (_super) {
+        __extends$d(Component, _super);
         function Component(props) {
             var _this = _super.call(this, props) || this;
             _this.fetchOutput = _this.fetchOutput.bind(_this);
@@ -1268,9 +1436,9 @@
         };
         return Component;
     }(React.Component));
-    var JobDetail = ReactRedux.connect(null, mapDispatchToProps$6)(Component$7);
+    var JobDetail = ReactRedux.connect(null, mapDispatchToProps$7)(Component$8);
 
-    var __extends$d = (undefined && undefined.__extends) || (function () {
+    var __extends$e = (undefined && undefined.__extends) || (function () {
         var extendStatics = function (d, b) {
             extendStatics = Object.setPrototypeOf ||
                 ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
@@ -1309,7 +1477,7 @@
             slug: 'minor-allele-frequencies',
         },
     ];
-    function mapDispatchToProps$7(dispatch, ownProps) {
+    function mapDispatchToProps$8(dispatch, ownProps) {
         return {
             onClick: function (slug) {
                 var url = '/plots/' + ownProps.jobId + '/' + slug + '/';
@@ -1321,8 +1489,8 @@
             },
         };
     }
-    var Component$8 = (function (_super) {
-        __extends$d(Component, _super);
+    var Component$9 = (function (_super) {
+        __extends$e(Component, _super);
         function Component() {
             return _super !== null && _super.apply(this, arguments) || this;
         }
@@ -1336,9 +1504,9 @@
         };
         return Component;
     }(React.Component));
-    var Sidebar = ReactRedux.connect(null, mapDispatchToProps$7)(Component$8);
+    var Sidebar = ReactRedux.connect(null, mapDispatchToProps$8)(Component$9);
 
-    var __extends$e = (undefined && undefined.__extends) || (function () {
+    var __extends$f = (undefined && undefined.__extends) || (function () {
         var extendStatics = function (d, b) {
             extendStatics = Object.setPrototypeOf ||
                 ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
@@ -1352,7 +1520,7 @@
         };
     })();
     var AverageMutations = (function (_super) {
-        __extends$e(AverageMutations, _super);
+        __extends$f(AverageMutations, _super);
         function AverageMutations(props) {
             var _this = _super.call(this, props) || this;
             _this.resizePlot = _this.resizePlot.bind(_this);
@@ -1425,7 +1593,7 @@
         return AverageMutations;
     }(React.Component));
 
-    var __extends$f = (undefined && undefined.__extends) || (function () {
+    var __extends$g = (undefined && undefined.__extends) || (function () {
         var extendStatics = function (d, b) {
             extendStatics = Object.setPrototypeOf ||
                 ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
@@ -1439,7 +1607,7 @@
         };
     })();
     var FitnessHistory = (function (_super) {
-        __extends$f(FitnessHistory, _super);
+        __extends$g(FitnessHistory, _super);
         function FitnessHistory(props) {
             var _this = _super.call(this, props) || this;
             _this.resizePlot = _this.resizePlot.bind(_this);
@@ -1509,7 +1677,7 @@
         return FitnessHistory;
     }(React.Component));
 
-    var __extends$g = (undefined && undefined.__extends) || (function () {
+    var __extends$h = (undefined && undefined.__extends) || (function () {
         var extendStatics = function (d, b) {
             extendStatics = Object.setPrototypeOf ||
                 ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
@@ -1523,7 +1691,7 @@
         };
     })();
     var DeleteriousMutations = (function (_super) {
-        __extends$g(DeleteriousMutations, _super);
+        __extends$h(DeleteriousMutations, _super);
         function DeleteriousMutations(props) {
             var _this = _super.call(this, props) || this;
             _this.resizePlot = _this.resizePlot.bind(_this);
@@ -1640,7 +1808,7 @@
         return DeleteriousMutations;
     }(React.Component));
 
-    var __extends$h = (undefined && undefined.__extends) || (function () {
+    var __extends$i = (undefined && undefined.__extends) || (function () {
         var extendStatics = function (d, b) {
             extendStatics = Object.setPrototypeOf ||
                 ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
@@ -1654,7 +1822,7 @@
         };
     })();
     var BeneficialMutations = (function (_super) {
-        __extends$h(BeneficialMutations, _super);
+        __extends$i(BeneficialMutations, _super);
         function BeneficialMutations(props) {
             var _this = _super.call(this, props) || this;
             _this.resizePlot = _this.resizePlot.bind(_this);
@@ -1770,7 +1938,7 @@
         return BeneficialMutations;
     }(React.Component));
 
-    var __extends$i = (undefined && undefined.__extends) || (function () {
+    var __extends$j = (undefined && undefined.__extends) || (function () {
         var extendStatics = function (d, b) {
             extendStatics = Object.setPrototypeOf ||
                 ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
@@ -1784,7 +1952,7 @@
         };
     })();
     var SnpFrequencies = (function (_super) {
-        __extends$i(SnpFrequencies, _super);
+        __extends$j(SnpFrequencies, _super);
         function SnpFrequencies(props) {
             var _this = _super.call(this, props) || this;
             _this.resizePlot = _this.resizePlot.bind(_this);
@@ -1958,7 +2126,7 @@
         return SnpFrequencies;
     }(React.Component));
 
-    var __extends$j = (undefined && undefined.__extends) || (function () {
+    var __extends$k = (undefined && undefined.__extends) || (function () {
         var extendStatics = function (d, b) {
             extendStatics = Object.setPrototypeOf ||
                 ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
@@ -1972,7 +2140,7 @@
         };
     })();
     var MinorAlleleFrequencies = (function (_super) {
-        __extends$j(MinorAlleleFrequencies, _super);
+        __extends$k(MinorAlleleFrequencies, _super);
         function MinorAlleleFrequencies(props) {
             var _this = _super.call(this, props) || this;
             _this.resizePlot = _this.resizePlot.bind(_this);
@@ -2112,7 +2280,7 @@
         return MinorAlleleFrequencies;
     }(React.Component));
 
-    function mapStateToProps$2(state) {
+    function mapStateToProps$3(state) {
         return {
             route: state.route,
         };
@@ -2140,6 +2308,9 @@
             return React.createElement(EditUser, {
                 userId: editUserMatch[1],
             });
+        }
+        else if (route === '/my-account/') {
+            return React.createElement(MyAccount, null);
         }
         else if (jobDetailMatch) {
             return React.createElement(JobDetail, {
@@ -2169,12 +2340,12 @@
         }
         return null;
     }
-    function Component$9(props) {
+    function Component$a(props) {
         return React.createElement('div', { className: 'page-content' }, getView(props.route));
     }
-    var Content = ReactRedux.connect(mapStateToProps$2)(Component$9);
+    var Content = ReactRedux.connect(mapStateToProps$3)(Component$a);
 
-    var __extends$k = (undefined && undefined.__extends) || (function () {
+    var __extends$l = (undefined && undefined.__extends) || (function () {
         var extendStatics = function (d, b) {
             extendStatics = Object.setPrototypeOf ||
                 ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
@@ -2187,12 +2358,12 @@
             d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
         };
     })();
-    function mapStateToProps$3(state) {
+    function mapStateToProps$4(state) {
         return {
             route: state.route,
         };
     }
-    function mapDispatchToProps$8(dispatch) {
+    function mapDispatchToProps$9(dispatch) {
         return {
             fetchCurrentUser: function () {
                 fetchGetSmart('/api/get-current-user/', dispatch).then(function (response) {
@@ -2204,20 +2375,20 @@
             },
         };
     }
-    var Component$a = (function (_super) {
-        __extends$k(Component$$1, _super);
-        function Component$$1() {
+    var Component$b = (function (_super) {
+        __extends$l(Component, _super);
+        function Component() {
             return _super !== null && _super.apply(this, arguments) || this;
         }
-        Component$$1.prototype.componentDidMount = function () {
+        Component.prototype.componentDidMount = function () {
             this.props.fetchCurrentUser();
         };
-        Component$$1.prototype.render = function () {
+        Component.prototype.render = function () {
             return React.createElement('div', null, (this.props.route == '/login/' ? null : React.createElement('div', { className: 'page-header__spacer' })), (this.props.route == '/login/' ? null : React.createElement(Header, null)), React.createElement(Content, null));
         };
-        return Component$$1;
+        return Component;
     }(React.Component));
-    var Root = ReactRedux.connect(mapStateToProps$3, mapDispatchToProps$8)(Component$a);
+    var Root = ReactRedux.connect(mapStateToProps$4, mapDispatchToProps$9)(Component$b);
 
     function init() {
         var store = Redux.createStore(reducer);

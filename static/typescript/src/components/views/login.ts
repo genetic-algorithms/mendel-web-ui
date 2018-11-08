@@ -2,10 +2,15 @@ import * as React from 'react';
 import * as Redux from 'redux';
 import * as ReactRedux from 'react-redux';
 import { ReduxAction } from '../../redux_action_types';
-import { User } from '../../user_types';
+import { UserWithId } from '../../user_types';
+
+type ApiResponse = {
+    status: 'success' | 'wrong_credentials';
+    user: UserWithId,
+};
 
 type Props = {
-    onLogin: (user: User) => void;
+    onLogin: (user: UserWithId) => void;
 };
 
 type State = {
@@ -17,7 +22,7 @@ type State = {
 
 function mapDispatchToProps(dispatch: Redux.Dispatch<ReduxAction>) {
     return {
-        onLogin: (user: User) => {
+        onLogin: (user: UserWithId) => {
             dispatch({
                 type: 'LOGIN',
                 user: user,
@@ -27,7 +32,7 @@ function mapDispatchToProps(dispatch: Redux.Dispatch<ReduxAction>) {
     };
 }
 
-export class Component extends React.Component<Props, State> {
+class Component extends React.Component<Props, State> {
     constructor(props: Props) {
         super(props);
 
@@ -43,7 +48,7 @@ export class Component extends React.Component<Props, State> {
         this.onSubmit = this.onSubmit.bind(this);
     }
 
-    onPasswordChange(e: React.FormEvent<HTMLInputElement>) {
+    onPasswordChange(e: React.ChangeEvent<HTMLInputElement>) {
         const value = e.currentTarget.value;
 
         this.setState(prevState => (Object.assign({}, prevState, {
@@ -51,7 +56,7 @@ export class Component extends React.Component<Props, State> {
         })));
     }
 
-    onUsernameChange(e: React.FormEvent<HTMLInputElement>) {
+    onUsernameChange(e: React.ChangeEvent<HTMLInputElement>) {
         const value = e.currentTarget.value;
 
         this.setState(prevState => (Object.assign({}, prevState, {
@@ -80,7 +85,7 @@ export class Component extends React.Component<Props, State> {
             credentials: 'same-origin',
         }).then(
             response => response.json()
-        ).then(responseJson => {
+        ).then((responseJson: ApiResponse) => {
             if (responseJson.status === 'success') {
                 this.props.onLogin(responseJson.user);
             } else if (responseJson.status === 'wrong_credentials') {

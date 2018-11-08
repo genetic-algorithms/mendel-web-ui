@@ -57,7 +57,7 @@ function mapDispatchToProps(dispatch: Redux.Dispatch<ReduxAction>) {
     };
 }
 
-export class Component extends React.Component<Props> {
+class Component extends React.Component<Props> {
     componentDidMount() {
         this.props.fetchUsers();
     }
