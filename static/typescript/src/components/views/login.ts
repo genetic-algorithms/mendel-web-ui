@@ -2,15 +2,10 @@ import * as React from 'react';
 import * as Redux from 'redux';
 import * as ReactRedux from 'react-redux';
 import { ReduxAction } from '../../redux_action_types';
-import { User } from '../../user_types';
-
-type ApiResponse = {
-    status: 'success' | 'wrong_credentials';
-    user: User,
-};
+import { apiPost } from '../../api';
 
 type Props = {
-    onLogin: (user: User) => void;
+    dispatch: Redux.Dispatch<ReduxAction>;
 };
 
 type State = {
@@ -19,18 +14,6 @@ type State = {
     submitting: boolean,
     wrongCredentials: boolean,
 };
-
-function mapDispatchToProps(dispatch: Redux.Dispatch<ReduxAction>) {
-    return {
-        onLogin: (user: User) => {
-            dispatch({
-                type: 'LOGIN',
-                user: user,
-            });
-            history.pushState(null, '', '/');
-        },
-    };
-}
 
 class Component extends React.Component<Props, State> {
     constructor(props: Props) {
@@ -73,22 +56,21 @@ class Component extends React.Component<Props, State> {
             submitting: true,
         });
 
-        fetch('/api/login/', {
-            method: 'POST',
-            body: JSON.stringify({
+        apiPost(
+            '/api/login/',
+            {
                 username: this.state.username,
                 password: this.state.password,
-            }),
-            headers: {
-                'Content-Type': 'application/json'
             },
-            credentials: 'same-origin',
-        }).then(
-            response => response.json()
-        ).then((responseJson: ApiResponse) => {
-            if (responseJson.status === 'success') {
-                this.props.onLogin(responseJson.user);
-            } else if (responseJson.status === 'wrong_credentials') {
+            this.props.dispatch,
+        ).then(response => {
+            if (response.status === 'success') {
+                this.props.dispatch({
+                    type: 'LOGIN',
+                    user: response.user,
+                });
+                history.pushState(null, '', '/');
+            } else if (response.status === 'wrong_credentials') {
                 this.setState({
                     username: '',
                     password: '',
@@ -125,14 +107,16 @@ class Component extends React.Component<Props, State> {
                     null
                 ),
 
-                React.createElement('input', {
-                    className: 'login-view__submit button',
-                    type: 'submit',
-                    value: this.state.submitting ? 'Processing…' : 'Login',
-                }),
+                React.createElement('button',
+                    {
+                        className: 'login-view__submit button' + (this.state.submitting ? ' login-view--submitting' : ''),
+                        type: 'submit',
+                    },
+                    React.createElement('span', { className: 'login-view__submit-text' }, 'Login'),
+                ),
             ),
         );
     }
 }
 
-export const Login = ReactRedux.connect(null, mapDispatchToProps)(Component);
+export const Login = ReactRedux.connect()(Component);

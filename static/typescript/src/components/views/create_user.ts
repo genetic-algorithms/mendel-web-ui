@@ -1,9 +1,10 @@
 import { Checkbox } from '../checkbox';
-import { setRoute, fetchPostSmart } from '../../util';
+import { setRoute } from '../../util';
 import * as React from 'react';
 import * as Redux from 'redux';
 import * as ReactRedux from 'react-redux';
 import { ReduxAction } from '../../redux_action_types';
+import { apiPost } from '../../api';
 
 type Props = {
     dispatch: Redux.Dispatch<ReduxAction>;
@@ -80,19 +81,18 @@ class Component extends React.Component<Props, State> {
 
         this.submitting = true;
 
-        fetchPostSmart(
+        apiPost(
             '/api/create-edit-user/',
             {
                 username: this.state.username,
                 password: this.state.password,
-                confirm_password: this.state.confirmPassword,
                 is_admin: this.state.isAdmin,
             },
             this.props.dispatch,
         ).then(response => {
             if (!this.mounted) return;
 
-            if (response.error === 'username_exists') {
+            if (response.status === 'username_exists') {
                 this.submitting = false;
                 this.setState({
                     usernameExists: true,

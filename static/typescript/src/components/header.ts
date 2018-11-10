@@ -1,11 +1,12 @@
 import * as ReactRedux from 'react-redux';
 import * as Redux from 'redux';
 import * as React from 'react';
-import { setRoute, fetchPostSmart } from '../util';
+import { setRoute } from '../util';
 import { AccountIcon } from './icons/account';
 import { ReduxState } from '../redux_state_types';
 import { ReduxAction } from '../redux_action_types';
 import { User } from '../user_types';
+import { apiPost } from '../api';
 
 type Props = {
     user: User | null;
@@ -37,7 +38,7 @@ function mapDispatchToProps(dispatch: Redux.Dispatch<ReduxAction>) {
         onUsersTabClick: () => setRoute(dispatch, '/user-listing/'),
         onMyAccountClick: () => setRoute(dispatch, '/my-account/'),
         onLogoutClick: () => {
-            fetchPostSmart(
+            apiPost(
                 '/api/logout/',
                 {},
                 dispatch,

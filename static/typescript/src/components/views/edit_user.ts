@@ -3,10 +3,12 @@ import * as React from 'react';
 import * as Redux from 'redux';
 import * as ReactRedux from 'react-redux';
 import { ReduxAction } from '../../redux_action_types';
+import { setRoute } from '../../util';
+import { apiPost, apiGet } from '../../api';
 
 type Props = {
     userId: string;
-    setRoute: (url: string) => void;
+    dispatch: Redux.Dispatch<ReduxAction>;
 };
 
 type State = {
@@ -17,18 +19,6 @@ type State = {
     submitting: boolean;
     usernameExists: boolean;
 };
-
-function mapDispatchToProps(dispatch: Redux.Dispatch<ReduxAction>) {
-    return {
-        setRoute: (url: string) => {
-            dispatch({
-                type: 'ROUTE',
-                value: url,
-            });
-            history.pushState(null, '', url);
-        },
-    };
-}
 
 class Component extends React.Component<Props, State> {
     fetchController: AbortController;
@@ -90,34 +80,23 @@ class Component extends React.Component<Props, State> {
             submitting: true,
         });
 
-        fetch('/api/create-edit-user/', {
-            method: 'POST',
-            body: JSON.stringify({
+        apiPost('/api/create-edit-user/',
+            {
                 id: this.props.userId,
                 username: this.state.username,
                 password: this.state.password,
                 is_admin: this.state.isAdmin,
-            }),
-            headers: {
-                'Content-Type': 'application/json'
             },
-            credentials: 'same-origin',
-        }).then(response => {
-            if (response.status === 401) {
-                this.props.setRoute('/login/');
-                return;
+            this.props.dispatch,
+        ).then(response => {
+            if (response.status === 'username_exists') {
+                this.setState({
+                    usernameExists: true,
+                    submitting: false,
+                });
+            } else {
+                setRoute(this.props.dispatch, '/user-listing/');
             }
-
-            response.json().then(responseJson => {
-                if (responseJson.error === 'username_exists') {
-                    this.setState({
-                        usernameExists: true,
-                        submitting: false,
-                    });
-                } else {
-                    this.props.setRoute('/user-listing/');
-                }
-            });
         });
     }
 
@@ -125,20 +104,15 @@ class Component extends React.Component<Props, State> {
         this.fetchController.abort();
         this.fetchController = new AbortController();
 
-        fetch('/api/get-user/?userId=' + encodeURIComponent(this.props.userId), {
-            credentials: 'same-origin',
-            signal: this.fetchController.signal,
-        }).then(response => {
-            if (response.status === 401) {
-                this.props.setRoute('/login/');
-                return;
-            }
-
-            response.json().then(responseJson => {
-                this.setState({
-                    username: responseJson.username,
-                    isAdmin: responseJson.is_admin,
-                });
+        apiGet(
+            '/api/get-user/',
+            { userId: this.props.userId },
+            this.props.dispatch,
+            this.fetchController.signal,
+        ).then(response => {
+            this.setState({
+                username: response.username,
+                isAdmin: response.is_admin,
             });
         });
     }
@@ -199,4 +173,4 @@ class Component extends React.Component<Props, State> {
     }
 }
 
-export const EditUser = ReactRedux.connect(null, mapDispatchToProps)(Component);
+export const EditUser = ReactRedux.connect()(Component);

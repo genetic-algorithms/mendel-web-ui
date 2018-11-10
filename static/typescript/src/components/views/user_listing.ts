@@ -4,9 +4,10 @@ import * as ReactRedux from 'react-redux';
 import { ReduxAction } from '../../redux_action_types';
 import { DeleteIcon } from '../icons/delete';
 import * as confirmationDialog from '../../confirmation_dialog';
-import { setRoute, fetchGetSmart, fetchPostSmart } from '../../util';
+import { setRoute } from '../../util';
 import { ReduxState } from '../../redux_state_types';
 import { User } from '../../user_types';
+import { apiPost, apiGet } from '../../api';
 
 type Props = {
     users: User[],
@@ -24,10 +25,7 @@ function mapStateToProps(state: ReduxState) {
 
 function mapDispatchToProps(dispatch: Redux.Dispatch<ReduxAction>) {
     function fetchUsers() {
-        fetchGetSmart(
-            '/api/user-list/',
-            dispatch,
-        ).then(response => {
+        apiGet('/api/user-list/', {}, dispatch).then(response => {
             dispatch({
                 type: 'user_listing.USERS',
                 value: response.users,
@@ -44,7 +42,7 @@ function mapDispatchToProps(dispatch: Redux.Dispatch<ReduxAction>) {
                 'Delete user?',
                 'The user will be deleted, but jobs run by the user will be kept.',
                 () => {
-                    fetchPostSmart(
+                    apiPost(
                         '/api/delete-user/',
                         {
                             id: userId,

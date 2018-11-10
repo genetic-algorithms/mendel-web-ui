@@ -1,0 +1,24 @@
+.snackbar {
+    position: fixed;
+    left: 50%;
+    bottom: 0;
+    margin-left: auto;
+    margin-right: auto;
+    z-index: 10000;
+    min-width: 288px;
+    max-width: 568px;
+    background-color: #323232;
+    color: #FFF;
+    padding: 14px 24px;
+    box-sizing: border-box;
+    border-radius: 2px;
+    font-size: 14px;
+    opacity: 0;
+    transform: translate(-50%, 100%);
+    transition: transform 0.4s, opacity 0.4s;
+}
+
+.snackbar--show {
+    transform: translateX(-50%);
+    opacity: 1;
+}

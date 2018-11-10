@@ -167,6 +167,8 @@ func rootHandler(w http.ResponseWriter, r *http.Request) {
 		CssFiles: []string{
 			staticMtime("static/css/main.css"),
 			staticMtime("static/css/button.css"),
+			staticMtime("static/css/snackbar.css"),
+			staticMtime("static/css/non_login.css"),
 			staticMtime("static/css/header.css"),
 			staticMtime("static/css/login.css"),
 			staticMtime("static/css/new_job.css"),

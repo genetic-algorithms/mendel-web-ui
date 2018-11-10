@@ -58,6 +58,24 @@
         });
         history.pushState(null, '', url);
     }
+    function fetchPost(url, body) {
+        return fetch(url, {
+            method: 'POST',
+            body: JSON.stringify(body),
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            credentials: 'same-origin',
+        });
+    }
+    function assertNotNull(obj) {
+        if (obj === null) {
+            throw new Error('Non-null assertion failed');
+        }
+        else {
+            return obj;
+        }
+    }
     function loadingIndicatorIncrement(dispatch) {
         dispatch({
             type: 'LOADING_INDICATOR_INCREMENT',
@@ -68,11 +86,22 @@
             type: 'LOADING_INDICATOR_DECREMENT',
         });
     }
-    function fetchGetSmart(url, dispatch) {
+
+    function paramsToString(params) {
+        var paramStrings = [];
+        for (var _i = 0, _a = Object.keys(params); _i < _a.length; _i++) {
+            var key = _a[_i];
+            var value = params[key];
+            paramStrings.push(key + '=' + encodeURIComponent(value));
+        }
+        return paramStrings.join('&');
+    }
+    function apiGet(url, params, dispatch, signal) {
         loadingIndicatorIncrement(dispatch);
         return new Promise(function (resolve, reject) {
-            fetch(url, {
+            fetch(url + '?' + paramsToString(params), {
                 credentials: 'same-origin',
+                signal: signal,
             }).then(function (response) {
                 loadingIndicatorDecrement(dispatch);
                 if (response.status === 401) {
@@ -90,17 +119,7 @@
             });
         });
     }
-    function fetchPost(url, body) {
-        return fetch(url, {
-            method: 'POST',
-            body: JSON.stringify(body),
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            credentials: 'same-origin',
-        });
-    }
-    function fetchPostSmart(url, body, dispatch) {
+    function apiPost(url, body, dispatch) {
         loadingIndicatorIncrement(dispatch);
         return new Promise(function (resolve, reject) {
             fetchPost(url, body).then(function (response) {
@@ -120,14 +139,6 @@
             });
         });
     }
-    function assertNotNull(obj) {
-        if (obj === null) {
-            throw new Error('Non-null assertion failed');
-        }
-        else {
-            return obj;
-        }
-    }
 
     var __extends = (undefined && undefined.__extends) || (function () {
         var extendStatics = function (d, b) {
@@ -142,8 +153,103 @@
             d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
         };
     })();
+    var Component = (function (_super) {
+        __extends(Component, _super);
+        function Component(props) {
+            var _this = _super.call(this, props) || this;
+            _this.state = {
+                username: '',
+                password: '',
+                submitting: false,
+                wrongCredentials: false,
+            };
+            _this.onPasswordChange = _this.onPasswordChange.bind(_this);
+            _this.onUsernameChange = _this.onUsernameChange.bind(_this);
+            _this.onSubmit = _this.onSubmit.bind(_this);
+            return _this;
+        }
+        Component.prototype.onPasswordChange = function (e) {
+            var value = e.currentTarget.value;
+            this.setState(function (prevState) { return (Object.assign({}, prevState, {
+                password: value,
+            })); });
+        };
+        Component.prototype.onUsernameChange = function (e) {
+            var value = e.currentTarget.value;
+            this.setState(function (prevState) { return (Object.assign({}, prevState, {
+                username: value,
+            })); });
+        };
+        Component.prototype.onSubmit = function (e) {
+            var _this = this;
+            e.preventDefault();
+            if (this.state.submitting)
+                return;
+            this.setState({
+                submitting: true,
+            });
+            apiPost('/api/login/', {
+                username: this.state.username,
+                password: this.state.password,
+            }, this.props.dispatch).then(function (response) {
+                if (response.status === 'success') {
+                    _this.props.dispatch({
+                        type: 'LOGIN',
+                        user: response.user,
+                    });
+                    history.pushState(null, '', '/');
+                }
+                else if (response.status === 'wrong_credentials') {
+                    _this.setState({
+                        username: '',
+                        password: '',
+                        submitting: false,
+                        wrongCredentials: true,
+                    });
+                }
+            });
+        };
+        Component.prototype.render = function () {
+            return React.createElement('div', { className: 'login-view' }, React.createElement('div', { className: 'login-view__title' }, 'Login'), React.createElement('form', { className: 'login-view__form', onSubmit: this.onSubmit }, React.createElement('input', {
+                className: 'login-view__input',
+                type: 'text',
+                placeholder: 'Username',
+                value: this.state.username,
+                required: true,
+                onChange: this.onUsernameChange,
+            }), React.createElement('input', {
+                className: 'login-view__password login-view__input',
+                type: 'password',
+                placeholder: 'Password',
+                value: this.state.password,
+                required: true,
+                onChange: this.onPasswordChange,
+            }), (this.state.wrongCredentials ?
+                React.createElement('div', { className: 'login-view__form-error' }, 'Incorrect credentials') :
+                null), React.createElement('button', {
+                className: 'login-view__submit button' + (this.state.submitting ? ' login-view--submitting' : ''),
+                type: 'submit',
+            }, React.createElement('span', { className: 'login-view__submit-text' }, 'Login'))));
+        };
+        return Component;
+    }(React.Component));
+    var Login = ReactRedux.connect()(Component);
+
+    var __extends$1 = (undefined && undefined.__extends) || (function () {
+        var extendStatics = function (d, b) {
+            extendStatics = Object.setPrototypeOf ||
+                ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+                function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+            return extendStatics(d, b);
+        };
+        return function (d, b) {
+            extendStatics(d, b);
+            function __() { this.constructor = d; }
+            d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+        };
+    })();
     var AccountIcon = (function (_super) {
-        __extends(AccountIcon, _super);
+        __extends$1(AccountIcon, _super);
         function AccountIcon() {
             return _super !== null && _super.apply(this, arguments) || this;
         }
@@ -158,7 +264,7 @@
         return AccountIcon;
     }(React.PureComponent));
 
-    var __extends$1 = (undefined && undefined.__extends) || (function () {
+    var __extends$2 = (undefined && undefined.__extends) || (function () {
         var extendStatics = function (d, b) {
             extendStatics = Object.setPrototypeOf ||
                 ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
@@ -185,7 +291,7 @@
             onUsersTabClick: function () { return setRoute(dispatch, '/user-listing/'); },
             onMyAccountClick: function () { return setRoute(dispatch, '/my-account/'); },
             onLogoutClick: function () {
-                fetchPostSmart('/api/logout/', {}, dispatch).then(function () {
+                apiPost('/api/logout/', {}, dispatch).then(function () {
                     dispatch({
                         type: 'LOGOUT',
                     });
@@ -194,8 +300,8 @@
             },
         };
     }
-    var Component = (function (_super) {
-        __extends$1(Component, _super);
+    var Component$1 = (function (_super) {
+        __extends$2(Component, _super);
         function Component(props) {
             var _this = _super.call(this, props) || this;
             _this.menuButtonElement = React.createRef();
@@ -259,36 +365,7 @@
         };
         return Component;
     }(React.Component));
-    var Header = ReactRedux.connect(mapStateToProps, mapDispatchToProps)(Component);
-
-    var __extends$2 = (undefined && undefined.__extends) || (function () {
-        var extendStatics = function (d, b) {
-            extendStatics = Object.setPrototypeOf ||
-                ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-                function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
-            return extendStatics(d, b);
-        };
-        return function (d, b) {
-            extendStatics(d, b);
-            function __() { this.constructor = d; }
-            d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-        };
-    })();
-    var CheckboxCheckedIcon = (function (_super) {
-        __extends$2(CheckboxCheckedIcon, _super);
-        function CheckboxCheckedIcon() {
-            return _super !== null && _super.apply(this, arguments) || this;
-        }
-        CheckboxCheckedIcon.prototype.render = function () {
-            return React.createElement('svg', {
-                width: this.props.width.toString(),
-                height: this.props.height.toString(),
-                viewBox: '0 0 24 24',
-                xmlns: 'http://www.w3.org/2000/svg',
-            }, React.createElement('path', { d: 'M19 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.11 0 2-.9 2-2V5c0-1.1-.89-2-2-2zm-9 14l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z' }));
-        };
-        return CheckboxCheckedIcon;
-    }(React.PureComponent));
+    var Header = ReactRedux.connect(mapStateToProps, mapDispatchToProps)(Component$1);
 
     var __extends$3 = (undefined && undefined.__extends) || (function () {
         var extendStatics = function (d, b) {
@@ -303,20 +380,20 @@
             d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
         };
     })();
-    var CheckboxUncheckedIcon = (function (_super) {
-        __extends$3(CheckboxUncheckedIcon, _super);
-        function CheckboxUncheckedIcon() {
+    var CheckboxCheckedIcon = (function (_super) {
+        __extends$3(CheckboxCheckedIcon, _super);
+        function CheckboxCheckedIcon() {
             return _super !== null && _super.apply(this, arguments) || this;
         }
-        CheckboxUncheckedIcon.prototype.render = function () {
+        CheckboxCheckedIcon.prototype.render = function () {
             return React.createElement('svg', {
                 width: this.props.width.toString(),
                 height: this.props.height.toString(),
                 viewBox: '0 0 24 24',
                 xmlns: 'http://www.w3.org/2000/svg',
-            }, React.createElement('path', { d: 'M19 5v14H5V5h14m0-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z' }));
+            }, React.createElement('path', { d: 'M19 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.11 0 2-.9 2-2V5c0-1.1-.89-2-2-2zm-9 14l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z' }));
         };
-        return CheckboxUncheckedIcon;
+        return CheckboxCheckedIcon;
     }(React.PureComponent));
 
     var __extends$4 = (undefined && undefined.__extends) || (function () {
@@ -332,8 +409,37 @@
             d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
         };
     })();
+    var CheckboxUncheckedIcon = (function (_super) {
+        __extends$4(CheckboxUncheckedIcon, _super);
+        function CheckboxUncheckedIcon() {
+            return _super !== null && _super.apply(this, arguments) || this;
+        }
+        CheckboxUncheckedIcon.prototype.render = function () {
+            return React.createElement('svg', {
+                width: this.props.width.toString(),
+                height: this.props.height.toString(),
+                viewBox: '0 0 24 24',
+                xmlns: 'http://www.w3.org/2000/svg',
+            }, React.createElement('path', { d: 'M19 5v14H5V5h14m0-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z' }));
+        };
+        return CheckboxUncheckedIcon;
+    }(React.PureComponent));
+
+    var __extends$5 = (undefined && undefined.__extends) || (function () {
+        var extendStatics = function (d, b) {
+            extendStatics = Object.setPrototypeOf ||
+                ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+                function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+            return extendStatics(d, b);
+        };
+        return function (d, b) {
+            extendStatics(d, b);
+            function __() { this.constructor = d; }
+            d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+        };
+    })();
     var Checkbox = (function (_super) {
-        __extends$4(Checkbox, _super);
+        __extends$5(Checkbox, _super);
         function Checkbox(props) {
             var _this = _super.call(this, props) || this;
             _this.onClick = _this.onClick.bind(_this);
@@ -353,7 +459,7 @@
         return Checkbox;
     }(React.PureComponent));
 
-    var __extends$5 = (undefined && undefined.__extends) || (function () {
+    var __extends$6 = (undefined && undefined.__extends) || (function () {
         var extendStatics = function (d, b) {
             extendStatics = Object.setPrototypeOf ||
                 ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
@@ -366,38 +472,8 @@
             d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
         };
     })();
-    function mapDispatchToProps$1(dispatch) {
-        return {
-            onShowLogin: function () {
-                dispatch({
-                    type: 'ROUTE',
-                    value: '/login/',
-                });
-                history.pushState(null, '', '/login/');
-            },
-            onSubmit: function (data) {
-                fetch('/api/create-job/', {
-                    method: 'POST',
-                    body: JSON.stringify(data),
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    credentials: 'same-origin',
-                }).then(function (response) {
-                    response.json().then(function (responseJson) {
-                        var url = '/job-detail/' + responseJson.job_id + '/';
-                        dispatch({
-                            type: 'ROUTE',
-                            value: url,
-                        });
-                        history.pushState(null, '', url);
-                    });
-                });
-            },
-        };
-    }
-    var Component$1 = (function (_super) {
-        __extends$5(Component, _super);
+    var Component$2 = (function (_super) {
+        __extends$6(Component, _super);
         function Component(props) {
             var _this = _super.call(this, props) || this;
             _this.fieldChangeHandlers = {
@@ -430,8 +506,9 @@
             return _this;
         }
         Component.prototype.onSubmit = function (e) {
+            var _this = this;
             e.preventDefault();
-            this.props.onSubmit({
+            var data = {
                 title: this.state.fieldValues.title,
                 config: [
                     '[basic]',
@@ -446,6 +523,9 @@
                     'plot_allele_gens = 1',
                     'files_to_output = ' + tomlString(filesToOutputString(this.state.fieldValues.files_to_output_fit, this.state.fieldValues.files_to_output_hst, this.state.fieldValues.files_to_output_allele_bins)),
                 ].join('\n'),
+            };
+            apiPost('/api/create-job/', data, this.props.dispatch).then(function (response) {
+                setRoute(_this.props.dispatch, '/job-detail/' + response.job_id + '/');
             });
         };
         Component.prototype.simpleFieldChanged = function (id, e) {
@@ -560,117 +640,7 @@
     function tomlString(s) {
         return '"' + s + '"';
     }
-    var NewJob = ReactRedux.connect(null, mapDispatchToProps$1)(Component$1);
-
-    var __extends$6 = (undefined && undefined.__extends) || (function () {
-        var extendStatics = function (d, b) {
-            extendStatics = Object.setPrototypeOf ||
-                ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-                function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
-            return extendStatics(d, b);
-        };
-        return function (d, b) {
-            extendStatics(d, b);
-            function __() { this.constructor = d; }
-            d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-        };
-    })();
-    function mapDispatchToProps$2(dispatch) {
-        return {
-            onLogin: function (user) {
-                dispatch({
-                    type: 'LOGIN',
-                    user: user,
-                });
-                history.pushState(null, '', '/');
-            },
-        };
-    }
-    var Component$2 = (function (_super) {
-        __extends$6(Component, _super);
-        function Component(props) {
-            var _this = _super.call(this, props) || this;
-            _this.state = {
-                username: '',
-                password: '',
-                submitting: false,
-                wrongCredentials: false,
-            };
-            _this.onPasswordChange = _this.onPasswordChange.bind(_this);
-            _this.onUsernameChange = _this.onUsernameChange.bind(_this);
-            _this.onSubmit = _this.onSubmit.bind(_this);
-            return _this;
-        }
-        Component.prototype.onPasswordChange = function (e) {
-            var value = e.currentTarget.value;
-            this.setState(function (prevState) { return (Object.assign({}, prevState, {
-                password: value,
-            })); });
-        };
-        Component.prototype.onUsernameChange = function (e) {
-            var value = e.currentTarget.value;
-            this.setState(function (prevState) { return (Object.assign({}, prevState, {
-                username: value,
-            })); });
-        };
-        Component.prototype.onSubmit = function (e) {
-            var _this = this;
-            e.preventDefault();
-            if (this.state.submitting)
-                return;
-            this.setState({
-                submitting: true,
-            });
-            fetch('/api/login/', {
-                method: 'POST',
-                body: JSON.stringify({
-                    username: this.state.username,
-                    password: this.state.password,
-                }),
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                credentials: 'same-origin',
-            }).then(function (response) { return response.json(); }).then(function (responseJson) {
-                if (responseJson.status === 'success') {
-                    _this.props.onLogin(responseJson.user);
-                }
-                else if (responseJson.status === 'wrong_credentials') {
-                    _this.setState({
-                        username: '',
-                        password: '',
-                        submitting: false,
-                        wrongCredentials: true,
-                    });
-                }
-            });
-        };
-        Component.prototype.render = function () {
-            return React.createElement('div', { className: 'login-view' }, React.createElement('div', { className: 'login-view__title' }, 'Login'), React.createElement('form', { className: 'login-view__form', onSubmit: this.onSubmit }, React.createElement('input', {
-                className: 'login-view__input',
-                type: 'text',
-                placeholder: 'Username',
-                value: this.state.username,
-                required: true,
-                onChange: this.onUsernameChange,
-            }), React.createElement('input', {
-                className: 'login-view__password login-view__input',
-                type: 'password',
-                placeholder: 'Password',
-                value: this.state.password,
-                required: true,
-                onChange: this.onPasswordChange,
-            }), (this.state.wrongCredentials ?
-                React.createElement('div', { className: 'login-view__form-error' }, 'Incorrect credentials') :
-                null), React.createElement('input', {
-                className: 'login-view__submit button',
-                type: 'submit',
-                value: this.state.submitting ? 'Processing…' : 'Login',
-            })));
-        };
-        return Component;
-    }(React.Component));
-    var Login = ReactRedux.connect(null, mapDispatchToProps$2)(Component$2);
+    var NewJob = ReactRedux.connect()(Component$2);
 
     var __extends$7 = (undefined && undefined.__extends) || (function () {
         var extendStatics = function (d, b) {
@@ -685,25 +655,6 @@
             d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
         };
     })();
-    function mapDispatchToProps$3(dispatch) {
-        return {
-            onShowLogin: function () {
-                dispatch({
-                    type: 'ROUTE',
-                    value: '/login/',
-                });
-                history.pushState(null, '', '/login/');
-            },
-            onClick: function (jobId) {
-                var url = '/job-detail/' + jobId + '/';
-                dispatch({
-                    type: 'ROUTE',
-                    value: url,
-                });
-                history.pushState(null, '', url);
-            },
-        };
-    }
     var Component$3 = (function (_super) {
         __extends$7(Component, _super);
         function Component(props) {
@@ -716,6 +667,9 @@
             };
             return _this;
         }
+        Component.prototype.onClick = function (jobId) {
+            setRoute(this.props.dispatch, '/job-detail/' + jobId + '/');
+        };
         Component.prototype.onFilterChanged = function (e) {
             var value = e.currentTarget.value;
             var all = value === 'all';
@@ -728,18 +682,9 @@
             var _this = this;
             this.fetchController.abort();
             this.fetchController = new AbortController();
-            fetch('/api/job-list/?filter=' + (all ? 'all' : 'mine'), {
-                credentials: 'same-origin',
-                signal: this.fetchController.signal,
-            }).then(function (response) {
-                if (response.status === 401) {
-                    _this.props.onShowLogin();
-                    return;
-                }
-                response.json().then(function (responseJson) {
-                    _this.setState({
-                        jobs: responseJson.jobs,
-                    });
+            apiGet('/api/job-list/', { filter: all ? 'all' : 'mine' }, this.props.dispatch, this.fetchController.signal).then(function (response) {
+                _this.setState({
+                    jobs: response.jobs,
                 });
             });
         };
@@ -758,7 +703,7 @@
             }, React.createElement('option', { value: 'mine' }, 'My Jobs'), React.createElement('option', { value: 'all' }, 'All Jobs')), React.createElement('div', { className: 'job-listing-view__jobs' }, React.createElement('div', { className: 'job-listing-view__labels' }, React.createElement('div', { className: 'job-listing-view__labels__title' }, 'Title'), React.createElement('div', { className: 'job-listing-view__labels__time' }, 'Time'), React.createElement('div', { className: 'job-listing-view__labels__status' }, 'Status')), this.state.jobs.map(function (job) { return (React.createElement('div', {
                 className: 'job-listing-view__job',
                 key: job.id,
-                onClick: function () { return _this.props.onClick(job.id); },
+                onClick: function () { return _this.onClick(job.id); },
             }, React.createElement('div', { className: 'job-listing-view__job__title' }, job.title), React.createElement('div', { className: 'job-listing-view__job__time' }, moment(job.time).fromNow()), React.createElement('div', { className: 'job-listing-view__job__status' }, capitalizeFirstLetter(job.status)))); })));
         };
         return Component;
@@ -766,7 +711,7 @@
     function capitalizeFirstLetter(s) {
         return s[0].toUpperCase() + s.substring(1);
     }
-    var JobListing = ReactRedux.connect(null, mapDispatchToProps$3)(Component$3);
+    var JobListing = ReactRedux.connect()(Component$3);
 
     var __extends$8 = (undefined && undefined.__extends) || (function () {
         var extendStatics = function (d, b) {
@@ -857,9 +802,9 @@
             users: state.user_listing.users,
         };
     }
-    function mapDispatchToProps$4(dispatch) {
+    function mapDispatchToProps$1(dispatch) {
         function fetchUsers() {
-            fetchGetSmart('/api/user-list/', dispatch).then(function (response) {
+            apiGet('/api/user-list/', {}, dispatch).then(function (response) {
                 dispatch({
                     type: 'user_listing.USERS',
                     value: response.users,
@@ -872,7 +817,7 @@
             fetchUsers: fetchUsers,
             onDeleteClick: function (userId) {
                 open('Delete user?', 'The user will be deleted, but jobs run by the user will be kept.', function () {
-                    fetchPostSmart('/api/delete-user/', {
+                    apiPost('/api/delete-user/', {
                         id: userId,
                     }, dispatch).then(fetchUsers);
                 });
@@ -902,7 +847,7 @@
         };
         return Component;
     }(React.Component));
-    var UserListing = ReactRedux.connect(mapStateToProps$1, mapDispatchToProps$4)(Component$4);
+    var UserListing = ReactRedux.connect(mapStateToProps$1, mapDispatchToProps$1)(Component$4);
 
     var __extends$a = (undefined && undefined.__extends) || (function () {
         var extendStatics = function (d, b) {
@@ -969,15 +914,14 @@
             if (this.state.confirmPassword !== this.state.password)
                 return;
             this.submitting = true;
-            fetchPostSmart('/api/create-edit-user/', {
+            apiPost('/api/create-edit-user/', {
                 username: this.state.username,
                 password: this.state.password,
-                confirm_password: this.state.confirmPassword,
                 is_admin: this.state.isAdmin,
             }, this.props.dispatch).then(function (response) {
                 if (!_this.mounted)
                     return;
-                if (response.error === 'username_exists') {
+                if (response.status === 'username_exists') {
                     _this.submitting = false;
                     _this.setState({
                         usernameExists: true,
@@ -1040,17 +984,6 @@
             d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
         };
     })();
-    function mapDispatchToProps$5(dispatch) {
-        return {
-            setRoute: function (url) {
-                dispatch({
-                    type: 'ROUTE',
-                    value: url,
-                });
-                history.pushState(null, '', url);
-            },
-        };
-    }
     var Component$6 = (function (_super) {
         __extends$b(Component, _super);
         function Component(props) {
@@ -1102,53 +1035,31 @@
             this.setState({
                 submitting: true,
             });
-            fetch('/api/create-edit-user/', {
-                method: 'POST',
-                body: JSON.stringify({
-                    id: this.props.userId,
-                    username: this.state.username,
-                    password: this.state.password,
-                    is_admin: this.state.isAdmin,
-                }),
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                credentials: 'same-origin',
-            }).then(function (response) {
-                if (response.status === 401) {
-                    _this.props.setRoute('/login/');
-                    return;
+            apiPost('/api/create-edit-user/', {
+                id: this.props.userId,
+                username: this.state.username,
+                password: this.state.password,
+                is_admin: this.state.isAdmin,
+            }, this.props.dispatch).then(function (response) {
+                if (response.status === 'username_exists') {
+                    _this.setState({
+                        usernameExists: true,
+                        submitting: false,
+                    });
                 }
-                response.json().then(function (responseJson) {
-                    if (responseJson.error === 'username_exists') {
-                        _this.setState({
-                            usernameExists: true,
-                            submitting: false,
-                        });
-                    }
-                    else {
-                        _this.props.setRoute('/user-listing/');
-                    }
-                });
+                else {
+                    setRoute(_this.props.dispatch, '/user-listing/');
+                }
             });
         };
         Component.prototype.componentDidMount = function () {
             var _this = this;
             this.fetchController.abort();
             this.fetchController = new AbortController();
-            fetch('/api/get-user/?userId=' + encodeURIComponent(this.props.userId), {
-                credentials: 'same-origin',
-                signal: this.fetchController.signal,
-            }).then(function (response) {
-                if (response.status === 401) {
-                    _this.props.setRoute('/login/');
-                    return;
-                }
-                response.json().then(function (responseJson) {
-                    _this.setState({
-                        username: responseJson.username,
-                        isAdmin: responseJson.is_admin,
-                    });
+            apiGet('/api/get-user/', { userId: this.props.userId }, this.props.dispatch, this.fetchController.signal).then(function (response) {
+                _this.setState({
+                    username: response.username,
+                    isAdmin: response.is_admin,
                 });
             });
         };
@@ -1184,7 +1095,24 @@
         };
         return Component;
     }(React.Component));
-    var EditUser = ReactRedux.connect(null, mapDispatchToProps$5)(Component$6);
+    var EditUser = ReactRedux.connect()(Component$6);
+
+    var rootElement$1 = null;
+    var timeout = 0;
+    function show(message) {
+        if (rootElement$1 === null) {
+            rootElement$1 = document.createElement('div');
+            rootElement$1.className = 'snackbar';
+            document.body.appendChild(rootElement$1);
+        }
+        clearTimeout(timeout);
+        rootElement$1.offsetWidth;
+        rootElement$1.textContent = message;
+        rootElement$1.classList.add('snackbar--show');
+        timeout = setTimeout(function () {
+            assertNotNull(rootElement$1).classList.remove('snackbar--show');
+        }, 5000);
+    }
 
     var __extends$c = (undefined && undefined.__extends) || (function () {
         var extendStatics = function (d, b) {
@@ -1201,36 +1129,25 @@
     })();
     function mapStateToProps$2(state) {
         return {
-            user: assertNotNull(state.user),
-        };
-    }
-    function mapDispatchToProps$6(dispatch) {
-        return {
-            setRoute: function (url) {
-                dispatch({
-                    type: 'ROUTE',
-                    value: url,
-                });
-                history.pushState(null, '', url);
-            },
+            user: state.user,
         };
     }
     var Component$7 = (function (_super) {
         __extends$c(Component, _super);
         function Component(props) {
             var _this = _super.call(this, props) || this;
-            _this.fetchController = new AbortController();
+            _this.mounted = false;
+            _this.submitting = false;
             _this.onUsernameChange = _this.onUsernameChange.bind(_this);
             _this.onPasswordChange = _this.onPasswordChange.bind(_this);
             _this.onConfirmPasswordChange = _this.onConfirmPasswordChange.bind(_this);
             _this.onIsAdminChange = _this.onIsAdminChange.bind(_this);
             _this.onSubmit = _this.onSubmit.bind(_this);
             _this.state = {
-                username: '',
+                username: assertNotNull(_this.props.user).username,
                 password: '',
                 confirmPassword: '',
-                isAdmin: false,
-                submitting: false,
+                isAdmin: assertNotNull(_this.props.user).is_admin,
                 usernameExists: false,
             };
             return _this;
@@ -1259,68 +1176,46 @@
         Component.prototype.onSubmit = function (e) {
             var _this = this;
             e.preventDefault();
-            if (this.state.submitting)
+            if (this.submitting)
                 return;
             if (this.state.confirmPassword !== this.state.password)
                 return;
-            this.setState({
-                submitting: true,
-            });
-            fetch('/api/create-edit-user/', {
-                method: 'POST',
-                body: JSON.stringify({
-                    id: this.props.user.id,
-                    username: this.state.username,
-                    password: this.state.password,
-                    is_admin: this.state.isAdmin,
-                }),
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                credentials: 'same-origin',
-            }).then(function (response) {
-                if (response.status === 401) {
-                    _this.props.setRoute('/login/');
+            this.submitting = true;
+            apiPost('/api/create-edit-user/', {
+                id: assertNotNull(this.props.user).id,
+                username: this.state.username,
+                password: this.state.password,
+                is_admin: this.state.isAdmin,
+            }, this.props.dispatch).then(function (response) {
+                _this.submitting = false;
+                if (!_this.mounted)
                     return;
+                if (response.status === 'username_exists') {
+                    _this.setState({
+                        usernameExists: true,
+                    });
                 }
-                response.json().then(function (responseJson) {
-                    if (responseJson.error === 'username_exists') {
-                        _this.setState({
-                            usernameExists: true,
-                            submitting: false,
-                        });
-                    }
-                    else {
-                        _this.props.setRoute('/user-listing/');
-                    }
-                });
+                else {
+                    _this.props.dispatch({
+                        type: 'USER',
+                        value: {
+                            id: assertNotNull(_this.props.user).id,
+                            username: _this.state.username,
+                            is_admin: _this.state.isAdmin,
+                        },
+                    });
+                    show('Saved');
+                }
             });
         };
         Component.prototype.componentDidMount = function () {
-            var _this = this;
-            this.fetchController.abort();
-            this.fetchController = new AbortController();
-            fetch('/api/get-user/?userId=' + encodeURIComponent(this.props.user.id), {
-                credentials: 'same-origin',
-                signal: this.fetchController.signal,
-            }).then(function (response) {
-                if (response.status === 401) {
-                    _this.props.setRoute('/login/');
-                    return;
-                }
-                response.json().then(function (responseJson) {
-                    _this.setState({
-                        username: responseJson.username,
-                        isAdmin: responseJson.is_admin,
-                    });
-                });
-            });
+            this.mounted = true;
         };
         Component.prototype.componentWillUnmount = function () {
-            this.fetchController.abort();
+            this.mounted = false;
         };
         Component.prototype.render = function () {
-            return React.createElement('div', { className: 'create-edit-user-view' }, React.createElement('div', { className: 'create-edit-user-view__title' }, 'Edit User'), React.createElement('form', { className: 'create-edit-user-view__form', onSubmit: this.onSubmit }, React.createElement('label', null, 'Username'), React.createElement('input', {
+            return React.createElement('div', { className: 'create-edit-user-view' }, React.createElement('div', { className: 'create-edit-user-view__title' }, 'My Account'), React.createElement('form', { className: 'create-edit-user-view__form', onSubmit: this.onSubmit }, React.createElement('label', null, 'Username'), React.createElement('input', {
                 type: 'text',
                 required: true,
                 value: this.state.username,
@@ -1337,18 +1232,19 @@
                 onChange: this.onConfirmPasswordChange,
             }), (this.state.confirmPassword !== this.state.password ?
                 React.createElement('div', { className: 'create-edit-user-view__error' }, 'Does not match password') :
-                null), React.createElement('div', { className: 'create-edit-user-view__checkbox-wrapper' }, React.createElement(Checkbox, {
-                checked: this.state.isAdmin,
-                onChange: this.onIsAdminChange,
-            }), React.createElement('label', { onClick: this.onIsAdminChange }, 'Admin')), React.createElement('input', {
+                null), (assertNotNull(this.props.user).is_admin ?
+                React.createElement('div', { className: 'create-edit-user-view__checkbox-wrapper' }, React.createElement(Checkbox, {
+                    checked: this.state.isAdmin,
+                    onChange: this.onIsAdminChange,
+                }), React.createElement('label', { onClick: this.onIsAdminChange }, 'Admin')) : null), React.createElement('input', {
                 className: 'button',
                 type: 'submit',
-                value: this.state.submitting ? 'Processing…' : 'Save',
+                value: 'Save',
             })));
         };
         return Component;
     }(React.Component));
-    var MyAccount = ReactRedux.connect(mapStateToProps$2, mapDispatchToProps$6)(Component$7);
+    var MyAccount = ReactRedux.connect(mapStateToProps$2, null)(Component$7);
 
     var __extends$d = (undefined && undefined.__extends) || (function () {
         var extendStatics = function (d, b) {
@@ -1363,25 +1259,6 @@
             d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
         };
     })();
-    function mapDispatchToProps$7(dispatch, ownProps) {
-        return {
-            onShowLogin: function () {
-                dispatch({
-                    type: 'ROUTE',
-                    value: '/login/',
-                });
-                history.pushState(null, '', '/login/');
-            },
-            onPlotsClick: function () {
-                var url = '/plots/' + ownProps.jobId + '/average-mutations/';
-                dispatch({
-                    type: 'ROUTE',
-                    value: url,
-                });
-                history.pushState(null, '', url);
-            },
-        };
-    }
     var Component$8 = (function (_super) {
         __extends$d(Component, _super);
         function Component(props) {
@@ -1394,8 +1271,12 @@
                 output: '',
                 done: false,
             };
+            _this.onPlotsClick = _this.onPlotsClick.bind(_this);
             return _this;
         }
+        Component.prototype.onPlotsClick = function () {
+            setRoute(this.props.dispatch, '/plots/' + this.props.jobId + '/average-mutations/');
+        };
         Component.prototype.componentDidMount = function () {
             this.fetchOutput();
         };
@@ -1406,37 +1287,28 @@
         Component.prototype.fetchOutput = function () {
             var _this = this;
             this.fetchController = new AbortController();
-            fetch('/api/job-output/?jobId=' + encodeURIComponent(this.props.jobId) + '&offset=' + encodeURIComponent(this.outputOffset.toString()), {
-                credentials: 'same-origin',
-                signal: this.fetchController.signal,
-            }).then(function (response) {
-                if (response.status === 401) {
-                    _this.props.onShowLogin();
-                    return;
+            apiGet('/api/job-output/', { jobId: this.props.jobId, offset: this.outputOffset.toString() }, this.props.dispatch, this.fetchController.signal).then(function (response) {
+                _this.outputOffset += response.output.length;
+                _this.setState(function (prevState, props) { return ({
+                    output: prevState.output + response.output,
+                    done: response.done,
+                }); });
+                if (!response.done) {
+                    _this.fetchTimeout = setTimeout(_this.fetchOutput, 1000);
                 }
-                response.json().then(function (responseJson) {
-                    _this.outputOffset += responseJson.output.length;
-                    _this.setState(function (prevState, props) { return ({
-                        output: prevState.output + responseJson.output,
-                        done: responseJson.done,
-                    }); });
-                    if (!responseJson.done) {
-                        _this.fetchTimeout = setTimeout(_this.fetchOutput, 1000);
-                    }
-                });
             });
         };
         Component.prototype.render = function () {
             return React.createElement('div', { className: 'job-detail-view' }, React.createElement('div', { className: 'job-detail-view__title' }, 'Job', React.createElement('span', { className: 'job-detail-view__job-id' }, this.props.jobId)), React.createElement('pre', { className: 'job-detail-view__output' }, this.state.output), React.createElement('div', { className: 'job-detail-view__bottom' }, React.createElement('div', { className: 'job-detail-view__status' }, 'Status: ' + (this.state.done ? 'Done' : 'Running')), (this.state.done ?
                 React.createElement('div', {
                     className: 'job-detail-view__plots-button button',
-                    onClick: this.props.onPlotsClick,
+                    onClick: this.onPlotsClick,
                 }, 'Plots') :
                 null)));
         };
         return Component;
     }(React.Component));
-    var JobDetail = ReactRedux.connect(null, mapDispatchToProps$7)(Component$8);
+    var JobDetail = ReactRedux.connect()(Component$8);
 
     var __extends$e = (undefined && undefined.__extends) || (function () {
         var extendStatics = function (d, b) {
@@ -1477,7 +1349,7 @@
             slug: 'minor-allele-frequencies',
         },
     ];
-    function mapDispatchToProps$8(dispatch, ownProps) {
+    function mapDispatchToProps$2(dispatch, ownProps) {
         return {
             onClick: function (slug) {
                 var url = '/plots/' + ownProps.jobId + '/' + slug + '/';
@@ -1504,7 +1376,7 @@
         };
         return Component;
     }(React.Component));
-    var Sidebar = ReactRedux.connect(null, mapDispatchToProps$8)(Component$9);
+    var Sidebar = ReactRedux.connect(null, mapDispatchToProps$2)(Component$9);
 
     var __extends$f = (undefined && undefined.__extends) || (function () {
         var extendStatics = function (d, b) {
@@ -1519,79 +1391,75 @@
             d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
         };
     })();
-    var AverageMutations = (function (_super) {
-        __extends$f(AverageMutations, _super);
-        function AverageMutations(props) {
+    var Component$a = (function (_super) {
+        __extends$f(Component, _super);
+        function Component(props) {
             var _this = _super.call(this, props) || this;
             _this.resizePlot = _this.resizePlot.bind(_this);
             _this.fetchController = new AbortController();
             _this.plotElement = React.createRef();
             return _this;
         }
-        AverageMutations.prototype.resizePlot = function () {
+        Component.prototype.resizePlot = function () {
             Plotly.Plots.resize(assertNotNull(this.plotElement.current));
         };
-        AverageMutations.prototype.componentDidMount = function () {
+        Component.prototype.componentDidMount = function () {
             var _this = this;
             this.fetchController = new AbortController();
-            fetch('/api/plot-average-mutations/?jobId=' + encodeURIComponent(this.props.jobId), {
-                credentials: 'same-origin',
-                signal: this.fetchController.signal,
-            }).then(function (response) {
-                response.json().then(function (responseJson) {
-                    var data = [
-                        {
-                            x: responseJson.generations,
-                            y: responseJson.deleterious,
-                            type: 'scatter',
-                            name: 'Deleterious',
-                            line: {
-                                color: 'rgb(200, 0, 0)',
-                            },
+            apiGet('/api/plot-average-mutations/', { jobId: this.props.jobId }, this.props.dispatch).then(function (response) {
+                var data = [
+                    {
+                        x: response.generations,
+                        y: response.deleterious,
+                        type: 'scatter',
+                        name: 'Deleterious',
+                        line: {
+                            color: 'rgb(200, 0, 0)',
                         },
-                        {
-                            x: responseJson.generations,
-                            y: responseJson.neutral,
-                            type: 'scatter',
-                            name: 'Neutral',
-                            line: {
-                                color: 'rgb(0, 0, 200)',
-                            },
+                    },
+                    {
+                        x: response.generations,
+                        y: response.neutral,
+                        type: 'scatter',
+                        name: 'Neutral',
+                        line: {
+                            color: 'rgb(0, 0, 200)',
                         },
-                        {
-                            x: responseJson.generations,
-                            y: responseJson.favorable,
-                            type: 'scatter',
-                            name: 'Favorable',
-                            line: {
-                                color: 'rgb(0, 200, 0)',
-                            },
+                    },
+                    {
+                        x: response.generations,
+                        y: response.favorable,
+                        type: 'scatter',
+                        name: 'Favorable',
+                        line: {
+                            color: 'rgb(0, 200, 0)',
                         },
-                    ];
-                    var layout = {
-                        title: 'Average mutations/individual',
-                        xaxis: {
-                            title: 'Generations',
-                        },
-                        yaxis: {
-                            title: 'Mutations',
-                        },
-                    };
-                    Plotly.newPlot(assertNotNull(_this.plotElement.current), data, layout);
-                });
+                    },
+                ];
+                var layout = {
+                    title: 'Average mutations/individual',
+                    xaxis: {
+                        title: 'Generations',
+                    },
+                    yaxis: {
+                        title: 'Mutations',
+                    },
+                };
+                Plotly.newPlot(assertNotNull(_this.plotElement.current), data, layout);
             });
             window.addEventListener('resize', this.resizePlot);
         };
-        AverageMutations.prototype.componentWillUnmount = function () {
+        Component.prototype.componentWillUnmount = function () {
             Plotly.purge(assertNotNull(this.plotElement.current));
             window.removeEventListener('resize', this.resizePlot);
             this.fetchController.abort();
         };
-        AverageMutations.prototype.render = function () {
+        Component.prototype.render = function () {
             return React.createElement('div', { className: 'plots-view' }, React.createElement(Sidebar, { jobId: this.props.jobId, activeSlug: 'average-mutations' }), React.createElement('div', { className: 'plots-view__non-sidebar' }, React.createElement('div', { className: 'plots-view__plot', ref: this.plotElement })));
         };
-        return AverageMutations;
+        return Component;
     }(React.Component));
+    var AverageMutations = ReactRedux.connect()(Component$a);
 
     var __extends$g = (undefined && undefined.__extends) || (function () {
         var extendStatics = function (d, b) {
@@ -1606,76 +1474,72 @@
             d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
         };
     })();
-    var FitnessHistory = (function (_super) {
-        __extends$g(FitnessHistory, _super);
-        function FitnessHistory(props) {
+    var Component$b = (function (_super) {
+        __extends$g(Component, _super);
+        function Component(props) {
             var _this = _super.call(this, props) || this;
             _this.resizePlot = _this.resizePlot.bind(_this);
             _this.fetchController = new AbortController();
             _this.plotElement = React.createRef();
             return _this;
         }
-        FitnessHistory.prototype.resizePlot = function () {
+        Component.prototype.resizePlot = function () {
             Plotly.Plots.resize(assertNotNull(this.plotElement.current));
         };
-        FitnessHistory.prototype.componentDidMount = function () {
+        Component.prototype.componentDidMount = function () {
             var _this = this;
             this.fetchController = new AbortController();
-            fetch('/api/plot-fitness-history/?jobId=' + encodeURIComponent(this.props.jobId), {
-                credentials: 'same-origin',
-                signal: this.fetchController.signal,
-            }).then(function (response) {
-                response.json().then(function (responseJson) {
-                    var data = [
-                        {
-                            x: responseJson.generations,
-                            y: responseJson.fitness,
-                            type: 'scatter',
-                            name: 'Fitness',
-                            line: {
-                                color: 'rgb(200, 0, 0)',
-                            },
+            apiGet('/api/plot-fitness-history/', { jobId: this.props.jobId }, this.props.dispatch).then(function (response) {
+                var data = [
+                    {
+                        x: response.generations,
+                        y: response.fitness,
+                        type: 'scatter',
+                        name: 'Fitness',
+                        line: {
+                            color: 'rgb(200, 0, 0)',
                         },
-                        {
-                            x: responseJson.generations,
-                            y: responseJson.pop_size,
-                            type: 'scatter',
-                            name: 'Population Size',
-                            line: {
-                                color: 'rgb(0, 0, 200)',
-                            },
-                            yaxis: 'y2',
+                    },
+                    {
+                        x: response.generations,
+                        y: response.pop_size,
+                        type: 'scatter',
+                        name: 'Population Size',
+                        line: {
+                            color: 'rgb(0, 0, 200)',
                         },
-                    ];
-                    var layout = {
-                        title: 'Fitness history',
-                        xaxis: {
-                            title: 'Generations',
-                        },
-                        yaxis: {
-                            title: 'Fitness',
-                        },
-                        yaxis2: {
-                            title: 'Population Size',
-                            overlaying: 'y',
-                            side: 'right',
-                        },
-                    };
-                    Plotly.newPlot(assertNotNull(_this.plotElement.current), data, layout);
-                });
+                        yaxis: 'y2',
+                    },
+                ];
+                var layout = {
+                    title: 'Fitness history',
+                    xaxis: {
+                        title: 'Generations',
+                    },
+                    yaxis: {
+                        title: 'Fitness',
+                    },
+                    yaxis2: {
+                        title: 'Population Size',
+                        overlaying: 'y',
+                        side: 'right',
+                    },
+                };
+                Plotly.newPlot(assertNotNull(_this.plotElement.current), data, layout);
             });
             window.addEventListener('resize', this.resizePlot);
         };
-        FitnessHistory.prototype.componentWillUnmount = function () {
+        Component.prototype.componentWillUnmount = function () {
             Plotly.purge(assertNotNull(this.plotElement.current));
             window.removeEventListener('resize', this.resizePlot);
             this.fetchController.abort();
         };
-        FitnessHistory.prototype.render = function () {
+        Component.prototype.render = function () {
             return React.createElement('div', { className: 'plots-view' }, React.createElement(Sidebar, { jobId: this.props.jobId, activeSlug: 'fitness-history' }), React.createElement('div', { className: 'plots-view__non-sidebar' }, React.createElement('div', { className: 'plots-view__plot', ref: this.plotElement })));
         };
-        return FitnessHistory;
+        return Component;
     }(React.Component));
+    var FitnessHistory = ReactRedux.connect()(Component$b);
 
     var __extends$h = (undefined && undefined.__extends) || (function () {
         var extendStatics = function (d, b) {
@@ -1690,9 +1554,9 @@
             d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
         };
     })();
-    var DeleteriousMutations = (function (_super) {
-        __extends$h(DeleteriousMutations, _super);
-        function DeleteriousMutations(props) {
+    var Component$c = (function (_super) {
+        __extends$h(Component, _super);
+        function Component(props) {
             var _this = _super.call(this, props) || this;
             _this.resizePlot = _this.resizePlot.bind(_this);
             _this.sliderInputChange = _this.sliderInputChange.bind(_this);
@@ -1704,10 +1568,10 @@
             };
             return _this;
         }
-        DeleteriousMutations.prototype.resizePlot = function () {
+        Component.prototype.resizePlot = function () {
             Plotly.Plots.resize(assertNotNull(this.plotElement.current));
         };
-        DeleteriousMutations.prototype.sliderInputChange = function (e) {
+        Component.prototype.sliderInputChange = function (e) {
             var newIndex = parseInt(e.target.value);
             if (newIndex < this.state.data.length) {
                 Plotly.restyle(assertNotNull(this.plotElement.current), {
@@ -1718,85 +1582,80 @@
                 currentIndex: newIndex,
             });
         };
-        DeleteriousMutations.prototype.componentDidMount = function () {
+        Component.prototype.componentDidMount = function () {
             var _this = this;
             this.fetchController = new AbortController();
-            fetch('/api/plot-deleterious-mutations/?jobId=' + encodeURIComponent(this.props.jobId), {
-                credentials: 'same-origin',
-                signal: this.fetchController.signal,
-            }).then(function (response) {
-                response.json().then(function (responseJson) {
-                    var maxY = 0;
-                    for (var _i = 0, responseJson_1 = responseJson; _i < responseJson_1.length; _i++) {
-                        var generation = responseJson_1[_i];
-                        for (var _a = 0, _b = generation.dominant; _a < _b.length; _a++) {
-                            var n = _b[_a];
-                            if (n > maxY) {
-                                maxY = n;
-                            }
-                        }
-                        for (var _c = 0, _d = generation.recessive; _c < _d.length; _c++) {
-                            var n = _d[_c];
-                            if (n > maxY) {
-                                maxY = n;
-                            }
+            apiGet('/api/plot-beneficial-mutations/', { jobId: this.props.jobId }, this.props.dispatch).then(function (response) {
+                var maxY = 0;
+                for (var _i = 0, response_1 = response; _i < response_1.length; _i++) {
+                    var generation = response_1[_i];
+                    for (var _a = 0, _b = generation.dominant; _a < _b.length; _a++) {
+                        var n = _b[_a];
+                        if (n > maxY) {
+                            maxY = n;
                         }
                     }
-                    var generationData = responseJson[responseJson.length - 1];
-                    var data = [
-                        {
-                            x: generationData.binmidpointfitness,
-                            y: generationData.dominant,
-                            type: 'scatter',
-                            name: 'Dominant',
-                            line: {
-                                color: 'rgb(0, 200, 0)',
-                                shape: 'hvh',
-                            },
-                            fill: 'tozeroy',
-                            fillcolor: 'rgba(0, 200, 0, 0.5)',
+                    for (var _c = 0, _d = generation.recessive; _c < _d.length; _c++) {
+                        var n = _d[_c];
+                        if (n > maxY) {
+                            maxY = n;
+                        }
+                    }
+                }
+                var generationData = response[response.length - 1];
+                var data = [
+                    {
+                        x: generationData.binmidpointfitness,
+                        y: generationData.dominant,
+                        type: 'scatter',
+                        name: 'Dominant',
+                        line: {
+                            color: 'rgb(0, 200, 0)',
+                            shape: 'hvh',
                         },
-                        {
-                            x: generationData.binmidpointfitness,
-                            y: generationData.recessive,
-                            type: 'scatter',
-                            name: 'Recessive',
-                            line: {
-                                color: 'rgb(200, 0, 0)',
-                                shape: 'hvh',
-                            },
-                            fill: 'tozeroy',
-                            fillcolor: 'rgba(200, 0, 0, 0.5)',
+                        fill: 'tozeroy',
+                        fillcolor: 'rgba(0, 200, 0, 0.5)',
+                    },
+                    {
+                        x: generationData.binmidpointfitness,
+                        y: generationData.recessive,
+                        type: 'scatter',
+                        name: 'Recessive',
+                        line: {
+                            color: 'rgb(200, 0, 0)',
+                            shape: 'hvh',
                         },
-                    ];
-                    var layout = {
-                        title: 'Distribution of accumulated mutations (deleterious)',
-                        xaxis: {
-                            title: 'Mutational Fitness Degradation',
-                            type: 'log',
-                            autorange: 'reversed',
-                            exponentformat: 'e',
-                        },
-                        yaxis: {
-                            title: 'Fraction of Mutations Retained in Genome',
-                            range: [0, maxY],
-                        },
-                    };
-                    Plotly.newPlot(assertNotNull(_this.plotElement.current), data, layout);
-                    _this.setState({
-                        data: responseJson,
-                        currentIndex: responseJson.length - 1,
-                    });
+                        fill: 'tozeroy',
+                        fillcolor: 'rgba(200, 0, 0, 0.5)',
+                    },
+                ];
+                var layout = {
+                    title: 'Distribution of accumulated mutations (deleterious)',
+                    xaxis: {
+                        title: 'Mutational Fitness Degradation',
+                        type: 'log',
+                        autorange: 'reversed',
+                        exponentformat: 'e',
+                    },
+                    yaxis: {
+                        title: 'Fraction of Mutations Retained in Genome',
+                        range: [0, maxY],
+                    },
+                };
+                Plotly.newPlot(assertNotNull(_this.plotElement.current), data, layout);
+                _this.setState({
+                    data: response,
+                    currentIndex: response.length - 1,
                 });
             });
             window.addEventListener('resize', this.resizePlot);
         };
-        DeleteriousMutations.prototype.componentWillUnmount = function () {
+        Component.prototype.componentWillUnmount = function () {
             Plotly.purge(assertNotNull(this.plotElement.current));
             window.removeEventListener('resize', this.resizePlot);
             this.fetchController.abort();
         };
-        DeleteriousMutations.prototype.render = function () {
+        Component.prototype.render = function () {
             return React.createElement('div', { className: 'plots-view' }, React.createElement(Sidebar, { jobId: this.props.jobId, activeSlug: 'deleterious-mutations' }), React.createElement('div', { className: 'plots-view__non-sidebar plots-view--has-slider' }, React.createElement('div', { className: 'plots-view__plot', ref: this.plotElement }), React.createElement('div', { className: 'plots-view__slider' }, React.createElement('div', { className: 'plots-view__slider-label' }, 'Generation:'), React.createElement('div', { className: 'plots-view__slider-number' }, this.state.data.length === 0 ? '' : this.state.data[this.state.currentIndex].generation), React.createElement('input', {
                 className: 'plots-view__slider-input',
                 type: 'range',
@@ -1805,8 +1664,9 @@
                 onChange: this.sliderInputChange,
             }))));
         };
-        return DeleteriousMutations;
+        return Component;
     }(React.Component));
+    var DeleteriousMutations = ReactRedux.connect()(Component$c);
 
     var __extends$i = (undefined && undefined.__extends) || (function () {
         var extendStatics = function (d, b) {
@@ -1821,9 +1681,9 @@
             d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
         };
     })();
-    var BeneficialMutations = (function (_super) {
-        __extends$i(BeneficialMutations, _super);
-        function BeneficialMutations(props) {
+    var Component$d = (function (_super) {
+        __extends$i(Component, _super);
+        function Component(props) {
             var _this = _super.call(this, props) || this;
             _this.resizePlot = _this.resizePlot.bind(_this);
             _this.sliderInputChange = _this.sliderInputChange.bind(_this);
@@ -1835,10 +1695,10 @@
             };
             return _this;
         }
-        BeneficialMutations.prototype.resizePlot = function () {
+        Component.prototype.resizePlot = function () {
             Plotly.Plots.resize(assertNotNull(this.plotElement.current));
         };
-        BeneficialMutations.prototype.sliderInputChange = function (e) {
+        Component.prototype.sliderInputChange = function (e) {
             var newIndex = parseInt(e.target.value);
             if (newIndex < this.state.data.length) {
                 Plotly.restyle(assertNotNull(this.plotElement.current), {
@@ -1849,84 +1709,79 @@
                 currentIndex: newIndex,
             });
         };
-        BeneficialMutations.prototype.componentDidMount = function () {
+        Component.prototype.componentDidMount = function () {
             var _this = this;
             this.fetchController = new AbortController();
-            fetch('/api/plot-beneficial-mutations/?jobId=' + encodeURIComponent(this.props.jobId), {
-                credentials: 'same-origin',
-                signal: this.fetchController.signal,
-            }).then(function (response) {
-                response.json().then(function (responseJson) {
-                    var maxY = 0;
-                    for (var _i = 0, responseJson_1 = responseJson; _i < responseJson_1.length; _i++) {
-                        var generation = responseJson_1[_i];
-                        for (var _a = 0, _b = generation.dominant; _a < _b.length; _a++) {
-                            var n = _b[_a];
-                            if (n > maxY) {
-                                maxY = n;
-                            }
-                        }
-                        for (var _c = 0, _d = generation.recessive; _c < _d.length; _c++) {
-                            var n = _d[_c];
-                            if (n > maxY) {
-                                maxY = n;
-                            }
+            apiGet('/api/plot-beneficial-mutations/', { jobId: this.props.jobId }, this.props.dispatch).then(function (response) {
+                var maxY = 0;
+                for (var _i = 0, response_1 = response; _i < response_1.length; _i++) {
+                    var generation = response_1[_i];
+                    for (var _a = 0, _b = generation.dominant; _a < _b.length; _a++) {
+                        var n = _b[_a];
+                        if (n > maxY) {
+                            maxY = n;
                         }
                     }
-                    var generationData = responseJson[responseJson.length - 1];
-                    var data = [
-                        {
-                            x: generationData.binmidpointfitness,
-                            y: generationData.dominant,
-                            type: 'scatter',
-                            name: 'Dominant',
-                            line: {
-                                color: 'rgb(0, 200, 0)',
-                                shape: 'hvh',
-                            },
-                            fill: 'tozeroy',
-                            fillcolor: 'rgba(0, 200, 0, 0.5)',
+                    for (var _c = 0, _d = generation.recessive; _c < _d.length; _c++) {
+                        var n = _d[_c];
+                        if (n > maxY) {
+                            maxY = n;
+                        }
+                    }
+                }
+                var generationData = response[response.length - 1];
+                var data = [
+                    {
+                        x: generationData.binmidpointfitness,
+                        y: generationData.dominant,
+                        type: 'scatter',
+                        name: 'Dominant',
+                        line: {
+                            color: 'rgb(0, 200, 0)',
+                            shape: 'hvh',
                         },
-                        {
-                            x: generationData.binmidpointfitness,
-                            y: generationData.recessive,
-                            type: 'scatter',
-                            name: 'Recessive',
-                            line: {
-                                color: 'rgb(200, 0, 0)',
-                                shape: 'hvh',
-                            },
-                            fill: 'tozeroy',
-                            fillcolor: 'rgba(200, 0, 0, 0.5)',
+                        fill: 'tozeroy',
+                        fillcolor: 'rgba(0, 200, 0, 0.5)',
+                    },
+                    {
+                        x: generationData.binmidpointfitness,
+                        y: generationData.recessive,
+                        type: 'scatter',
+                        name: 'Recessive',
+                        line: {
+                            color: 'rgb(200, 0, 0)',
+                            shape: 'hvh',
                         },
-                    ];
-                    var layout = {
-                        title: 'Distribution of accumulated mutations (beneficial)',
-                        xaxis: {
-                            title: 'Mutational Fitness Enhancement',
-                            type: 'log',
-                            exponentformat: 'e',
-                        },
-                        yaxis: {
-                            title: 'Fraction of Mutations Retained in Genome',
-                            range: [0, maxY],
-                        },
-                    };
-                    Plotly.newPlot(assertNotNull(_this.plotElement.current), data, layout);
-                    _this.setState({
-                        data: responseJson,
-                        currentIndex: responseJson.length - 1,
-                    });
+                        fill: 'tozeroy',
+                        fillcolor: 'rgba(200, 0, 0, 0.5)',
+                    },
+                ];
+                var layout = {
+                    title: 'Distribution of accumulated mutations (beneficial)',
+                    xaxis: {
+                        title: 'Mutational Fitness Enhancement',
+                        type: 'log',
+                        exponentformat: 'e',
+                    },
+                    yaxis: {
+                        title: 'Fraction of Mutations Retained in Genome',
+                        range: [0, maxY],
+                    },
+                };
+                Plotly.newPlot(assertNotNull(_this.plotElement.current), data, layout);
+                _this.setState({
+                    data: response,
+                    currentIndex: response.length - 1,
                 });
             });
             window.addEventListener('resize', this.resizePlot);
         };
-        BeneficialMutations.prototype.componentWillUnmount = function () {
+        Component.prototype.componentWillUnmount = function () {
             Plotly.purge(assertNotNull(this.plotElement.current));
             window.removeEventListener('resize', this.resizePlot);
             this.fetchController.abort();
         };
-        BeneficialMutations.prototype.render = function () {
+        Component.prototype.render = function () {
             return React.createElement('div', { className: 'plots-view' }, React.createElement(Sidebar, { jobId: this.props.jobId, activeSlug: 'beneficial-mutations' }), React.createElement('div', { className: 'plots-view__non-sidebar plots-view--has-slider' }, React.createElement('div', { className: 'plots-view__plot', ref: this.plotElement }), React.createElement('div', { className: 'plots-view__slider' }, React.createElement('div', { className: 'plots-view__slider-label' }, 'Generation:'), React.createElement('div', { className: 'plots-view__slider-number' }, this.state.data.length === 0 ? '' : this.state.data[this.state.currentIndex].generation), React.createElement('input', {
                 className: 'plots-view__slider-input',
                 type: 'range',
@@ -1935,8 +1790,9 @@
                 onChange: this.sliderInputChange,
             }))));
         };
-        return BeneficialMutations;
+        return Component;
     }(React.Component));
+    var BeneficialMutations = ReactRedux.connect()(Component$d);
 
     var __extends$j = (undefined && undefined.__extends) || (function () {
         var extendStatics = function (d, b) {
@@ -1951,9 +1807,9 @@
             d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
         };
     })();
-    var SnpFrequencies = (function (_super) {
-        __extends$j(SnpFrequencies, _super);
-        function SnpFrequencies(props) {
+    var Component$e = (function (_super) {
+        __extends$j(Component, _super);
+        function Component(props) {
             var _this = _super.call(this, props) || this;
             _this.resizePlot = _this.resizePlot.bind(_this);
             _this.sliderInputChange = _this.sliderInputChange.bind(_this);
@@ -1965,10 +1821,10 @@
             };
             return _this;
         }
-        SnpFrequencies.prototype.resizePlot = function () {
+        Component.prototype.resizePlot = function () {
             Plotly.Plots.resize(assertNotNull(this.plotElement.current));
         };
-        SnpFrequencies.prototype.sliderInputChange = function (e) {
+        Component.prototype.sliderInputChange = function (e) {
             var newIndex = parseInt(e.target.value);
             if (newIndex < this.state.data.length) {
                 Plotly.restyle(assertNotNull(this.plotElement.current), {
@@ -1985,136 +1841,131 @@
                 currentIndex: newIndex,
             });
         };
-        SnpFrequencies.prototype.componentDidMount = function () {
+        Component.prototype.componentDidMount = function () {
             var _this = this;
             this.fetchController = new AbortController();
-            fetch('/api/plot-snp-frequencies/?jobId=' + encodeURIComponent(this.props.jobId), {
-                credentials: 'same-origin',
-                signal: this.fetchController.signal,
-            }).then(function (response) {
-                response.json().then(function (responseJson) {
-                    var maxY = 0;
-                    for (var _i = 0, responseJson_1 = responseJson; _i < responseJson_1.length; _i++) {
-                        var generation = responseJson_1[_i];
-                        for (var _a = 0, _b = generation.deleterious; _a < _b.length; _a++) {
-                            var n = _b[_a];
-                            if (n > maxY) {
-                                maxY = n;
-                            }
-                        }
-                        for (var _c = 0, _d = generation.favorable; _c < _d.length; _c++) {
-                            var n = _d[_c];
-                            if (n > maxY) {
-                                maxY = n;
-                            }
-                        }
-                        for (var _e = 0, _f = generation.neutral; _e < _f.length; _e++) {
-                            var n = _f[_e];
-                            if (n > maxY) {
-                                maxY = n;
-                            }
-                        }
-                        for (var _g = 0, _h = generation.delInitialAlleles; _g < _h.length; _g++) {
-                            var n = _h[_g];
-                            if (n > maxY) {
-                                maxY = n;
-                            }
-                        }
-                        for (var _j = 0, _k = generation.favInitialAlleles; _j < _k.length; _j++) {
-                            var n = _k[_j];
-                            if (n > maxY) {
-                                maxY = n;
-                            }
+            apiGet('/api/plot-snp-frequencies/', { jobId: this.props.jobId }, this.props.dispatch).then(function (response) {
+                var maxY = 0;
+                for (var _i = 0, response_1 = response; _i < response_1.length; _i++) {
+                    var generation = response_1[_i];
+                    for (var _a = 0, _b = generation.deleterious; _a < _b.length; _a++) {
+                        var n = _b[_a];
+                        if (n > maxY) {
+                            maxY = n;
                         }
                     }
-                    var generationData = responseJson[responseJson.length - 1];
-                    var data = [
-                        {
-                            x: generationData.bins,
-                            y: generationData.deleterious,
-                            type: 'scatter',
-                            name: 'Deleterious',
-                            line: {
-                                color: 'rgb(200, 0, 0)',
-                                shape: 'hvh',
-                            },
-                            fill: 'tozeroy',
-                            fillcolor: 'rgba(200, 0, 0, 0.5)',
+                    for (var _c = 0, _d = generation.favorable; _c < _d.length; _c++) {
+                        var n = _d[_c];
+                        if (n > maxY) {
+                            maxY = n;
+                        }
+                    }
+                    for (var _e = 0, _f = generation.neutral; _e < _f.length; _e++) {
+                        var n = _f[_e];
+                        if (n > maxY) {
+                            maxY = n;
+                        }
+                    }
+                    for (var _g = 0, _h = generation.delInitialAlleles; _g < _h.length; _g++) {
+                        var n = _h[_g];
+                        if (n > maxY) {
+                            maxY = n;
+                        }
+                    }
+                    for (var _j = 0, _k = generation.favInitialAlleles; _j < _k.length; _j++) {
+                        var n = _k[_j];
+                        if (n > maxY) {
+                            maxY = n;
+                        }
+                    }
+                }
+                var generationData = response[response.length - 1];
+                var data = [
+                    {
+                        x: generationData.bins,
+                        y: generationData.deleterious,
+                        type: 'scatter',
+                        name: 'Deleterious',
+                        line: {
+                            color: 'rgb(200, 0, 0)',
+                            shape: 'hvh',
                         },
-                        {
-                            x: generationData.bins,
-                            y: generationData.favorable,
-                            type: 'scatter',
-                            name: 'Favorable',
-                            line: {
-                                color: 'rgb(0, 200, 0)',
-                                shape: 'hvh',
-                            },
-                            fill: 'tozeroy',
-                            fillcolor: 'rgba(0, 200, 0, 0.5)',
+                        fill: 'tozeroy',
+                        fillcolor: 'rgba(200, 0, 0, 0.5)',
+                    },
+                    {
+                        x: generationData.bins,
+                        y: generationData.favorable,
+                        type: 'scatter',
+                        name: 'Favorable',
+                        line: {
+                            color: 'rgb(0, 200, 0)',
+                            shape: 'hvh',
                         },
-                        {
-                            x: generationData.bins,
-                            y: generationData.neutral,
-                            type: 'scatter',
-                            name: 'Neutral',
-                            line: {
-                                color: 'rgb(0, 0, 200)',
-                                shape: 'hvh',
-                            },
-                            fill: 'tozeroy',
-                            fillcolor: 'rgba(0, 0, 200, 0.5)',
+                        fill: 'tozeroy',
+                        fillcolor: 'rgba(0, 200, 0, 0.5)',
+                    },
+                    {
+                        x: generationData.bins,
+                        y: generationData.neutral,
+                        type: 'scatter',
+                        name: 'Neutral',
+                        line: {
+                            color: 'rgb(0, 0, 200)',
+                            shape: 'hvh',
                         },
-                        {
-                            x: generationData.bins,
-                            y: generationData.delInitialAlleles,
-                            type: 'scatter',
-                            name: 'Deleterious Initial',
-                            line: {
-                                color: 'rgb(237, 158, 0)',
-                                shape: 'hvh',
-                            },
-                            fill: 'tozeroy',
-                            fillcolor: 'rgba(237, 158, 0, 0.5)',
+                        fill: 'tozeroy',
+                        fillcolor: 'rgba(0, 0, 200, 0.5)',
+                    },
+                    {
+                        x: generationData.bins,
+                        y: generationData.delInitialAlleles,
+                        type: 'scatter',
+                        name: 'Deleterious Initial',
+                        line: {
+                            color: 'rgb(237, 158, 0)',
+                            shape: 'hvh',
                         },
-                        {
-                            x: generationData.bins,
-                            y: generationData.favInitialAlleles,
-                            type: 'scatter',
-                            name: 'Favorable Initial',
-                            line: {
-                                color: 'rgb(200, 0, 200)',
-                                shape: 'hvh',
-                            },
-                            fill: 'tozeroy',
-                            fillcolor: 'rgba(200, 0, 200, 0.5)',
+                        fill: 'tozeroy',
+                        fillcolor: 'rgba(237, 158, 0, 0.5)',
+                    },
+                    {
+                        x: generationData.bins,
+                        y: generationData.favInitialAlleles,
+                        type: 'scatter',
+                        name: 'Favorable Initial',
+                        line: {
+                            color: 'rgb(200, 0, 200)',
+                            shape: 'hvh',
                         },
-                    ];
-                    var layout = {
+                        fill: 'tozeroy',
+                        fillcolor: 'rgba(200, 0, 200, 0.5)',
+                    },
+                ];
+                var layout = {
+                    title: 'SNP Frequencies',
+                    xaxis: {
                         title: 'SNP Frequencies',
-                        xaxis: {
-                            title: 'SNP Frequencies',
-                        },
-                        yaxis: {
-                            title: 'Number of Alleles',
-                            range: [0, maxY],
-                        },
-                    };
-                    Plotly.newPlot(assertNotNull(_this.plotElement.current), data, layout);
-                    _this.setState({
-                        data: responseJson,
-                        currentIndex: responseJson.length - 1,
-                    });
+                    },
+                    yaxis: {
+                        title: 'Number of Alleles',
+                        range: [0, maxY],
+                    },
+                };
+                Plotly.newPlot(assertNotNull(_this.plotElement.current), data, layout);
+                _this.setState({
+                    data: response,
+                    currentIndex: response.length - 1,
                 });
             });
             window.addEventListener('resize', this.resizePlot);
         };
-        SnpFrequencies.prototype.componentWillUnmount = function () {
+        Component.prototype.componentWillUnmount = function () {
             Plotly.purge(assertNotNull(this.plotElement.current));
             window.removeEventListener('resize', this.resizePlot);
             this.fetchController.abort();
         };
-        SnpFrequencies.prototype.render = function () {
+        Component.prototype.render = function () {
             return React.createElement('div', { className: 'plots-view' }, React.createElement(Sidebar, { jobId: this.props.jobId, activeSlug: 'snp-frequencies' }), React.createElement('div', { className: 'plots-view__non-sidebar plots-view--has-slider' }, React.createElement('div', { className: 'plots-view__plot', ref: this.plotElement }), React.createElement('div', { className: 'plots-view__slider' }, React.createElement('div', { className: 'plots-view__slider-label' }, 'Generation:'), React.createElement('div', { className: 'plots-view__slider-number' }, this.state.data.length === 0 ? '' : this.state.data[this.state.currentIndex].generation), React.createElement('input', {
                 className: 'plots-view__slider-input',
                 type: 'range',
@@ -2123,8 +1974,9 @@
                 onChange: this.sliderInputChange,
             }))));
         };
-        return SnpFrequencies;
+        return Component;
     }(React.Component));
+    var SnpFrequencies = ReactRedux.connect()(Component$e);
 
     var __extends$k = (undefined && undefined.__extends) || (function () {
         var extendStatics = function (d, b) {
@@ -2139,9 +1991,9 @@
             d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
         };
     })();
-    var MinorAlleleFrequencies = (function (_super) {
-        __extends$k(MinorAlleleFrequencies, _super);
-        function MinorAlleleFrequencies(props) {
+    var Component$f = (function (_super) {
+        __extends$k(Component, _super);
+        function Component(props) {
             var _this = _super.call(this, props) || this;
             _this.resizePlot = _this.resizePlot.bind(_this);
             _this.sliderInputChange = _this.sliderInputChange.bind(_this);
@@ -2153,10 +2005,10 @@
             };
             return _this;
         }
-        MinorAlleleFrequencies.prototype.resizePlot = function () {
+        Component.prototype.resizePlot = function () {
             Plotly.Plots.resize(assertNotNull(this.plotElement.current));
         };
-        MinorAlleleFrequencies.prototype.sliderInputChange = function (e) {
+        Component.prototype.sliderInputChange = function (e) {
             var newIndex = parseInt(e.target.value);
             if (newIndex < this.state.data.length) {
                 Plotly.restyle(assertNotNull(this.plotElement.current), {
@@ -2173,102 +2025,97 @@
                 currentIndex: newIndex,
             });
         };
-        MinorAlleleFrequencies.prototype.componentDidMount = function () {
+        Component.prototype.componentDidMount = function () {
             var _this = this;
             this.fetchController = new AbortController();
-            fetch('/api/plot-minor-allele-frequencies/?jobId=' + encodeURIComponent(this.props.jobId), {
-                credentials: 'same-origin',
-                signal: this.fetchController.signal,
-            }).then(function (response) {
-                response.json().then(function (responseJson) {
-                    var generationData = responseJson[responseJson.length - 1];
-                    var data = [
-                        {
-                            x: generationData.bins,
-                            y: generationData.deleterious,
-                            type: 'scatter',
-                            name: 'Deleterious',
-                            line: {
-                                color: 'rgb(200, 0, 0)',
-                                shape: 'hvh',
-                            },
-                            fill: 'tozeroy',
-                            fillcolor: 'rgba(200, 0, 0, 0.5)',
+            apiGet('/api/plot-minor-allele-frequencies/', { jobId: this.props.jobId }, this.props.dispatch).then(function (response) {
+                var generationData = response[response.length - 1];
+                var data = [
+                    {
+                        x: generationData.bins,
+                        y: generationData.deleterious,
+                        type: 'scatter',
+                        name: 'Deleterious',
+                        line: {
+                            color: 'rgb(200, 0, 0)',
+                            shape: 'hvh',
                         },
-                        {
-                            x: generationData.bins,
-                            y: generationData.favorable,
-                            type: 'scatter',
-                            name: 'Favorable',
-                            line: {
-                                color: 'rgb(0, 200, 0)',
-                                shape: 'hvh',
-                            },
-                            fill: 'tozeroy',
-                            fillcolor: 'rgba(0, 200, 0, 0.5)',
+                        fill: 'tozeroy',
+                        fillcolor: 'rgba(200, 0, 0, 0.5)',
+                    },
+                    {
+                        x: generationData.bins,
+                        y: generationData.favorable,
+                        type: 'scatter',
+                        name: 'Favorable',
+                        line: {
+                            color: 'rgb(0, 200, 0)',
+                            shape: 'hvh',
                         },
-                        {
-                            x: generationData.bins,
-                            y: generationData.neutral,
-                            type: 'scatter',
-                            name: 'Neutral',
-                            line: {
-                                color: 'rgb(0, 0, 200)',
-                                shape: 'hvh',
-                            },
-                            fill: 'tozeroy',
-                            fillcolor: 'rgba(0, 0, 200, 0.5)',
+                        fill: 'tozeroy',
+                        fillcolor: 'rgba(0, 200, 0, 0.5)',
+                    },
+                    {
+                        x: generationData.bins,
+                        y: generationData.neutral,
+                        type: 'scatter',
+                        name: 'Neutral',
+                        line: {
+                            color: 'rgb(0, 0, 200)',
+                            shape: 'hvh',
                         },
-                        {
-                            x: generationData.bins,
-                            y: generationData.delInitialAlleles,
-                            type: 'scatter',
-                            name: 'Deleterious Initial',
-                            line: {
-                                color: 'rgb(237, 158, 0)',
-                                shape: 'hvh',
-                            },
-                            fill: 'tozeroy',
-                            fillcolor: 'rgba(237, 158, 0, 0.5)',
+                        fill: 'tozeroy',
+                        fillcolor: 'rgba(0, 0, 200, 0.5)',
+                    },
+                    {
+                        x: generationData.bins,
+                        y: generationData.delInitialAlleles,
+                        type: 'scatter',
+                        name: 'Deleterious Initial',
+                        line: {
+                            color: 'rgb(237, 158, 0)',
+                            shape: 'hvh',
                         },
-                        {
-                            x: generationData.bins,
-                            y: generationData.favInitialAlleles,
-                            type: 'scatter',
-                            name: 'Favorable Initial',
-                            line: {
-                                color: 'rgb(200, 0, 200)',
-                                shape: 'hvh',
-                            },
-                            fill: 'tozeroy',
-                            fillcolor: 'rgba(200, 0, 200, 0.5)',
+                        fill: 'tozeroy',
+                        fillcolor: 'rgba(237, 158, 0, 0.5)',
+                    },
+                    {
+                        x: generationData.bins,
+                        y: generationData.favInitialAlleles,
+                        type: 'scatter',
+                        name: 'Favorable Initial',
+                        line: {
+                            color: 'rgb(200, 0, 200)',
+                            shape: 'hvh',
                         },
-                    ];
-                    var layout = {
+                        fill: 'tozeroy',
+                        fillcolor: 'rgba(200, 0, 200, 0.5)',
+                    },
+                ];
+                var layout = {
+                    title: 'SNP Frequencies',
+                    xaxis: {
                         title: 'SNP Frequencies',
-                        xaxis: {
-                            title: 'SNP Frequencies',
-                        },
-                        yaxis: {
-                            title: 'Number of Alleles',
-                            range: [0, 1],
-                        },
-                    };
-                    Plotly.newPlot(assertNotNull(_this.plotElement.current), data, layout);
-                    _this.setState({
-                        data: responseJson,
-                        currentIndex: responseJson.length - 1,
-                    });
+                    },
+                    yaxis: {
+                        title: 'Number of Alleles',
+                        range: [0, 1],
+                    },
+                };
+                Plotly.newPlot(assertNotNull(_this.plotElement.current), data, layout);
+                _this.setState({
+                    data: response,
+                    currentIndex: response.length - 1,
                 });
             });
             window.addEventListener('resize', this.resizePlot);
         };
-        MinorAlleleFrequencies.prototype.componentWillUnmount = function () {
+        Component.prototype.componentWillUnmount = function () {
             Plotly.purge(assertNotNull(this.plotElement.current));
             window.removeEventListener('resize', this.resizePlot);
             this.fetchController.abort();
         };
-        MinorAlleleFrequencies.prototype.render = function () {
+        Component.prototype.render = function () {
             return React.createElement('div', { className: 'plots-view' }, React.createElement(Sidebar, { jobId: this.props.jobId, activeSlug: 'minor-allele-frequencies' }), React.createElement('div', { className: 'plots-view__non-sidebar plots-view--has-slider' }, React.createElement('div', { className: 'plots-view__plot', ref: this.plotElement }), React.createElement('div', { className: 'plots-view__slider' }, React.createElement('div', { className: 'plots-view__slider-label' }, 'Generation:'), React.createElement('div', { className: 'plots-view__slider-number' }, this.state.data.length === 0 ? '' : this.state.data[this.state.currentIndex].generation), React.createElement('input', {
                 className: 'plots-view__slider-input',
                 type: 'range',
@@ -2277,8 +2124,9 @@
                 onChange: this.sliderInputChange,
             }))));
         };
-        return MinorAlleleFrequencies;
+        return Component;
     }(React.Component));
+    var MinorAlleleFrequencies = ReactRedux.connect()(Component$f);
 
     function mapStateToProps$3(state) {
         return {
@@ -2340,10 +2188,10 @@
         }
         return null;
     }
-    function Component$a(props) {
+    function Component$g(props) {
         return React.createElement('div', { className: 'page-content' }, getView(props.route));
     }
-    var Content = ReactRedux.connect(mapStateToProps$3)(Component$a);
+    var Content = ReactRedux.connect(mapStateToProps$3)(Component$g);
 
     var __extends$l = (undefined && undefined.__extends) || (function () {
         var extendStatics = function (d, b) {
@@ -2363,32 +2211,66 @@
             route: state.route,
         };
     }
-    function mapDispatchToProps$9(dispatch) {
-        return {
-            fetchCurrentUser: function () {
-                fetchGetSmart('/api/get-current-user/', dispatch).then(function (response) {
-                    dispatch({
-                        type: 'USER',
-                        value: response,
-                    });
-                });
-            },
-        };
-    }
-    var Component$b = (function (_super) {
+    var Component$h = (function (_super) {
         __extends$l(Component, _super);
-        function Component() {
-            return _super !== null && _super.apply(this, arguments) || this;
+        function Component(props) {
+            var _this = _super.call(this, props) || this;
+            _this.state = {
+                loaded: false,
+            };
+            return _this;
         }
         Component.prototype.componentDidMount = function () {
-            this.props.fetchCurrentUser();
+            var _this = this;
+            apiGet('/api/get-current-user/', {}, this.props.dispatch).then(function (user) {
+                _this.props.dispatch({
+                    type: 'USER',
+                    value: user,
+                });
+                _this.setState({
+                    loaded: true,
+                });
+            });
         };
         Component.prototype.render = function () {
-            return React.createElement('div', null, (this.props.route == '/login/' ? null : React.createElement('div', { className: 'page-header__spacer' })), (this.props.route == '/login/' ? null : React.createElement(Header, null)), React.createElement(Content, null));
+            return React.createElement('div', { className: 'non-login' + (!this.state.loaded ? ' non-login--loading' : '') }, (this.state.loaded ?
+                React.createElement(React.Fragment, null, React.createElement('div', { className: 'page-header__spacer' }), React.createElement(Header, null), React.createElement(Content, null)) : null));
         };
         return Component;
     }(React.Component));
-    var Root = ReactRedux.connect(mapStateToProps$4, mapDispatchToProps$9)(Component$b);
+    var NonLogin = ReactRedux.connect(mapStateToProps$4)(Component$h);
+
+    var __extends$m = (undefined && undefined.__extends) || (function () {
+        var extendStatics = function (d, b) {
+            extendStatics = Object.setPrototypeOf ||
+                ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+                function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+            return extendStatics(d, b);
+        };
+        return function (d, b) {
+            extendStatics(d, b);
+            function __() { this.constructor = d; }
+            d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+        };
+    })();
+    function mapStateToProps$5(state) {
+        return {
+            route: state.route,
+        };
+    }
+    var Component$i = (function (_super) {
+        __extends$m(Component, _super);
+        function Component() {
+            return _super !== null && _super.apply(this, arguments) || this;
+        }
+        Component.prototype.render = function () {
+            return React.createElement('div', null, (this.props.route === '/login/' ?
+                React.createElement(Login, null) :
+                React.createElement(NonLogin, null)));
+        };
+        return Component;
+    }(React.Component));
+    var Root = ReactRedux.connect(mapStateToProps$5)(Component$i);
 
     function init() {
         var store = Redux.createStore(reducer);

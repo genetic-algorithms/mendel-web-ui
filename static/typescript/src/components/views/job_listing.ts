@@ -3,6 +3,8 @@ import * as Redux from 'redux';
 import * as ReactRedux from 'react-redux';
 import moment from 'moment';
 import { ReduxAction } from '../../redux_action_types';
+import { apiGet } from '../../api';
+import { setRoute } from '../../util';
 
 type Job = {
     id: string;
@@ -12,34 +14,13 @@ type Job = {
 };
 
 type Props = {
-    onShowLogin: () => void;
-    onClick: (jobId: string) => void;
+    dispatch: Redux.Dispatch<ReduxAction>;
 };
 
 type State = {
     jobs: Job[],
     all: boolean,
 };
-
-function mapDispatchToProps(dispatch: Redux.Dispatch<ReduxAction>) {
-    return {
-        onShowLogin: () => {
-            dispatch({
-                type: 'ROUTE',
-                value: '/login/',
-            });
-            history.pushState(null, '', '/login/');
-        },
-        onClick: (jobId: string) => {
-            const url = '/job-detail/' + jobId + '/';
-            dispatch({
-                type: 'ROUTE',
-                value: url,
-            });
-            history.pushState(null, '', url);
-        },
-    };
-}
 
 class Component extends React.Component<Props, State> {
     fetchController: AbortController;
@@ -54,6 +35,10 @@ class Component extends React.Component<Props, State> {
             jobs: [],
             all: false,
         };
+    }
+
+    onClick(jobId: string) {
+        setRoute(this.props.dispatch, '/job-detail/' + jobId + '/');
     }
 
     onFilterChanged(e: React.ChangeEvent<HTMLSelectElement>) {
@@ -71,19 +56,14 @@ class Component extends React.Component<Props, State> {
         this.fetchController.abort();
         this.fetchController = new AbortController();
 
-        fetch('/api/job-list/?filter=' + (all ? 'all' : 'mine'), {
-            credentials: 'same-origin',
-            signal: this.fetchController.signal,
-        }).then(response => {
-            if (response.status === 401) {
-                this.props.onShowLogin();
-                return;
-            }
-
-            response.json().then(responseJson => {
-                this.setState({
-                    jobs: responseJson.jobs,
-                });
+        apiGet(
+            '/api/job-list/',
+            { filter: all ? 'all' : 'mine' },
+            this.props.dispatch,
+            this.fetchController.signal,
+        ).then(response => {
+            this.setState({
+                jobs: response.jobs,
             });
         });
     }
@@ -120,7 +100,7 @@ class Component extends React.Component<Props, State> {
                         {
                             className: 'job-listing-view__job',
                             key: job.id,
-                            onClick: () => this.props.onClick(job.id),
+                            onClick: () => this.onClick(job.id),
                         },
                         React.createElement('div', { className: 'job-listing-view__job__title' }, job.title),
                         React.createElement('div', { className: 'job-listing-view__job__time' }, moment(job.time).fromNow()),
@@ -138,4 +118,4 @@ function capitalizeFirstLetter(s: string) {
     return s[0].toUpperCase() + s.substring(1);
 }
 
-export const JobListing = ReactRedux.connect(null, mapDispatchToProps)(Component);
+export const JobListing = ReactRedux.connect()(Component);

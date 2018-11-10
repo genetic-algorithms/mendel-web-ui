@@ -12,6 +12,7 @@ func apiGetCurrentUserHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	writeJsonResponse(w, map[string]interface{}{
+		"id": user.Id,
 		"username": user.Username,
 		"is_admin": user.IsAdmin,
 	})

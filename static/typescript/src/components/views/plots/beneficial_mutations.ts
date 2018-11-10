@@ -1,7 +1,11 @@
+import * as ReactRedux from 'react-redux';
+import * as Redux from 'redux';
 import { assertNotNull } from '../../../util';
 import { Sidebar } from './sidebar';
 import * as Plotly from 'plotly.js';
 import * as React from 'react';
+import { ReduxAction } from '../../../redux_action_types';
+import { apiGet } from '../../../api';
 
 type ApiData = {
     generation: number[];
@@ -12,6 +16,7 @@ type ApiData = {
 
 type Props = {
     jobId: string;
+    dispatch: Redux.Dispatch<ReduxAction>;
 };
 
 type State = {
@@ -19,7 +24,7 @@ type State = {
     currentIndex: number;
 };
 
-export class BeneficialMutations extends React.Component<Props, State> {
+class Component extends React.Component<Props, State> {
     fetchController: AbortController;
     plotElement: React.RefObject<HTMLElement>;
 
@@ -59,74 +64,69 @@ export class BeneficialMutations extends React.Component<Props, State> {
     componentDidMount() {
         this.fetchController = new AbortController();
 
-        fetch('/api/plot-beneficial-mutations/?jobId=' + encodeURIComponent(this.props.jobId), {
-            credentials: 'same-origin',
-            signal: this.fetchController.signal,
-        }).then(response => {
-            response.json().then((responseJson: ApiData) => {
-                let maxY = 0;
-                for (let generation of responseJson) {
-                    for (let n of generation.dominant) {
-                        if (n > maxY) {
-                            maxY = n;
-                        }
-                    }
-
-                    for (let n of generation.recessive) {
-                        if (n > maxY) {
-                            maxY = n;
-                        }
+        apiGet('/api/plot-beneficial-mutations/', { jobId: this.props.jobId }, this.props.dispatch).then(response => {
+            let maxY = 0;
+            for (let generation of response) {
+                for (let n of generation.dominant) {
+                    if (n > maxY) {
+                        maxY = n;
                     }
                 }
 
-                const generationData = responseJson[responseJson.length - 1];
+                for (let n of generation.recessive) {
+                    if (n > maxY) {
+                        maxY = n;
+                    }
+                }
+            }
 
-                const data: Plotly.Data[] = [
-                    {
-                        x: generationData.binmidpointfitness,
-                        y: generationData.dominant,
-                        type: 'scatter',
-                        name: 'Dominant',
-                        line: {
-                            color: 'rgb(0, 200, 0)',
-                            shape: 'hvh',
-                        },
-                        fill: 'tozeroy',
-                        fillcolor: 'rgba(0, 200, 0, 0.5)',
-                    },
-                    {
-                        x: generationData.binmidpointfitness,
-                        y: generationData.recessive,
-                        type: 'scatter',
-                        name: 'Recessive',
-                        line: {
-                            color: 'rgb(200, 0, 0)',
-                            shape: 'hvh',
-                        },
-                        fill: 'tozeroy',
-                        fillcolor: 'rgba(200, 0, 0, 0.5)',
-                    },
-                ];
+            const generationData = response[response.length - 1];
 
-                const layout: Partial<Plotly.Layout> = {
-                    title: 'Distribution of accumulated mutations (beneficial)',
-                    xaxis: {
-                        title: 'Mutational Fitness Enhancement',
-                        type: 'log',
-                        exponentformat: 'e',
+            const data: Plotly.Data[] = [
+                {
+                    x: generationData.binmidpointfitness,
+                    y: generationData.dominant,
+                    type: 'scatter',
+                    name: 'Dominant',
+                    line: {
+                        color: 'rgb(0, 200, 0)',
+                        shape: 'hvh',
                     },
-                    yaxis: {
-                        title: 'Fraction of Mutations Retained in Genome',
-                        range: [0, maxY],
+                    fill: 'tozeroy',
+                    fillcolor: 'rgba(0, 200, 0, 0.5)',
+                },
+                {
+                    x: generationData.binmidpointfitness,
+                    y: generationData.recessive,
+                    type: 'scatter',
+                    name: 'Recessive',
+                    line: {
+                        color: 'rgb(200, 0, 0)',
+                        shape: 'hvh',
                     },
-                };
+                    fill: 'tozeroy',
+                    fillcolor: 'rgba(200, 0, 0, 0.5)',
+                },
+            ];
 
-                Plotly.newPlot(assertNotNull(this.plotElement.current), data, layout);
+            const layout: Partial<Plotly.Layout> = {
+                title: 'Distribution of accumulated mutations (beneficial)',
+                xaxis: {
+                    title: 'Mutational Fitness Enhancement',
+                    type: 'log',
+                    exponentformat: 'e',
+                },
+                yaxis: {
+                    title: 'Fraction of Mutations Retained in Genome',
+                    range: [0, maxY],
+                },
+            };
 
-                this.setState({
-                    data: responseJson,
-                    currentIndex: responseJson.length - 1,
-                });
+            Plotly.newPlot(assertNotNull(this.plotElement.current), data, layout);
+
+            this.setState({
+                data: response,
+                currentIndex: response.length - 1,
             });
         });
 
@@ -161,3 +161,5 @@ export class BeneficialMutations extends React.Component<Props, State> {
         );
     }
 }
+
+export const BeneficialMutations = ReactRedux.connect()(Component);

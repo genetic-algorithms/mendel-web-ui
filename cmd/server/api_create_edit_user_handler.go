@@ -15,7 +15,7 @@ func apiCreateEditUserHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	user := getAuthenticatedUser(r)
-	if user.Id == "" || !user.IsAdmin {
+	if user.Id == "" {
 		http.Error(w, "401 Unauthorized", http.StatusUnauthorized)
 		return
 	}
@@ -45,7 +45,7 @@ func apiCreateEditUserHandler(w http.ResponseWriter, r *http.Request) {
 
 	if usernameExists {
 		writeJsonResponse(w, map[string]string{
-			"error": "username_exists",
+			"status": "username_exists",
 		})
 		return
 	}
@@ -63,6 +63,11 @@ func apiCreateEditUserHandler(w http.ResponseWriter, r *http.Request) {
 	if postUser.Id == "" {
 		// Create user
 
+		if !user.IsAdmin {
+			http.Error(w, "401 Unauthorized", http.StatusUnauthorized)
+			return
+		}
+
 		userId, err := generateUuid()
 		if err != nil {
 			http.Error(w, "500 Internal Server Error (could not generate userId)", http.StatusInternalServerError)
@@ -77,6 +82,11 @@ func apiCreateEditUserHandler(w http.ResponseWriter, r *http.Request) {
 		}
 	} else {
 		// Edit user
+
+		if !(user.IsAdmin || (user.Id == postUser.Id && user.IsAdmin == postUser.IsAdmin)) {
+			http.Error(w, "401 Unauthorized", http.StatusUnauthorized)
+			return
+		}
 
 		globalDbLock.RLock()
 		var ok bool
@@ -104,5 +114,7 @@ func apiCreateEditUserHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	writeJsonResponse(w, map[string]string{})
+	writeJsonResponse(w, map[string]string{
+		"status": "success",
+	})
 }

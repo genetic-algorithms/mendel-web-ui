@@ -3,15 +3,11 @@ import * as React from 'react';
 import * as Redux from 'redux';
 import * as ReactRedux from 'react-redux';
 import { ReduxAction } from '../../redux_action_types';
-
-type SubmitData = {
-    title: string;
-    config: string;
-};
+import { apiPost } from '../../api';
+import { setRoute } from '../../util';
 
 type Props = {
-    onShowLogin: () => void;
-    onSubmit: (data: SubmitData) => void;
+    dispatch: Redux.Dispatch<ReduxAction>;
 };
 
 type State = {
@@ -28,37 +24,6 @@ type State = {
         files_to_output_allele_bins: boolean;
     },
 };
-
-function mapDispatchToProps(dispatch: Redux.Dispatch<ReduxAction>) {
-    return {
-        onShowLogin: () => {
-            dispatch({
-                type: 'ROUTE',
-                value: '/login/',
-            });
-            history.pushState(null, '', '/login/');
-        },
-        onSubmit: (data: SubmitData) => {
-            fetch('/api/create-job/', {
-                method: 'POST',
-                body: JSON.stringify(data),
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                credentials: 'same-origin',
-            }).then(response => {
-                response.json().then(responseJson => {
-                    const url = '/job-detail/' + responseJson.job_id + '/';
-                    dispatch({
-                        type: 'ROUTE',
-                        value: url,
-                    });
-                    history.pushState(null, '', url);
-                });
-            });
-        },
-    };
-}
 
 class Component extends React.Component<Props, State> {
     fieldChangeHandlers: {
@@ -110,7 +75,8 @@ class Component extends React.Component<Props, State> {
 
     onSubmit(e: React.FormEvent<HTMLFormElement>) {
         e.preventDefault();
-        this.props.onSubmit({
+
+        const data = {
             title: this.state.fieldValues.title,
             config: [
                 '[basic]',
@@ -133,6 +99,10 @@ class Component extends React.Component<Props, State> {
                     )
                 ),
             ].join('\n'),
+        };
+
+        apiPost('/api/create-job/', data, this.props.dispatch).then(response => {
+            setRoute(this.props.dispatch, '/job-detail/' + response.job_id + '/');
         });
     }
 
@@ -325,4 +295,4 @@ function tomlString(s: string) {
     return '"' + s + '"';
 }
 
-export const NewJob = ReactRedux.connect(null, mapDispatchToProps)(Component);
+export const NewJob = ReactRedux.connect()(Component);

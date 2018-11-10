@@ -1,7 +1,11 @@
+import * as ReactRedux from 'react-redux';
+import * as Redux from 'redux';
 import { assertNotNull } from '../../../util';
 import { Sidebar } from './sidebar';
 import * as Plotly from 'plotly.js';
 import * as React from 'react';
+import { ReduxAction } from '../../../redux_action_types';
+import { apiGet } from '../../../api';
 
 type ApiData = {
     generation: number;
@@ -15,6 +19,7 @@ type ApiData = {
 
 type Props = {
     jobId: string;
+    dispatch: Redux.Dispatch<ReduxAction>;
 };
 
 type State = {
@@ -22,7 +27,7 @@ type State = {
     currentIndex: number;
 };
 
-export class MinorAlleleFrequencies extends React.Component<Props, State> {
+class Component extends React.Component<Props, State> {
     fetchController: AbortController;
     plotElement: React.RefObject<HTMLElement>;
 
@@ -68,93 +73,88 @@ export class MinorAlleleFrequencies extends React.Component<Props, State> {
     componentDidMount() {
         this.fetchController = new AbortController();
 
-        fetch('/api/plot-minor-allele-frequencies/?jobId=' + encodeURIComponent(this.props.jobId), {
-            credentials: 'same-origin',
-            signal: this.fetchController.signal,
-        }).then(response => {
-            response.json().then((responseJson: ApiData) => {
-                const generationData = responseJson[responseJson.length - 1];
+        apiGet('/api/plot-minor-allele-frequencies/', { jobId: this.props.jobId }, this.props.dispatch).then(response => {
+            const generationData = response[response.length - 1];
 
-                const data: Plotly.Data[] = [
-                    {
-                        x: generationData.bins,
-                        y: generationData.deleterious,
-                        type: 'scatter',
-                        name: 'Deleterious',
-                        line: {
-                            color: 'rgb(200, 0, 0)',
-                            shape: 'hvh',
-                        },
-                        fill: 'tozeroy',
-                        fillcolor: 'rgba(200, 0, 0, 0.5)',
+            const data: Plotly.Data[] = [
+                {
+                    x: generationData.bins,
+                    y: generationData.deleterious,
+                    type: 'scatter',
+                    name: 'Deleterious',
+                    line: {
+                        color: 'rgb(200, 0, 0)',
+                        shape: 'hvh',
                     },
-                    {
-                        x: generationData.bins,
-                        y: generationData.favorable,
-                        type: 'scatter',
-                        name: 'Favorable',
-                        line: {
-                            color: 'rgb(0, 200, 0)',
-                            shape: 'hvh',
-                        },
-                        fill: 'tozeroy',
-                        fillcolor: 'rgba(0, 200, 0, 0.5)',
+                    fill: 'tozeroy',
+                    fillcolor: 'rgba(200, 0, 0, 0.5)',
+                },
+                {
+                    x: generationData.bins,
+                    y: generationData.favorable,
+                    type: 'scatter',
+                    name: 'Favorable',
+                    line: {
+                        color: 'rgb(0, 200, 0)',
+                        shape: 'hvh',
                     },
-                    {
-                        x: generationData.bins,
-                        y: generationData.neutral,
-                        type: 'scatter',
-                        name: 'Neutral',
-                        line: {
-                            color: 'rgb(0, 0, 200)',
-                            shape: 'hvh',
-                        },
-                        fill: 'tozeroy',
-                        fillcolor: 'rgba(0, 0, 200, 0.5)',
+                    fill: 'tozeroy',
+                    fillcolor: 'rgba(0, 200, 0, 0.5)',
+                },
+                {
+                    x: generationData.bins,
+                    y: generationData.neutral,
+                    type: 'scatter',
+                    name: 'Neutral',
+                    line: {
+                        color: 'rgb(0, 0, 200)',
+                        shape: 'hvh',
                     },
-                    {
-                        x: generationData.bins,
-                        y: generationData.delInitialAlleles,
-                        type: 'scatter',
-                        name: 'Deleterious Initial',
-                        line: {
-                            color: 'rgb(237, 158, 0)',
-                            shape: 'hvh',
-                        },
-                        fill: 'tozeroy',
-                        fillcolor: 'rgba(237, 158, 0, 0.5)',
+                    fill: 'tozeroy',
+                    fillcolor: 'rgba(0, 0, 200, 0.5)',
+                },
+                {
+                    x: generationData.bins,
+                    y: generationData.delInitialAlleles,
+                    type: 'scatter',
+                    name: 'Deleterious Initial',
+                    line: {
+                        color: 'rgb(237, 158, 0)',
+                        shape: 'hvh',
                     },
-                    {
-                        x: generationData.bins,
-                        y: generationData.favInitialAlleles,
-                        type: 'scatter',
-                        name: 'Favorable Initial',
-                        line: {
-                            color: 'rgb(200, 0, 200)',
-                            shape: 'hvh',
-                        },
-                        fill: 'tozeroy',
-                        fillcolor: 'rgba(200, 0, 200, 0.5)',
+                    fill: 'tozeroy',
+                    fillcolor: 'rgba(237, 158, 0, 0.5)',
+                },
+                {
+                    x: generationData.bins,
+                    y: generationData.favInitialAlleles,
+                    type: 'scatter',
+                    name: 'Favorable Initial',
+                    line: {
+                        color: 'rgb(200, 0, 200)',
+                        shape: 'hvh',
                     },
-                ];
+                    fill: 'tozeroy',
+                    fillcolor: 'rgba(200, 0, 200, 0.5)',
+                },
+            ];
 
-                const layout: Partial<Plotly.Layout> = {
+            const layout: Partial<Plotly.Layout> = {
+                title: 'SNP Frequencies',
+                xaxis: {
                     title: 'SNP Frequencies',
-                    xaxis: {
-                        title: 'SNP Frequencies',
-                    },
-                    yaxis: {
-                        title: 'Number of Alleles',
-                        range: [0, 1],
-                    },
-                };
+                },
+                yaxis: {
+                    title: 'Number of Alleles',
+                    range: [0, 1],
+                },
+            };
 
-                Plotly.newPlot(assertNotNull(this.plotElement.current), data, layout);
+            Plotly.newPlot(assertNotNull(this.plotElement.current), data, layout);
 
-                this.setState({
-                    data: responseJson,
-                    currentIndex: responseJson.length - 1,
-                });
+            this.setState({
+                data: response,
+                currentIndex: response.length - 1,
             });
         });
 
@@ -189,3 +189,5 @@ export class MinorAlleleFrequencies extends React.Component<Props, State> {
         );
     }
 }
+
+export const MinorAlleleFrequencies = ReactRedux.connect()(Component);

@@ -1,4 +1,4 @@
-package: github.com/genetic-algorithms/mendel-web-example
+package: github.com/genetic-algorithms/mendel-web-ui
 import:
 - package: golang.org/x/crypto/bcrypt
 - package: github.com/gorilla/securecookie

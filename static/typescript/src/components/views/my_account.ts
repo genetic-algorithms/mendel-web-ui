@@ -6,10 +6,12 @@ import { ReduxAction } from '../../redux_action_types';
 import { ReduxState } from '../../redux_state_types';
 import { assertNotNull } from '../../util';
 import { User } from '../../user_types';
+import * as snackbar from '../../snackbar';
+import { apiPost } from '../../api';
 
 type Props = {
-    user: User;
-    setRoute: (url: string) => void;
+    user: User | null;
+    dispatch: Redux.Dispatch<ReduxAction>;
 };
 
 type State = {
@@ -17,35 +19,24 @@ type State = {
     password: string;
     confirmPassword: string;
     isAdmin: boolean;
-    submitting: boolean;
     usernameExists: boolean;
 };
 
 function mapStateToProps(state: ReduxState) {
     return {
-        user: assertNotNull(state.user),
-    };
-}
-
-function mapDispatchToProps(dispatch: Redux.Dispatch<ReduxAction>) {
-    return {
-        setRoute: (url: string) => {
-            dispatch({
-                type: 'ROUTE',
-                value: url,
-            });
-            history.pushState(null, '', url);
-        },
+        user: state.user,
     };
 }
 
 class Component extends React.Component<Props, State> {
-    fetchController: AbortController;
+    mounted: boolean;
+    submitting: boolean;
 
     constructor(props: Props) {
         super(props);
 
-        this.fetchController = new AbortController();
+        this.mounted = false;
+        this.submitting = false;
 
         this.onUsernameChange = this.onUsernameChange.bind(this);
         this.onPasswordChange = this.onPasswordChange.bind(this);
@@ -54,11 +45,10 @@ class Component extends React.Component<Props, State> {
         this.onSubmit = this.onSubmit.bind(this);
 
         this.state = {
-            username: '',
+            username: assertNotNull(this.props.user).username,
             password: '',
             confirmPassword: '',
-            isAdmin: false,
-            submitting: false,
+            isAdmin: assertNotNull(this.props.user).is_admin,
             usernameExists: false,
         };
     }
@@ -91,74 +81,56 @@ class Component extends React.Component<Props, State> {
     onSubmit(e: React.FormEvent<HTMLFormElement>) {
         e.preventDefault();
 
-        if (this.state.submitting) return;
+        if (this.submitting) return;
 
         if (this.state.confirmPassword !== this.state.password) return;
 
-        this.setState({
-            submitting: true,
-        });
+        this.submitting = true;
 
-        fetch('/api/create-edit-user/', {
-            method: 'POST',
-            body: JSON.stringify({
-                id: this.props.user.id,
+        apiPost(
+            '/api/create-edit-user/',
+            {
+                id: assertNotNull(this.props.user).id,
                 username: this.state.username,
                 password: this.state.password,
                 is_admin: this.state.isAdmin,
-            }),
-            headers: {
-                'Content-Type': 'application/json'
             },
-            credentials: 'same-origin',
-        }).then(response => {
-            if (response.status === 401) {
-                this.props.setRoute('/login/');
-                return;
-            }
+            this.props.dispatch,
+        ).then(response => {
+            this.submitting = false;
 
-            response.json().then(responseJson => {
-                if (responseJson.error === 'username_exists') {
-                    this.setState({
-                        usernameExists: true,
-                        submitting: false,
-                    });
-                } else {
-                    this.props.setRoute('/user-listing/');
-                }
-            });
+            if (!this.mounted) return;
+
+            if (response.status === 'username_exists') {
+                this.setState({
+                    usernameExists: true,
+                });
+            } else {
+                this.props.dispatch({
+                    type: 'USER',
+                    value: {
+                        id: assertNotNull(this.props.user).id,
+                        username: this.state.username,
+                        is_admin: this.state.isAdmin,
+                    },
+                });
+
+                snackbar.show('Saved');
+            }
         });
     }
 
     componentDidMount() {
-        this.fetchController.abort();
-        this.fetchController = new AbortController();
-
-        fetch('/api/get-user/?userId=' + encodeURIComponent(this.props.user.id), {
-            credentials: 'same-origin',
-            signal: this.fetchController.signal,
-        }).then(response => {
-            if (response.status === 401) {
-                this.props.setRoute('/login/');
-                return;
-            }
-
-            response.json().then(responseJson => {
-                this.setState({
-                    username: responseJson.username,
-                    isAdmin: responseJson.is_admin,
-                });
-            });
-        });
+        this.mounted = true;
     }
 
     componentWillUnmount() {
-        this.fetchController.abort();
+        this.mounted = false;
     }
 
     render() {
         return React.createElement('div', { className: 'create-edit-user-view' },
-            React.createElement('div', { className: 'create-edit-user-view__title' }, 'Edit User'),
+            React.createElement('div', { className: 'create-edit-user-view__title' }, 'My Account'),
             React.createElement('form', { className: 'create-edit-user-view__form', onSubmit: this.onSubmit },
                 React.createElement('label', null, 'Username'),
                 React.createElement('input', {
@@ -190,22 +162,24 @@ class Component extends React.Component<Props, State> {
                     null
                 ),
 
-                React.createElement('div', { className: 'create-edit-user-view__checkbox-wrapper' },
-                    React.createElement(Checkbox, {
-                        checked: this.state.isAdmin,
-                        onChange: this.onIsAdminChange,
-                    }),
-                    React.createElement('label', { onClick: this.onIsAdminChange }, 'Admin'),
+                (assertNotNull(this.props.user).is_admin ?
+                    React.createElement('div', { className: 'create-edit-user-view__checkbox-wrapper' },
+                        React.createElement(Checkbox, {
+                            checked: this.state.isAdmin,
+                            onChange: this.onIsAdminChange,
+                        }),
+                        React.createElement('label', { onClick: this.onIsAdminChange }, 'Admin'),
+                    ) : null
                 ),
 
                 React.createElement('input', {
                     className: 'button',
                     type: 'submit',
-                    value: this.state.submitting ? 'Processing…' : 'Save',
+                    value: 'Save',
                 }),
             ),
         );
     }
 }
 
-export const MyAccount = ReactRedux.connect(mapStateToProps, mapDispatchToProps)(Component);
+export const MyAccount = ReactRedux.connect(mapStateToProps, null)(Component);

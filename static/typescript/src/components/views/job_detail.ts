@@ -2,41 +2,21 @@ import * as React from 'react';
 import * as Redux from 'redux';
 import * as ReactRedux from 'react-redux';
 import { ReduxAction } from '../../redux_action_types';
+import { apiGet } from '../../api';
+import { setRoute } from '../../util';
 
 type OwnProps = {
     jobId: string;
 };
 
 type Props = OwnProps & {
-    onShowLogin: () => void;
-    onPlotsClick: () => void;
+    dispatch: Redux.Dispatch<ReduxAction>;
 };
 
 type State = {
     output: string,
     done: boolean,
 };
-
-function mapDispatchToProps(dispatch: Redux.Dispatch<ReduxAction>, ownProps: OwnProps) {
-    return {
-        onShowLogin: () => {
-            dispatch({
-                type: 'ROUTE',
-                value: '/login/',
-            });
-            history.pushState(null, '', '/login/');
-        },
-        onPlotsClick: () => {
-            const url = '/plots/' + ownProps.jobId + '/average-mutations/';
-
-            dispatch({
-                type: 'ROUTE',
-                value: url,
-            });
-            history.pushState(null, '', url);
-        },
-    };
-}
 
 class Component extends React.Component<Props, State> {
     fetchController: AbortController;
@@ -55,6 +35,12 @@ class Component extends React.Component<Props, State> {
             output: '',
             done: false,
         };
+
+        this.onPlotsClick = this.onPlotsClick.bind(this);
+    }
+
+    onPlotsClick() {
+        setRoute(this.props.dispatch, '/plots/' + this.props.jobId + '/average-mutations/');
     }
 
     componentDidMount() {
@@ -69,27 +55,22 @@ class Component extends React.Component<Props, State> {
     fetchOutput() {
         this.fetchController = new AbortController();
 
-        fetch('/api/job-output/?jobId=' + encodeURIComponent(this.props.jobId) + '&offset=' + encodeURIComponent(this.outputOffset.toString()), {
-            credentials: 'same-origin',
-            signal: this.fetchController.signal,
-        }).then(response => {
-            if (response.status === 401) {
-                this.props.onShowLogin();
-                return;
+        apiGet(
+            '/api/job-output/',
+            { jobId: this.props.jobId, offset: this.outputOffset.toString() },
+            this.props.dispatch,
+            this.fetchController.signal,
+        ).then(response => {
+            this.outputOffset += response.output.length;
+
+            this.setState((prevState, props) => ({
+                output: prevState.output + response.output,
+                done: response.done,
+            }));
+
+            if (!response.done) {
+                this.fetchTimeout = setTimeout(this.fetchOutput, 1000);
             }
-
-            response.json().then(responseJson => {
-                this.outputOffset += responseJson.output.length;
-
-                this.setState((prevState, props) => ({
-                    output: prevState.output + responseJson.output,
-                    done: responseJson.done,
-                }));
-
-                if (!responseJson.done) {
-                    this.fetchTimeout = setTimeout(this.fetchOutput, 1000);
-                }
-            });
         });
     }
 
@@ -108,7 +89,7 @@ class Component extends React.Component<Props, State> {
                     React.createElement('div',
                         {
                             className: 'job-detail-view__plots-button button',
-                            onClick: this.props.onPlotsClick,
+                            onClick: this.onPlotsClick,
                         },
                         'Plots',
                     ) :
@@ -119,4 +100,4 @@ class Component extends React.Component<Props, State> {
     }
 }
 
-export const JobDetail = ReactRedux.connect(null, mapDispatchToProps)(Component);
+export const JobDetail = ReactRedux.connect()(Component);

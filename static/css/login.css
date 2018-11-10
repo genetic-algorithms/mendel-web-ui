@@ -34,7 +34,41 @@
 
 .login-view__submit {
     margin-top: 40px;
+    position: relative;
 }
+
+.login-view__submit.login-view--submitting .login-view__submit-text {
+    opacity: 0;
+}
+
+.login-view__submit.login-view--submitting::before {
+    content: "";
+    display: block;
+    border: 2px solid #FFF;
+    border-bottom-color: transparent;
+    border-left-color: transparent;
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    margin: auto;
+    width: 17px;
+    height: 17px;
+    border-radius: 100px;
+    animation: login-view__spin 0.9s linear infinite;
+}
+
+@keyframes login-view__spin {
+    from {
+        transform: rotate(0);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+}
+
 
 .login-view__form-error {
     color: #F00;
