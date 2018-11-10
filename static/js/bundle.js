@@ -984,6 +984,11 @@
             d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
         };
     })();
+    function mapStateToProps$2(state) {
+        return {
+            sessionUserId: assertNotNull(state.user).id,
+        };
+    }
     var Component$6 = (function (_super) {
         __extends$b(Component, _super);
         function Component(props) {
@@ -1048,6 +1053,16 @@
                     });
                 }
                 else {
+                    if (_this.props.userId === _this.props.sessionUserId) {
+                        _this.props.dispatch({
+                            type: 'USER',
+                            value: {
+                                id: _this.props.userId,
+                                username: _this.state.username,
+                                is_admin: _this.state.isAdmin,
+                            },
+                        });
+                    }
                     setRoute(_this.props.dispatch, '/user-listing/');
                 }
             });
@@ -1087,15 +1102,11 @@
                 null), React.createElement('div', { className: 'create-edit-user-view__checkbox-wrapper' }, React.createElement(Checkbox, {
                 checked: this.state.isAdmin,
                 onChange: this.onIsAdminChange,
-            }), React.createElement('label', { onClick: this.onIsAdminChange }, 'Admin')), React.createElement('input', {
-                className: 'button',
-                type: 'submit',
-                value: this.state.submitting ? 'Processing…' : 'Save',
-            })));
+            }), React.createElement('label', { onClick: this.onIsAdminChange }, 'Admin')), React.createElement('input', { className: 'button', type: 'submit', value: 'Save' })));
         };
         return Component;
     }(React.Component));
-    var EditUser = ReactRedux.connect()(Component$6);
+    var EditUser = ReactRedux.connect(mapStateToProps$2)(Component$6);
 
     var rootElement$1 = null;
     var timeout = 0;
@@ -1127,7 +1138,7 @@
             d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
         };
     })();
-    function mapStateToProps$2(state) {
+    function mapStateToProps$3(state) {
         return {
             user: state.user,
         };
@@ -1244,7 +1255,7 @@
         };
         return Component;
     }(React.Component));
-    var MyAccount = ReactRedux.connect(mapStateToProps$2, null)(Component$7);
+    var MyAccount = ReactRedux.connect(mapStateToProps$3, null)(Component$7);
 
     var __extends$d = (undefined && undefined.__extends) || (function () {
         var extendStatics = function (d, b) {
@@ -2128,7 +2139,7 @@
     }(React.Component));
     var MinorAlleleFrequencies = ReactRedux.connect()(Component$f);
 
-    function mapStateToProps$3(state) {
+    function mapStateToProps$4(state) {
         return {
             route: state.route,
         };
@@ -2191,7 +2202,7 @@
     function Component$g(props) {
         return React.createElement('div', { className: 'page-content' }, getView(props.route));
     }
-    var Content = ReactRedux.connect(mapStateToProps$3)(Component$g);
+    var Content = ReactRedux.connect(mapStateToProps$4)(Component$g);
 
     var __extends$l = (undefined && undefined.__extends) || (function () {
         var extendStatics = function (d, b) {
@@ -2206,7 +2217,7 @@
             d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
         };
     })();
-    function mapStateToProps$4(state) {
+    function mapStateToProps$5(state) {
         return {
             route: state.route,
         };
@@ -2238,7 +2249,7 @@
         };
         return Component;
     }(React.Component));
-    var NonLogin = ReactRedux.connect(mapStateToProps$4)(Component$h);
+    var NonLogin = ReactRedux.connect(mapStateToProps$5)(Component$h);
 
     var __extends$m = (undefined && undefined.__extends) || (function () {
         var extendStatics = function (d, b) {
@@ -2253,7 +2264,7 @@
             d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
         };
     })();
-    function mapStateToProps$5(state) {
+    function mapStateToProps$6(state) {
         return {
             route: state.route,
         };
@@ -2270,7 +2281,7 @@
         };
         return Component;
     }(React.Component));
-    var Root = ReactRedux.connect(mapStateToProps$5)(Component$i);
+    var Root = ReactRedux.connect(mapStateToProps$6)(Component$i);
 
     function init() {
         var store = Redux.createStore(reducer);

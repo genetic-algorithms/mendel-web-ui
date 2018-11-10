@@ -3,11 +3,13 @@ import * as React from 'react';
 import * as Redux from 'redux';
 import * as ReactRedux from 'react-redux';
 import { ReduxAction } from '../../redux_action_types';
-import { setRoute } from '../../util';
+import { setRoute, assertNotNull } from '../../util';
 import { apiPost, apiGet } from '../../api';
+import { ReduxState } from '../../redux_state_types';
 
 type Props = {
     userId: string;
+    sessionUserId: string;
     dispatch: Redux.Dispatch<ReduxAction>;
 };
 
@@ -19,6 +21,12 @@ type State = {
     submitting: boolean;
     usernameExists: boolean;
 };
+
+function mapStateToProps(state: ReduxState) {
+    return {
+        sessionUserId: assertNotNull(state.user).id,
+    };
+}
 
 class Component extends React.Component<Props, State> {
     fetchController: AbortController;
@@ -95,6 +103,17 @@ class Component extends React.Component<Props, State> {
                     submitting: false,
                 });
             } else {
+                if (this.props.userId === this.props.sessionUserId) {
+                    this.props.dispatch({
+                        type: 'USER',
+                        value: {
+                            id: this.props.userId,
+                            username: this.state.username,
+                            is_admin: this.state.isAdmin,
+                        },
+                    });
+                }
+
                 setRoute(this.props.dispatch, '/user-listing/');
             }
         });
@@ -163,14 +182,10 @@ class Component extends React.Component<Props, State> {
                     React.createElement('label', { onClick: this.onIsAdminChange }, 'Admin'),
                 ),
 
-                React.createElement('input', {
-                    className: 'button',
-                    type: 'submit',
-                    value: this.state.submitting ? 'Processing…' : 'Save',
-                }),
+                React.createElement('input', { className: 'button', type: 'submit', value: 'Save' }),
             ),
         );
     }
 }
 
-export const EditUser = ReactRedux.connect()(Component);
+export const EditUser = ReactRedux.connect(mapStateToProps)(Component);
