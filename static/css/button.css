@@ -15,3 +15,8 @@
 .button:focus {
     outline: none;
 }
+
+.button--text {
+    background-color: transparent;
+    color: #1AB41E;
+}

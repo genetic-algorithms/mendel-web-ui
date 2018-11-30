@@ -102,10 +102,6 @@
     fill: #00B600;
 }
 
-.new-job-view__form input[type=submit] {
-    margin-top: 30px;
-}
-
 .new-job-view__help {
     position: absolute;
     right: 0;
@@ -166,4 +162,13 @@
     height: 6px;
     background-color: #00B600;
     border-radius: 50%;
+}
+
+.new-job-view__actions {
+    display: flex;
+    margin-top: 50px;
+}
+
+.new-job-view__action:not(:first-child) {
+    margin-left: 20px;
 }

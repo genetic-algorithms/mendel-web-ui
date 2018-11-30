@@ -575,6 +575,8 @@
                 files_to_output_allele_bins: function (checked) { return _this.checkboxFieldChanged('files_to_output_allele_bins', checked); },
             };
             _this.onSubmit = _this.onSubmit.bind(_this);
+            _this.onImportClick = _this.onImportClick.bind(_this);
+            _this.onExportClick = _this.onExportClick.bind(_this);
             _this.state = {
                 defaultValues: {
                     title: '',
@@ -603,24 +605,29 @@
             };
             return _this;
         }
+        Component.prototype.onImportClick = function () {
+            var _this = this;
+            chooseFileContents(function (contents) {
+                var config = toml.parse(contents);
+                var values = configToState(config);
+                _this.setState({
+                    fieldValues: values,
+                });
+            });
+        };
+        Component.prototype.onExportClick = function () {
+            var output = stateToConfig(this.state.fieldValues);
+            var a = document.createElement('a');
+            a.setAttribute('download', 'export.toml');
+            a.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(output));
+            a.click();
+        };
         Component.prototype.onSubmit = function (e) {
             var _this = this;
             e.preventDefault();
             var data = {
                 title: this.state.fieldValues.title,
-                config: [
-                    '[basic]',
-                    'pop_size = ' + tomlInt(this.state.fieldValues.pop_size),
-                    'num_generations = ' + tomlInt(this.state.fieldValues.num_generations),
-                    '[mutations]',
-                    'mutn_rate = ' + tomlFloat(this.state.fieldValues.mutn_rate),
-                    'fitness_effect_model = ' + tomlString(this.state.fieldValues.fitness_effect_model),
-                    'uniform_fitness_effect_del = ' + tomlFloat(this.state.fieldValues.uniform_fitness_effect_del),
-                    'uniform_fitness_effect_fav = ' + tomlFloat(this.state.fieldValues.uniform_fitness_effect_fav),
-                    '[computation]',
-                    'plot_allele_gens = 1',
-                    'files_to_output = ' + tomlString(filesToOutputString(this.state.fieldValues.files_to_output_fit, this.state.fieldValues.files_to_output_hst, this.state.fieldValues.files_to_output_allele_bins)),
-                ].join('\n'),
+                config: stateToConfig(this.state.fieldValues),
             };
             apiPost('/api/create-job/', data, this.props.dispatch).then(function (response) {
                 setRoute(_this.props.dispatch, '/job-detail/' + response.job_id + '/');
@@ -773,10 +780,39 @@
                 null), React.createElement(Help, {
                 title: 'files_to_output',
                 content: 'This contains data needed for the "SNP Frequencies", "Minor Allele Frequencies", and allele distribution plots.',
-            })), React.createElement('input', { className: 'button', type: 'submit', value: 'Submit' })));
+            })), React.createElement('div', { className: 'new-job-view__actions' }, React.createElement('input', { className: 'new-job-view__action button', type: 'submit', value: 'Start' }), React.createElement('div', { className: 'new-job-view__action button button--text', onClick: this.onImportClick }, 'Import'), React.createElement('div', { className: 'new-job-view__action button button--text', onClick: this.onExportClick }, 'Export'))));
         };
         return Component;
     }(React.Component));
+    function stateToConfig(state) {
+        return [
+            '[basic]',
+            'pop_size = ' + tomlInt(state.pop_size),
+            'num_generations = ' + tomlInt(state.num_generations),
+            '[mutations]',
+            'mutn_rate = ' + tomlFloat(state.mutn_rate),
+            'fitness_effect_model = ' + tomlString(state.fitness_effect_model),
+            'uniform_fitness_effect_del = ' + tomlFloat(state.uniform_fitness_effect_del),
+            'uniform_fitness_effect_fav = ' + tomlFloat(state.uniform_fitness_effect_fav),
+            '[computation]',
+            'plot_allele_gens = 1',
+            'files_to_output = ' + tomlString(filesToOutputString(state.files_to_output_fit, state.files_to_output_hst, state.files_to_output_allele_bins)),
+        ].join('\n');
+    }
+    function chooseFileContents(callback) {
+        var input = document.createElement('input');
+        input.setAttribute('type', 'file');
+        input.click();
+        var onChange = function () {
+            var f = assertNotNull(input.files)[0];
+            var reader = new FileReader();
+            reader.onload = function () {
+                callback(reader.result);
+            };
+            reader.readAsText(f);
+        };
+        input.addEventListener('change', onChange, { once: true });
+    }
     function configToState(config) {
         var filesToOutput = filesToOutputBooleans(config.computation.files_to_output);
         return {

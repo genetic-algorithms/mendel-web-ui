@@ -4,7 +4,7 @@ import * as Redux from 'redux';
 import * as ReactRedux from 'react-redux';
 import { ReduxAction } from '../../../redux_action_types';
 import { apiPost, apiGet } from '../../../api';
-import { setRoute } from '../../../util';
+import { setRoute, assertNotNull } from '../../../util';
 import { Help } from './help';
 
 type Props = {
@@ -61,6 +61,8 @@ class Component extends React.Component<Props, State> {
         };
 
         this.onSubmit = this.onSubmit.bind(this);
+        this.onImportClick = this.onImportClick.bind(this);
+        this.onExportClick = this.onExportClick.bind(this);
 
         this.state = {
             defaultValues: {
@@ -90,32 +92,31 @@ class Component extends React.Component<Props, State> {
         };
     }
 
+    onImportClick() {
+        chooseFileContents(contents => {
+            const config = toml.parse(contents);
+            const values = configToState(config);
+
+            this.setState({
+                fieldValues: values,
+            });
+        });
+    }
+
+    onExportClick() {
+        const output = stateToConfig(this.state.fieldValues);
+        const a = document.createElement('a');
+        a.setAttribute('download', 'export.toml');
+        a.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(output));
+        a.click();
+    }
+
     onSubmit(e: React.FormEvent<HTMLFormElement>) {
         e.preventDefault();
 
         const data = {
             title: this.state.fieldValues.title,
-            config: [
-                '[basic]',
-                'pop_size = ' + tomlInt(this.state.fieldValues.pop_size),
-                'num_generations = ' + tomlInt(this.state.fieldValues.num_generations),
-
-                '[mutations]',
-                'mutn_rate = ' + tomlFloat(this.state.fieldValues.mutn_rate),
-                'fitness_effect_model = ' + tomlString(this.state.fieldValues.fitness_effect_model),
-                'uniform_fitness_effect_del = ' + tomlFloat(this.state.fieldValues.uniform_fitness_effect_del),
-                'uniform_fitness_effect_fav = ' + tomlFloat(this.state.fieldValues.uniform_fitness_effect_fav),
-
-                '[computation]',
-                'plot_allele_gens = 1',
-                'files_to_output = ' + tomlString(
-                    filesToOutputString(
-                        this.state.fieldValues.files_to_output_fit,
-                        this.state.fieldValues.files_to_output_hst,
-                        this.state.fieldValues.files_to_output_allele_bins
-                    )
-                ),
-            ].join('\n'),
+            config: stateToConfig(this.state.fieldValues),
         };
 
         apiPost('/api/create-job/', data, this.props.dispatch).then(response => {
@@ -391,10 +392,55 @@ class Component extends React.Component<Props, State> {
                     }),
                 ),
 
-                React.createElement('input', { className: 'button', type: 'submit', value: 'Submit' }),
+                React.createElement('div', { className: 'new-job-view__actions' },
+                    React.createElement('input', { className: 'new-job-view__action button', type: 'submit', value: 'Start' }),
+                    React.createElement('div', { className: 'new-job-view__action button button--text', onClick: this.onImportClick }, 'Import'),
+                    React.createElement('div', { className: 'new-job-view__action button button--text', onClick: this.onExportClick }, 'Export'),
+                ),
             )
         );
     }
+}
+
+function stateToConfig(state: StateConfig) {
+    return [
+        '[basic]',
+        'pop_size = ' + tomlInt(state.pop_size),
+        'num_generations = ' + tomlInt(state.num_generations),
+
+        '[mutations]',
+        'mutn_rate = ' + tomlFloat(state.mutn_rate),
+        'fitness_effect_model = ' + tomlString(state.fitness_effect_model),
+        'uniform_fitness_effect_del = ' + tomlFloat(state.uniform_fitness_effect_del),
+        'uniform_fitness_effect_fav = ' + tomlFloat(state.uniform_fitness_effect_fav),
+
+        '[computation]',
+        'plot_allele_gens = 1',
+        'files_to_output = ' + tomlString(
+            filesToOutputString(
+                state.files_to_output_fit,
+                state.files_to_output_hst,
+                state.files_to_output_allele_bins
+            )
+        ),
+    ].join('\n');
+}
+
+function chooseFileContents(callback: (content: string) => void) {
+    const input = document.createElement('input');
+    input.setAttribute('type', 'file');
+    input.click();
+
+    const onChange = () => {
+        const f = assertNotNull(input.files)[0];
+        const reader = new FileReader();
+        reader.onload = () => {
+            callback(reader.result as string);
+        };
+        reader.readAsText(f);
+    };
+
+    input.addEventListener('change', onChange, { once: true });
 }
 
 function configToState(config: any) {
