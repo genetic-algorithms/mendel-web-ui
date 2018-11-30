@@ -94,7 +94,7 @@ func apiCreateJobHandler(w http.ResponseWriter, r *http.Request) {
 	globalDbLock.Unlock()
 
 	go func() {
-		cmd := exec.Command("../mendel-go/mendel-go", "-f", configFilePath)
+		cmd := exec.Command(globalMendelGoBinaryPath, "-f", configFilePath)
 		stdout, err := cmd.StdoutPipe()
 		if err != nil {
 			log.Println(err)

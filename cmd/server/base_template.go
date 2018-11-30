@@ -23,6 +23,7 @@ var baseTemplate = `
 			<script src="https://unpkg.com/immer@1.5.0/dist/immer.umd.js"></script>
 			<script src="https://unpkg.com/plotly.js@1.40.1/dist/plotly-basic.min.js"></script>
 			<script src="https://unpkg.com/moment@2.22.2/min/moment.min.js"></script>
+			<script src="https://unpkg.com/toml-j0.4@1.1.1/dist/toml-browser.js"></script>
 
 			{{range .JsFiles}}
 				<script src="{{.}}"></script>

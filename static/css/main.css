@@ -4,3 +4,7 @@ body {
     background-color: #F3F3F3;
     color: #333;
 }
+
+svg {
+    display: block;
+}

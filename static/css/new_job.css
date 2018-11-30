@@ -3,7 +3,7 @@
 }
 
 .new-job-view__form {
-    max-width: 700px;
+    max-width: 800px;
     padding-left: 24px;
     padding-right: 24px;
     margin-left: auto;
@@ -20,6 +20,8 @@
     display: flex;
     align-items: center;
     margin-bottom: 15px;
+    position: relative;
+    padding-right: 66px;
 }
 
 .new-job-view__field.new-job-view--indented {
@@ -102,4 +104,66 @@
 
 .new-job-view__form input[type=submit] {
     margin-top: 30px;
+}
+
+.new-job-view__help {
+    position: absolute;
+    right: 0;
+    top: 0;
+}
+
+.new-job-view__help.new-job-view--hidden {
+    visibility: hidden;
+}
+
+.new-job-view__help-button {
+    margin-left: 10px;
+    padding: 5px;
+    cursor: pointer;
+}
+
+.new-job-view__help-button svg {
+    fill: #999;
+}
+
+.new-job-view__help-menu {
+    position: absolute;
+    right: 0;
+    top: calc(100% + 10px);
+    background-color: #FFF;
+    border-radius: 4px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    padding: 16px;
+    width: 250px;
+    font-size: 14px;
+    z-index: 1;
+    line-height: calc(100% + 5px);
+}
+
+.new-job-view__help-menu-title {
+    font-weight: 700;
+    margin-bottom: 12px;
+}
+
+.new-job-view__help-menu-link {
+    color: #00B600;
+    margin-top: 12px;
+    display: inline-block;
+    vertical-align: top;
+    text-decoration: none;
+}
+
+.new-job-view__help-menu-link:hover {
+    text-decoration: underline;
+}
+
+.new-job-view__not-default {
+    position: absolute;
+    right: 45px;
+    top: 14px;
+    display: block;
+    width: 6px;
+    height: 6px;
+    background-color: #00B600;
+    border-radius: 50%;
 }

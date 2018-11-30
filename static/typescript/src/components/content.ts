@@ -1,6 +1,6 @@
 import * as ReactRedux from 'react-redux';
 import * as React from 'react';
-import { NewJob } from './views/new_job';
+import { NewJob } from './views/new_job/index';
 import { Login } from './views/login';
 import { JobListing } from './views/job_listing';
 import { UserListing } from './views/user_listing';
@@ -28,11 +28,20 @@ function mapStateToProps(state: ReduxState) {
 
 function getView(route: string) {
     const jobDetailMatch = route.match(new RegExp('^/job-detail/(\\w+)/$'));
+    const jobConfigMatch = route.match(new RegExp('^/job-config/(\\w+)/$'));
     const editUserMatch = route.match(new RegExp('^/edit-user/(\\w+)/$'));
     const plotMatch = route.match(new RegExp('^/plots/(\\w+)/([\\w-]+)/$'));
 
     if (route === '/') {
-        return React.createElement(NewJob, null);
+        return React.createElement(NewJob, {
+            jobId: null,
+            key: 'new_job',
+        });
+    } else if (jobConfigMatch) {
+        return React.createElement(NewJob, {
+            jobId: jobConfigMatch[1],
+            key: 'job_config:' + jobConfigMatch[1],
+        });
     } else if (route === '/login/') {
         return React.createElement(Login, null);
     } else if (route === '/job-listing/') {

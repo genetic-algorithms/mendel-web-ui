@@ -18,7 +18,7 @@ func apiGetUserHandler(w http.ResponseWriter, r *http.Request) {
 	globalDbLock.RUnlock()
 
 	if !ok {
-		http.Error(w, "404 Not Four (user does not exist)", http.StatusNotFound)
+		http.Error(w, "404 Not Found (user does not exist)", http.StatusNotFound)
 		return
 	}
 

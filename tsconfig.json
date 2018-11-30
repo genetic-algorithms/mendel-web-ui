@@ -26,5 +26,6 @@
     },
     "files": [
         "./static/typescript/src/main.ts",
+        "./static/typescript/typings/toml.d.ts",
     ],
 }

@@ -11,6 +11,7 @@ type Job = {
     title: string;
     time: string;
     status: string;
+    username: string;
 };
 
 type Props = {
@@ -33,7 +34,7 @@ class Component extends React.Component<Props, State> {
 
         this.state = {
             jobs: [],
-            all: false,
+            all: true,
         };
     }
 
@@ -92,6 +93,7 @@ class Component extends React.Component<Props, State> {
                 React.createElement('div', { className: 'job-listing-view__labels' },
                     React.createElement('div', { className: 'job-listing-view__labels__title' }, 'Title'),
                     React.createElement('div', { className: 'job-listing-view__labels__time' }, 'Time'),
+                    React.createElement('div', { className: 'job-listing-view__labels__username' }, 'User'),
                     React.createElement('div', { className: 'job-listing-view__labels__status' }, 'Status'),
                 ),
 
@@ -104,6 +106,7 @@ class Component extends React.Component<Props, State> {
                         },
                         React.createElement('div', { className: 'job-listing-view__job__title' }, job.title),
                         React.createElement('div', { className: 'job-listing-view__job__time' }, moment(job.time).fromNow()),
+                        React.createElement('div', { className: 'job-listing-view__job__username' }, job.username),
                         React.createElement('div', { className: 'job-listing-view__job__status' },
                             capitalizeFirstLetter(job.status),
                         ),

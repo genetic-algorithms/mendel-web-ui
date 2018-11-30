@@ -54,9 +54,19 @@ var globalSecureCookie *securecookie.SecureCookie
 var globalRunningJobsOutput map[string]*strings.Builder
 var globalRunningJobsLock sync.RWMutex
 var globalJobsDir string = "./output/jobs"
+var globalMendelGoBinaryPath string
+var globalDefaultConfigPath string
 
 
 func main() {
+	if len(os.Args) < 3 {
+		fmt.Println("Usage: ./cmd/server/server binary default_config")
+		return
+	}
+
+	globalMendelGoBinaryPath = os.Args[1]
+	globalDefaultConfigPath = os.Args[2]
+
 	globalRunningJobsOutput = make(map[string]*strings.Builder)
 
 	globalBaseTemplateParsed = template.Must(template.New("base").Parse(baseTemplate))
@@ -208,6 +218,10 @@ func apiHandler(w http.ResponseWriter, r *http.Request) {
 		apiDeleteUserHandler(w, r)
 	} else if r.URL.Path == "/api/get-user/" {
 		apiGetUserHandler(w, r)
+	} else if r.URL.Path == "/api/default-config/" {
+		apiGetDefaultConfigHandler(w, r)
+	} else if r.URL.Path == "/api/job-config/" {
+		apiGetJobConfigHandler(w, r)
 	} else if r.URL.Path == "/api/plot-average-mutations/" {
 		apiPlotAverageMutationsHandler(w, r)
 	} else if r.URL.Path == "/api/plot-fitness-history/" {

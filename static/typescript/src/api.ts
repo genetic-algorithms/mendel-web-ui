@@ -65,6 +65,7 @@ export function apiGet(
         title: string;
         time: string;
         status: string;
+        username: string;
     }[];
 }>;
 
@@ -156,6 +157,22 @@ export function apiGet(
     delInitialAlleles: number[];
     favInitialAlleles: number[];
 }[]>;
+
+export function apiGet(
+    url: '/api/job-config/',
+    params: {
+        jobId: string;
+    },
+    dispatch: Redux.Dispatch<ReduxAction>,
+    signal?: AbortSignal,
+): Promise<{ config: string }>;
+
+export function apiGet(
+    url: '/api/default-config/',
+    params: {},
+    dispatch: Redux.Dispatch<ReduxAction>,
+    signal?: AbortSignal,
+): Promise<{ config: string }>;
 
 export function apiGet(url: string, params: { [key: string]: string }, dispatch: Redux.Dispatch<ReduxAction>, signal?: AbortSignal) {
     loadingIndicatorIncrement(dispatch);

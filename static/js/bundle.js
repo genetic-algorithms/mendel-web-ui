@@ -472,8 +472,94 @@
             d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
         };
     })();
+    var HelpIcon = (function (_super) {
+        __extends$6(HelpIcon, _super);
+        function HelpIcon() {
+            return _super !== null && _super.apply(this, arguments) || this;
+        }
+        HelpIcon.prototype.render = function () {
+            return React.createElement('svg', {
+                width: this.props.width.toString(),
+                height: this.props.height.toString(),
+                viewBox: '0 0 24 24',
+                xmlns: 'http://www.w3.org/2000/svg',
+            }, React.createElement('path', { d: 'M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17h-2v-2h2v2zm2.07-7.75l-.9.92C13.45 12.9 13 13.5 13 15h-2v-.5c0-1.1.45-2.1 1.17-2.83l1.24-1.26c.37-.36.59-.86.59-1.41 0-1.1-.9-2-2-2s-2 .9-2 2H8c0-2.21 1.79-4 4-4s4 1.79 4 4c0 .88-.36 1.68-.93 2.25z' }));
+        };
+        return HelpIcon;
+    }(React.PureComponent));
+
+    var __extends$7 = (undefined && undefined.__extends) || (function () {
+        var extendStatics = function (d, b) {
+            extendStatics = Object.setPrototypeOf ||
+                ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+                function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+            return extendStatics(d, b);
+        };
+        return function (d, b) {
+            extendStatics(d, b);
+            function __() { this.constructor = d; }
+            d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+        };
+    })();
+    var Help = (function (_super) {
+        __extends$7(Help, _super);
+        function Help(props) {
+            var _this = _super.call(this, props) || this;
+            _this.buttonRef = React.createRef();
+            _this.menuRef = React.createRef();
+            _this.state = {
+                open: false,
+            };
+            _this.onButtonClick = _this.onButtonClick.bind(_this);
+            _this.onDocumentClick = _this.onDocumentClick.bind(_this);
+            return _this;
+        }
+        Help.prototype.onButtonClick = function (e) {
+            this.setState(function (prevState) { return ({
+                open: !prevState.open,
+            }); });
+        };
+        Help.prototype.onDocumentClick = function (e) {
+            var target = e.target;
+            if (this.state.open &&
+                !assertNotNull(this.buttonRef.current).contains(target) &&
+                !assertNotNull(this.menuRef.current).contains(target)) {
+                this.setState({
+                    open: false,
+                });
+            }
+        };
+        Help.prototype.componentDidMount = function () {
+            document.addEventListener('click', this.onDocumentClick);
+        };
+        Help.prototype.componentWillUnmount = function () {
+            document.removeEventListener('click', this.onDocumentClick);
+        };
+        Help.prototype.render = function () {
+            return React.createElement('div', { className: 'new-job-view__help' }, React.createElement('div', { className: 'new-job-view__help-button', ref: this.buttonRef, onClick: this.onButtonClick }, React.createElement(HelpIcon, { width: 24, height: 24 })), (this.state.open ?
+                React.createElement('div', { className: 'new-job-view__help-menu', ref: this.menuRef }, React.createElement('div', { className: 'new-job-view__help-menu-title' }, this.props.title), React.createElement('div', { className: 'new-job-view__help-menu-content' }, this.props.content), (this.props.url ?
+                    React.createElement('a', { className: 'new-job-view__help-menu-link', href: this.props.url, target: '_blank' }, 'Read More') :
+                    null)) :
+                null));
+        };
+        return Help;
+    }(React.PureComponent));
+
+    var __extends$8 = (undefined && undefined.__extends) || (function () {
+        var extendStatics = function (d, b) {
+            extendStatics = Object.setPrototypeOf ||
+                ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+                function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+            return extendStatics(d, b);
+        };
+        return function (d, b) {
+            extendStatics(d, b);
+            function __() { this.constructor = d; }
+            d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+        };
+    })();
     var Component$2 = (function (_super) {
-        __extends$6(Component, _super);
+        __extends$8(Component, _super);
         function Component(props) {
             var _this = _super.call(this, props) || this;
             _this.fieldChangeHandlers = {
@@ -490,14 +576,26 @@
             };
             _this.onSubmit = _this.onSubmit.bind(_this);
             _this.state = {
+                defaultValues: {
+                    title: '',
+                    pop_size: '',
+                    num_generations: '',
+                    mutn_rate: '',
+                    fitness_effect_model: 'weibull',
+                    uniform_fitness_effect_del: '',
+                    uniform_fitness_effect_fav: '',
+                    files_to_output_fit: true,
+                    files_to_output_hst: true,
+                    files_to_output_allele_bins: true,
+                },
                 fieldValues: {
                     title: '',
-                    pop_size: '1000',
-                    num_generations: '200',
-                    mutn_rate: '50.0',
+                    pop_size: '',
+                    num_generations: '',
+                    mutn_rate: '',
                     fitness_effect_model: 'weibull',
-                    uniform_fitness_effect_del: '0.0001',
-                    uniform_fitness_effect_fav: '0.0001',
+                    uniform_fitness_effect_del: '',
+                    uniform_fitness_effect_fav: '',
                     files_to_output_fit: true,
                     files_to_output_hst: true,
                     files_to_output_allele_bins: true,
@@ -547,18 +645,52 @@
                 });
             });
         };
+        Component.prototype.componentDidMount = function () {
+            var _this = this;
+            if (this.props.jobId === null) {
+                apiGet('/api/default-config/', {}, this.props.dispatch).then(function (response) {
+                    var config = toml.parse(response.config);
+                    var values = configToState(config);
+                    _this.setState({
+                        defaultValues: values,
+                        fieldValues: values,
+                    });
+                });
+            }
+            else {
+                apiGet('/api/default-config/', {}, this.props.dispatch).then(function (response) {
+                    var config = toml.parse(response.config);
+                    _this.setState({
+                        defaultValues: configToState(config),
+                    });
+                });
+                apiGet('/api/job-config/', { jobId: this.props.jobId }, this.props.dispatch).then(function (response) {
+                    var config = toml.parse(response.config);
+                    _this.setState({
+                        fieldValues: configToState(config),
+                    });
+                });
+            }
+        };
         Component.prototype.render = function () {
             return React.createElement('div', { className: 'new-job-view' }, React.createElement('div', { className: 'new-job-view__loading' }), React.createElement('form', { className: 'new-job-view__form', onSubmit: this.onSubmit }, React.createElement('div', { className: 'new-job-view__form-section-title' }, 'Metadata'), React.createElement('div', { className: 'new-job-view__field' }, React.createElement('label', {}, 'Job title'), React.createElement('input', {
                 type: 'text',
                 value: this.state.fieldValues.title,
                 onChange: this.fieldChangeHandlers.title,
-            })), React.createElement('div', { className: 'new-job-view__form-section-title' }, 'Basic'), React.createElement('div', { className: 'new-job-view__field' }, React.createElement('label', {}, 'Population size (initial or fixed)'), React.createElement('input', {
+            }), (this.state.fieldValues.title !== this.state.defaultValues.title ?
+                React.createElement('div', { className: 'new-job-view__not-default' }) :
+                null)), React.createElement('div', { className: 'new-job-view__form-section-title' }, 'Basic'), React.createElement('div', { className: 'new-job-view__field' }, React.createElement('label', {}, 'Population size (initial or fixed)'), React.createElement('input', {
                 type: 'number',
                 min: '2',
                 max: '1000000',
                 step: '1',
                 value: this.state.fieldValues.pop_size,
                 onChange: this.fieldChangeHandlers.pop_size,
+            }), (this.state.fieldValues.pop_size !== this.state.defaultValues.pop_size ?
+                React.createElement('div', { className: 'new-job-view__not-default' }) :
+                null), React.createElement(Help, {
+                title: 'pop_size',
+                content: 'This is the number of reproducing adults, after selection. This number is normally kept constant, except when fertility is insufficient to allow replacement, or when population growth is specified below. For smaller computer systems such as PCs, population size must remain small (100-5000) or the program will run out of memory. Population sizes smaller than 1000 can be strongly affected by inbreeding and drift.',
             })), React.createElement('div', { className: 'new-job-view__field' }, React.createElement('label', {}, 'Generations'), React.createElement('input', {
                 type: 'number',
                 min: '0',
@@ -566,6 +698,11 @@
                 step: '1',
                 value: this.state.fieldValues.num_generations,
                 onChange: this.fieldChangeHandlers.num_generations,
+            }), (this.state.fieldValues.num_generations !== this.state.defaultValues.num_generations ?
+                React.createElement('div', { className: 'new-job-view__not-default' }) :
+                null), React.createElement(Help, {
+                title: 'num_generations',
+                content: 'The number of generations the program should run. If there are too many generations specified, smaller computers will run out of memory because of the accumulation of large numbers of mutations, and the experiment will terminate prematurely. This problem can be mitigated by tracking only the larger-effect mutations (see computation parameters).  The program also terminates prematurely if fitness reaches a specified extinction threshold (default = 0.0) or if the population size shrinks to just one individual. In the special case of pop_growth_model==exponential, this value can be 0 which indicates the run should continue until max_pop_size is reached.',
             })), React.createElement('div', { className: 'new-job-view__form-section-title' }, 'Mutations'), React.createElement('div', { className: 'new-job-view__field' }, React.createElement('label', {}, 'Total mutation rate (per individual per generation)'), React.createElement('input', {
                 type: 'number',
                 min: '0',
@@ -573,10 +710,20 @@
                 step: 'any',
                 value: this.state.fieldValues.mutn_rate,
                 onChange: this.fieldChangeHandlers.mutn_rate,
+            }), (parseFloat(this.state.fieldValues.mutn_rate) !== parseFloat(this.state.defaultValues.mutn_rate) ?
+                React.createElement('div', { className: 'new-job-view__not-default' }) :
+                null), React.createElement(Help, {
+                title: 'mutn_rate',
+                content: 'This is the average number of new mutations per individual per generation. In humans, this number is believed to be approximately 100. The mutation rate can be adjusted to be proportional to the size of the functional genome. Thus if only 10% of the human genome actually functions (assuming the rest to be biologically inert), or if only 10% of the genome is modeled (as is the default), then the biologically relevant human mutation rate would be just 10. Rates of less than 1 new mutation per individual are allowed, including zero.',
             })), React.createElement('div', { className: 'new-job-view__field' }, React.createElement('label', {}, 'Fitness effect model'), React.createElement('select', {
                 value: this.state.fieldValues.fitness_effect_model,
                 onChange: this.fieldChangeHandlers.fitness_effect_model,
-            }, React.createElement('option', { value: 'fixed' }, 'Fixed'), React.createElement('option', { value: 'uniform' }, 'Uniform'), React.createElement('option', { value: 'weibull' }, 'Weibull (default)'))), React.createElement('div', { className: 'new-job-view__field new-job-view--indented' }, React.createElement('label', {}, 'For fixed: effect for each deleterious mutation'), React.createElement('input', {
+            }, React.createElement('option', { value: 'fixed' }, 'Fixed'), React.createElement('option', { value: 'uniform' }, 'Uniform'), React.createElement('option', { value: 'weibull' }, 'Weibull (default)')), (this.state.fieldValues.fitness_effect_model !== this.state.defaultValues.fitness_effect_model ?
+                React.createElement('div', { className: 'new-job-view__not-default' }) :
+                null), React.createElement(Help, {
+                title: 'fitness_effect_model',
+                content: 'Choices: "weibull" - the fitness effect of each mutation is determined by the Weibull distribution, "fixed" - use fixed values for mutation fitness effect as set in uniform_fitness_effect_*, or "uniform" - even distribution between 0 and uniform_fitness_effect_* as max.',
+            })), React.createElement('div', { className: 'new-job-view__field' }, React.createElement('label', {}, 'For fixed: effect for each deleterious mutation'), React.createElement('input', {
                 type: 'number',
                 min: '0',
                 max: '0.1',
@@ -584,7 +731,12 @@
                 disabled: this.state.fieldValues.fitness_effect_model !== 'fixed',
                 value: this.state.fieldValues.uniform_fitness_effect_del,
                 onChange: this.fieldChangeHandlers.uniform_fitness_effect_del,
-            })), React.createElement('div', { className: 'new-job-view__field new-job-view--indented' }, React.createElement('label', {}, 'For fixed: effect for each beneficial mutation'), React.createElement('input', {
+            }), (parseFloat(this.state.fieldValues.uniform_fitness_effect_del) !== parseFloat(this.state.defaultValues.uniform_fitness_effect_del) ?
+                React.createElement('div', { className: 'new-job-view__not-default' }) :
+                null), React.createElement(Help, {
+                title: 'uniform_fitness_effect_del',
+                content: 'Used for fitness_effect_model=fixed. Each deleterious mutation should have this fitness effect.',
+            })), React.createElement('div', { className: 'new-job-view__field' }, React.createElement('label', {}, 'For fixed: effect for each beneficial mutation'), React.createElement('input', {
                 type: 'number',
                 min: '0',
                 max: '0.1',
@@ -592,19 +744,54 @@
                 disabled: this.state.fieldValues.fitness_effect_model !== 'fixed',
                 value: this.state.fieldValues.uniform_fitness_effect_fav,
                 onChange: this.fieldChangeHandlers.uniform_fitness_effect_fav,
+            }), (parseFloat(this.state.fieldValues.uniform_fitness_effect_fav) !== parseFloat(this.state.defaultValues.uniform_fitness_effect_fav) ?
+                React.createElement('div', { className: 'new-job-view__not-default' }) :
+                null), React.createElement(Help, {
+                title: 'uniform_fitness_effect_fav',
+                content: 'Used for fitness_effect_model=fixed. Each beneficial mutation should have this fitness effect.',
             })), React.createElement('div', { className: 'new-job-view__form-section-title' }, 'Output Files'), React.createElement('div', { className: 'new-job-view__field' }, React.createElement('label', {}, 'mendel.fit'), React.createElement('div', { className: 'new-job-view__checkbox-wrapper' }, React.createElement(Checkbox, {
                 checked: this.state.fieldValues.files_to_output_fit,
                 onChange: this.fieldChangeHandlers.files_to_output_fit,
-            }))), React.createElement('div', { className: 'new-job-view__field' }, React.createElement('label', {}, 'mendel.hst'), React.createElement('div', { className: 'new-job-view__checkbox-wrapper' }, React.createElement(Checkbox, {
+            })), (this.state.fieldValues.files_to_output_fit !== this.state.defaultValues.files_to_output_fit ?
+                React.createElement('div', { className: 'new-job-view__not-default' }) :
+                null), React.createElement(Help, {
+                title: 'files_to_output',
+                content: 'This contains data needed for the "Fitness History" plot.',
+            })), React.createElement('div', { className: 'new-job-view__field' }, React.createElement('label', {}, 'mendel.hst'), React.createElement('div', { className: 'new-job-view__checkbox-wrapper' }, React.createElement(Checkbox, {
                 checked: this.state.fieldValues.files_to_output_hst,
                 onChange: this.fieldChangeHandlers.files_to_output_hst,
-            }))), React.createElement('div', { className: 'new-job-view__field' }, React.createElement('label', {}, 'Allele bin and distribution files'), React.createElement('div', { className: 'new-job-view__checkbox-wrapper' }, React.createElement(Checkbox, {
+            })), (this.state.fieldValues.files_to_output_hst !== this.state.defaultValues.files_to_output_hst ?
+                React.createElement('div', { className: 'new-job-view__not-default' }) :
+                null), React.createElement(Help, {
+                title: 'files_to_output',
+                content: 'This contains data needed for the "Average Mutations/Individual" plot.',
+            })), React.createElement('div', { className: 'new-job-view__field' }, React.createElement('label', {}, 'Allele bin and distribution files'), React.createElement('div', { className: 'new-job-view__checkbox-wrapper' }, React.createElement(Checkbox, {
                 checked: this.state.fieldValues.files_to_output_allele_bins,
                 onChange: this.fieldChangeHandlers.files_to_output_allele_bins,
-            }))), React.createElement('input', { className: 'button', type: 'submit', value: 'Submit' })));
+            })), (this.state.fieldValues.files_to_output_allele_bins !== this.state.defaultValues.files_to_output_allele_bins ?
+                React.createElement('div', { className: 'new-job-view__not-default' }) :
+                null), React.createElement(Help, {
+                title: 'files_to_output',
+                content: 'This contains data needed for the "SNP Frequencies", "Minor Allele Frequencies", and allele distribution plots.',
+            })), React.createElement('input', { className: 'button', type: 'submit', value: 'Submit' })));
         };
         return Component;
     }(React.Component));
+    function configToState(config) {
+        var filesToOutput = filesToOutputBooleans(config.computation.files_to_output);
+        return {
+            title: '',
+            pop_size: config.basic.pop_size.toString(),
+            num_generations: config.basic.num_generations.toString(),
+            mutn_rate: config.mutations.mutn_rate.toString(),
+            fitness_effect_model: config.mutations.fitness_effect_model,
+            uniform_fitness_effect_del: config.mutations.uniform_fitness_effect_del.toString(),
+            uniform_fitness_effect_fav: config.mutations.uniform_fitness_effect_fav.toString(),
+            files_to_output_fit: filesToOutput.fit,
+            files_to_output_hst: filesToOutput.hst,
+            files_to_output_allele_bins: filesToOutput.alleles,
+        };
+    }
     function filesToOutputString(fit, hst, alleles) {
         if (fit && hst && alleles) {
             return '*';
@@ -626,6 +813,24 @@
             return outputFiles.join(',');
         }
     }
+    function filesToOutputBooleans(s) {
+        if (s === '*') {
+            return {
+                fit: true,
+                hst: true,
+                alleles: true,
+            };
+        }
+        var parts = s.split(',').map(function (x) { return x.trim(); });
+        return {
+            fit: parts.indexOf('mendel.fit') >= 0,
+            hst: parts.indexOf('mendel.hst') >= 0,
+            alleles: (parts.indexOf('allele-bins/') >= 0 &&
+                parts.indexOf('normalized-allele-bins/') >= 0 &&
+                parts.indexOf('allele-distribution-del/') >= 0 &&
+                parts.indexOf('allele-distribution-fav/') >= 0),
+        };
+    }
     function tomlInt(s) {
         return parseInt(s).toString();
     }
@@ -642,7 +847,7 @@
     }
     var NewJob = ReactRedux.connect()(Component$2);
 
-    var __extends$7 = (undefined && undefined.__extends) || (function () {
+    var __extends$9 = (undefined && undefined.__extends) || (function () {
         var extendStatics = function (d, b) {
             extendStatics = Object.setPrototypeOf ||
                 ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
@@ -656,14 +861,14 @@
         };
     })();
     var Component$3 = (function (_super) {
-        __extends$7(Component, _super);
+        __extends$9(Component, _super);
         function Component(props) {
             var _this = _super.call(this, props) || this;
             _this.onFilterChanged = _this.onFilterChanged.bind(_this);
             _this.fetchController = new AbortController();
             _this.state = {
                 jobs: [],
-                all: false,
+                all: true,
             };
             return _this;
         }
@@ -700,11 +905,11 @@
                 className: 'job-listing-view__filter',
                 value: this.state.all ? 'all' : 'mine',
                 onChange: this.onFilterChanged,
-            }, React.createElement('option', { value: 'mine' }, 'My Jobs'), React.createElement('option', { value: 'all' }, 'All Jobs')), React.createElement('div', { className: 'job-listing-view__jobs' }, React.createElement('div', { className: 'job-listing-view__labels' }, React.createElement('div', { className: 'job-listing-view__labels__title' }, 'Title'), React.createElement('div', { className: 'job-listing-view__labels__time' }, 'Time'), React.createElement('div', { className: 'job-listing-view__labels__status' }, 'Status')), this.state.jobs.map(function (job) { return (React.createElement('div', {
+            }, React.createElement('option', { value: 'mine' }, 'My Jobs'), React.createElement('option', { value: 'all' }, 'All Jobs')), React.createElement('div', { className: 'job-listing-view__jobs' }, React.createElement('div', { className: 'job-listing-view__labels' }, React.createElement('div', { className: 'job-listing-view__labels__title' }, 'Title'), React.createElement('div', { className: 'job-listing-view__labels__time' }, 'Time'), React.createElement('div', { className: 'job-listing-view__labels__username' }, 'User'), React.createElement('div', { className: 'job-listing-view__labels__status' }, 'Status')), this.state.jobs.map(function (job) { return (React.createElement('div', {
                 className: 'job-listing-view__job',
                 key: job.id,
                 onClick: function () { return _this.onClick(job.id); },
-            }, React.createElement('div', { className: 'job-listing-view__job__title' }, job.title), React.createElement('div', { className: 'job-listing-view__job__time' }, moment(job.time).fromNow()), React.createElement('div', { className: 'job-listing-view__job__status' }, capitalizeFirstLetter(job.status)))); })));
+            }, React.createElement('div', { className: 'job-listing-view__job__title' }, job.title), React.createElement('div', { className: 'job-listing-view__job__time' }, moment(job.time).fromNow()), React.createElement('div', { className: 'job-listing-view__job__username' }, job.username), React.createElement('div', { className: 'job-listing-view__job__status' }, capitalizeFirstLetter(job.status)))); })));
         };
         return Component;
     }(React.Component));
@@ -713,7 +918,7 @@
     }
     var JobListing = ReactRedux.connect()(Component$3);
 
-    var __extends$8 = (undefined && undefined.__extends) || (function () {
+    var __extends$a = (undefined && undefined.__extends) || (function () {
         var extendStatics = function (d, b) {
             extendStatics = Object.setPrototypeOf ||
                 ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
@@ -727,7 +932,7 @@
         };
     })();
     var DeleteIcon = (function (_super) {
-        __extends$8(DeleteIcon, _super);
+        __extends$a(DeleteIcon, _super);
         function DeleteIcon() {
             return _super !== null && _super.apply(this, arguments) || this;
         }
@@ -784,7 +989,7 @@
         return element;
     }
 
-    var __extends$9 = (undefined && undefined.__extends) || (function () {
+    var __extends$b = (undefined && undefined.__extends) || (function () {
         var extendStatics = function (d, b) {
             extendStatics = Object.setPrototypeOf ||
                 ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
@@ -825,7 +1030,7 @@
         };
     }
     var Component$4 = (function (_super) {
-        __extends$9(Component, _super);
+        __extends$b(Component, _super);
         function Component() {
             return _super !== null && _super.apply(this, arguments) || this;
         }
@@ -849,7 +1054,7 @@
     }(React.Component));
     var UserListing = ReactRedux.connect(mapStateToProps$1, mapDispatchToProps$1)(Component$4);
 
-    var __extends$a = (undefined && undefined.__extends) || (function () {
+    var __extends$c = (undefined && undefined.__extends) || (function () {
         var extendStatics = function (d, b) {
             extendStatics = Object.setPrototypeOf ||
                 ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
@@ -863,7 +1068,7 @@
         };
     })();
     var Component$5 = (function (_super) {
-        __extends$a(Component, _super);
+        __extends$c(Component, _super);
         function Component(props) {
             var _this = _super.call(this, props) || this;
             _this.mounted = false;
@@ -971,7 +1176,7 @@
     }(React.Component));
     var CreateUser = ReactRedux.connect(null, null)(Component$5);
 
-    var __extends$b = (undefined && undefined.__extends) || (function () {
+    var __extends$d = (undefined && undefined.__extends) || (function () {
         var extendStatics = function (d, b) {
             extendStatics = Object.setPrototypeOf ||
                 ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
@@ -990,7 +1195,7 @@
         };
     }
     var Component$6 = (function (_super) {
-        __extends$b(Component, _super);
+        __extends$d(Component, _super);
         function Component(props) {
             var _this = _super.call(this, props) || this;
             _this.fetchController = new AbortController();
@@ -1125,7 +1330,7 @@
         }, 5000);
     }
 
-    var __extends$c = (undefined && undefined.__extends) || (function () {
+    var __extends$e = (undefined && undefined.__extends) || (function () {
         var extendStatics = function (d, b) {
             extendStatics = Object.setPrototypeOf ||
                 ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
@@ -1144,7 +1349,7 @@
         };
     }
     var Component$7 = (function (_super) {
-        __extends$c(Component, _super);
+        __extends$e(Component, _super);
         function Component(props) {
             var _this = _super.call(this, props) || this;
             _this.mounted = false;
@@ -1257,7 +1462,7 @@
     }(React.Component));
     var MyAccount = ReactRedux.connect(mapStateToProps$3, null)(Component$7);
 
-    var __extends$d = (undefined && undefined.__extends) || (function () {
+    var __extends$f = (undefined && undefined.__extends) || (function () {
         var extendStatics = function (d, b) {
             extendStatics = Object.setPrototypeOf ||
                 ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
@@ -1271,7 +1476,7 @@
         };
     })();
     var Component$8 = (function (_super) {
-        __extends$d(Component, _super);
+        __extends$f(Component, _super);
         function Component(props) {
             var _this = _super.call(this, props) || this;
             _this.fetchOutput = _this.fetchOutput.bind(_this);
@@ -1283,10 +1488,14 @@
                 done: false,
             };
             _this.onPlotsClick = _this.onPlotsClick.bind(_this);
+            _this.onConfigClick = _this.onConfigClick.bind(_this);
             return _this;
         }
         Component.prototype.onPlotsClick = function () {
             setRoute(this.props.dispatch, '/plots/' + this.props.jobId + '/average-mutations/');
+        };
+        Component.prototype.onConfigClick = function () {
+            setRoute(this.props.dispatch, '/job-config/' + this.props.jobId + '/');
         };
         Component.prototype.componentDidMount = function () {
             this.fetchOutput();
@@ -1315,13 +1524,19 @@
                     className: 'job-detail-view__plots-button button',
                     onClick: this.onPlotsClick,
                 }, 'Plots') :
-                null)));
+                null), React.createElement('div', {
+                className: 'job-detail-view__config-button button',
+                onClick: this.onConfigClick,
+            }, 'Config'), React.createElement('div', {
+                className: 'job-detail-view__download-button button',
+                onClick: function () { },
+            }, 'Download')));
         };
         return Component;
     }(React.Component));
     var JobDetail = ReactRedux.connect()(Component$8);
 
-    var __extends$e = (undefined && undefined.__extends) || (function () {
+    var __extends$g = (undefined && undefined.__extends) || (function () {
         var extendStatics = function (d, b) {
             extendStatics = Object.setPrototypeOf ||
                 ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
@@ -1373,7 +1588,7 @@
         };
     }
     var Component$9 = (function (_super) {
-        __extends$e(Component, _super);
+        __extends$g(Component, _super);
         function Component() {
             return _super !== null && _super.apply(this, arguments) || this;
         }
@@ -1389,7 +1604,7 @@
     }(React.Component));
     var Sidebar = ReactRedux.connect(null, mapDispatchToProps$2)(Component$9);
 
-    var __extends$f = (undefined && undefined.__extends) || (function () {
+    var __extends$h = (undefined && undefined.__extends) || (function () {
         var extendStatics = function (d, b) {
             extendStatics = Object.setPrototypeOf ||
                 ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
@@ -1403,7 +1618,7 @@
         };
     })();
     var Component$a = (function (_super) {
-        __extends$f(Component, _super);
+        __extends$h(Component, _super);
         function Component(props) {
             var _this = _super.call(this, props) || this;
             _this.resizePlot = _this.resizePlot.bind(_this);
@@ -1472,7 +1687,7 @@
     }(React.Component));
     var AverageMutations = ReactRedux.connect()(Component$a);
 
-    var __extends$g = (undefined && undefined.__extends) || (function () {
+    var __extends$i = (undefined && undefined.__extends) || (function () {
         var extendStatics = function (d, b) {
             extendStatics = Object.setPrototypeOf ||
                 ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
@@ -1486,7 +1701,7 @@
         };
     })();
     var Component$b = (function (_super) {
-        __extends$g(Component, _super);
+        __extends$i(Component, _super);
         function Component(props) {
             var _this = _super.call(this, props) || this;
             _this.resizePlot = _this.resizePlot.bind(_this);
@@ -1552,7 +1767,7 @@
     }(React.Component));
     var FitnessHistory = ReactRedux.connect()(Component$b);
 
-    var __extends$h = (undefined && undefined.__extends) || (function () {
+    var __extends$j = (undefined && undefined.__extends) || (function () {
         var extendStatics = function (d, b) {
             extendStatics = Object.setPrototypeOf ||
                 ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
@@ -1566,7 +1781,7 @@
         };
     })();
     var Component$c = (function (_super) {
-        __extends$h(Component, _super);
+        __extends$j(Component, _super);
         function Component(props) {
             var _this = _super.call(this, props) || this;
             _this.resizePlot = _this.resizePlot.bind(_this);
@@ -1679,7 +1894,7 @@
     }(React.Component));
     var DeleteriousMutations = ReactRedux.connect()(Component$c);
 
-    var __extends$i = (undefined && undefined.__extends) || (function () {
+    var __extends$k = (undefined && undefined.__extends) || (function () {
         var extendStatics = function (d, b) {
             extendStatics = Object.setPrototypeOf ||
                 ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
@@ -1693,7 +1908,7 @@
         };
     })();
     var Component$d = (function (_super) {
-        __extends$i(Component, _super);
+        __extends$k(Component, _super);
         function Component(props) {
             var _this = _super.call(this, props) || this;
             _this.resizePlot = _this.resizePlot.bind(_this);
@@ -1805,7 +2020,7 @@
     }(React.Component));
     var BeneficialMutations = ReactRedux.connect()(Component$d);
 
-    var __extends$j = (undefined && undefined.__extends) || (function () {
+    var __extends$l = (undefined && undefined.__extends) || (function () {
         var extendStatics = function (d, b) {
             extendStatics = Object.setPrototypeOf ||
                 ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
@@ -1819,7 +2034,7 @@
         };
     })();
     var Component$e = (function (_super) {
-        __extends$j(Component, _super);
+        __extends$l(Component, _super);
         function Component(props) {
             var _this = _super.call(this, props) || this;
             _this.resizePlot = _this.resizePlot.bind(_this);
@@ -1989,7 +2204,7 @@
     }(React.Component));
     var SnpFrequencies = ReactRedux.connect()(Component$e);
 
-    var __extends$k = (undefined && undefined.__extends) || (function () {
+    var __extends$m = (undefined && undefined.__extends) || (function () {
         var extendStatics = function (d, b) {
             extendStatics = Object.setPrototypeOf ||
                 ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
@@ -2003,7 +2218,7 @@
         };
     })();
     var Component$f = (function (_super) {
-        __extends$k(Component, _super);
+        __extends$m(Component, _super);
         function Component(props) {
             var _this = _super.call(this, props) || this;
             _this.resizePlot = _this.resizePlot.bind(_this);
@@ -2146,10 +2361,20 @@
     }
     function getView(route) {
         var jobDetailMatch = route.match(new RegExp('^/job-detail/(\\w+)/$'));
+        var jobConfigMatch = route.match(new RegExp('^/job-config/(\\w+)/$'));
         var editUserMatch = route.match(new RegExp('^/edit-user/(\\w+)/$'));
         var plotMatch = route.match(new RegExp('^/plots/(\\w+)/([\\w-]+)/$'));
         if (route === '/') {
-            return React.createElement(NewJob, null);
+            return React.createElement(NewJob, {
+                jobId: null,
+                key: 'new_job',
+            });
+        }
+        else if (jobConfigMatch) {
+            return React.createElement(NewJob, {
+                jobId: jobConfigMatch[1],
+                key: 'job_config:' + jobConfigMatch[1],
+            });
         }
         else if (route === '/login/') {
             return React.createElement(Login, null);
@@ -2204,7 +2429,7 @@
     }
     var Content = ReactRedux.connect(mapStateToProps$4)(Component$g);
 
-    var __extends$l = (undefined && undefined.__extends) || (function () {
+    var __extends$n = (undefined && undefined.__extends) || (function () {
         var extendStatics = function (d, b) {
             extendStatics = Object.setPrototypeOf ||
                 ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
@@ -2223,7 +2448,7 @@
         };
     }
     var Component$h = (function (_super) {
-        __extends$l(Component, _super);
+        __extends$n(Component, _super);
         function Component(props) {
             var _this = _super.call(this, props) || this;
             _this.state = {
@@ -2251,7 +2476,7 @@
     }(React.Component));
     var NonLogin = ReactRedux.connect(mapStateToProps$5)(Component$h);
 
-    var __extends$m = (undefined && undefined.__extends) || (function () {
+    var __extends$o = (undefined && undefined.__extends) || (function () {
         var extendStatics = function (d, b) {
             extendStatics = Object.setPrototypeOf ||
                 ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
@@ -2270,7 +2495,7 @@
         };
     }
     var Component$i = (function (_super) {
-        __extends$m(Component, _super);
+        __extends$o(Component, _super);
         function Component() {
             return _super !== null && _super.apply(this, arguments) || this;
         }

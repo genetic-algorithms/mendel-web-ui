@@ -32,3 +32,11 @@
 .job-detail-view__plots-button {
     margin-left: 40px;
 }
+
+.job-detail-view__config-button {
+    margin-left: 20px;
+}
+
+.job-detail-view__download-button {
+    margin-left: 20px;
+}

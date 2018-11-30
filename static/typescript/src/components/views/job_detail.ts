@@ -37,10 +37,15 @@ class Component extends React.Component<Props, State> {
         };
 
         this.onPlotsClick = this.onPlotsClick.bind(this);
+        this.onConfigClick = this.onConfigClick.bind(this);
     }
 
     onPlotsClick() {
         setRoute(this.props.dispatch, '/plots/' + this.props.jobId + '/average-mutations/');
+    }
+
+    onConfigClick() {
+        setRoute(this.props.dispatch, '/job-config/' + this.props.jobId + '/');
     }
 
     componentDidMount() {
@@ -94,6 +99,20 @@ class Component extends React.Component<Props, State> {
                         'Plots',
                     ) :
                     null
+                ),
+                React.createElement('div',
+                    {
+                        className: 'job-detail-view__config-button button',
+                        onClick: this.onConfigClick,
+                    },
+                    'Config',
+                ),
+                React.createElement('div',
+                    {
+                        className: 'job-detail-view__download-button button',
+                        onClick: () => {},
+                    },
+                    'Download',
                 ),
             ),
         );

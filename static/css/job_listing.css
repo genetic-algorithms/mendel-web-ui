@@ -58,9 +58,11 @@
 
 .job-listing-view__labels__title,
 .job-listing-view__labels__time,
+.job-listing-view__labels__username,
 .job-listing-view__labels__status,
 .job-listing-view__job__title,
 .job-listing-view__job__time,
+.job-listing-view__job__username,
 .job-listing-view__job__status {
     padding: 14px 0;
     font-size: 14px;
@@ -68,13 +70,14 @@
 
 .job-listing-view__labels__title,
 .job-listing-view__labels__time,
+.job-listing-view__labels__username,
 .job-listing-view__labels__status {
     font-weight: 700;
 }
 
 .job-listing-view__labels__title,
 .job-listing-view__job__title {
-    width: calc(100% - 400px);
+    width: calc(100% - 600px);
     box-sizing: border-box;
     padding-right: 20px;
 }
@@ -82,6 +85,19 @@
 .job-listing-view__labels__time,
 .job-listing-view__job__time {
     width: 300px;
+}
+
+.job-listing-view__labels__username,
+.job-listing-view__job__username {
+    width: 200px;
+}
+
+.job-listing-view__job__username {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    padding-right: 30px;
+    box-sizing: border-box;
 }
 
 .job-listing-view__labels__status,

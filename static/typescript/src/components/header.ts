@@ -67,7 +67,7 @@ class Component extends React.Component<Props, State> {
         this.onDocumentClick = this.onDocumentClick.bind(this);
     }
 
-    onDocumentClick(e: Event) {
+    onDocumentClick(e: MouseEvent) {
         if (this.state.menuOpen) {
             this.setState({
                 menuOpen: false,
