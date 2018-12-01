@@ -53,7 +53,7 @@ var globalDbLock sync.RWMutex
 var globalSecureCookie *securecookie.SecureCookie
 var globalRunningJobsOutput map[string]*strings.Builder
 var globalRunningJobsLock sync.RWMutex
-var globalJobsDir string = "./output/jobs"
+var globalJobsDir string = "output/jobs"
 var globalMendelGoBinaryPath string
 var globalDefaultConfigPath string
 
@@ -222,6 +222,8 @@ func apiHandler(w http.ResponseWriter, r *http.Request) {
 		apiGetDefaultConfigHandler(w, r)
 	} else if r.URL.Path == "/api/job-config/" {
 		apiGetJobConfigHandler(w, r)
+	} else if r.URL.Path == "/api/export-job/" {
+		apiExportJobHandler(w, r)
 	} else if r.URL.Path == "/api/plot-average-mutations/" {
 		apiPlotAverageMutationsHandler(w, r)
 	} else if r.URL.Path == "/api/plot-fitness-history/" {

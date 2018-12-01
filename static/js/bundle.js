@@ -1525,6 +1525,7 @@
             };
             _this.onPlotsClick = _this.onPlotsClick.bind(_this);
             _this.onConfigClick = _this.onConfigClick.bind(_this);
+            _this.onDownloadClick = _this.onDownloadClick.bind(_this);
             return _this;
         }
         Component.prototype.onPlotsClick = function () {
@@ -1532,6 +1533,14 @@
         };
         Component.prototype.onConfigClick = function () {
             setRoute(this.props.dispatch, '/job-config/' + this.props.jobId + '/');
+        };
+        Component.prototype.onDownloadClick = function () {
+            apiGet('/api/export-job/', { jobId: this.props.jobId }, this.props.dispatch).then(function (response) {
+                var a = document.createElement('a');
+                a.setAttribute('download', 'export.zip');
+                a.setAttribute('href', 'data:text/plain;base64,' + response.contents);
+                a.click();
+            });
         };
         Component.prototype.componentDidMount = function () {
             this.fetchOutput();
@@ -1565,7 +1574,7 @@
                 onClick: this.onConfigClick,
             }, 'Config'), React.createElement('div', {
                 className: 'job-detail-view__download-button button',
-                onClick: function () { },
+                onClick: this.onDownloadClick,
             }, 'Download')));
         };
         return Component;

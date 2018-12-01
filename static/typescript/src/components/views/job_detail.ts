@@ -38,6 +38,7 @@ class Component extends React.Component<Props, State> {
 
         this.onPlotsClick = this.onPlotsClick.bind(this);
         this.onConfigClick = this.onConfigClick.bind(this);
+        this.onDownloadClick = this.onDownloadClick.bind(this);
     }
 
     onPlotsClick() {
@@ -46,6 +47,19 @@ class Component extends React.Component<Props, State> {
 
     onConfigClick() {
         setRoute(this.props.dispatch, '/job-config/' + this.props.jobId + '/');
+    }
+
+    onDownloadClick() {
+        apiGet(
+            '/api/export-job/',
+            { jobId: this.props.jobId },
+            this.props.dispatch,
+        ).then(response => {
+            const a = document.createElement('a');
+            a.setAttribute('download', 'export.zip');
+            a.setAttribute('href', 'data:text/plain;base64,' + response.contents);
+            a.click();
+        });
     }
 
     componentDidMount() {
@@ -110,7 +124,7 @@ class Component extends React.Component<Props, State> {
                 React.createElement('div',
                     {
                         className: 'job-detail-view__download-button button',
-                        onClick: () => {},
+                        onClick: this.onDownloadClick,
                     },
                     'Download',
                 ),

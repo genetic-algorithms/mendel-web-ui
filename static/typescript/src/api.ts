@@ -168,6 +168,15 @@ export function apiGet(
 ): Promise<{ config: string }>;
 
 export function apiGet(
+    url: '/api/export-job/',
+    params: {
+        jobId: string;
+    },
+    dispatch: Redux.Dispatch<ReduxAction>,
+    signal?: AbortSignal,
+): Promise<{ contents: string }>;
+
+export function apiGet(
     url: '/api/default-config/',
     params: {},
     dispatch: Redux.Dispatch<ReduxAction>,
