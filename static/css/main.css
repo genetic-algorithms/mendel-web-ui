@@ -8,3 +8,7 @@ body {
 svg {
     display: block;
 }
+
+.js-plotly-plot svg {
+    display: inline;
+}
