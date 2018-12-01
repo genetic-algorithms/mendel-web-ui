@@ -28,7 +28,6 @@ func apiCreateJobHandler(w http.ResponseWriter, r *http.Request) {
 
 	decoder := json.NewDecoder(r.Body)
 	var data struct {
-		Title string `json:"title"`
 		Config string `json:"config"`
 	}
 	err := decoder.Decode(&data)
@@ -84,7 +83,6 @@ func apiCreateJobHandler(w http.ResponseWriter, r *http.Request) {
 	job := DatabaseJob{
 		Id: jobId,
 		Time: time.Now().UTC(),
-		Title: data.Title,
 		OwnerId: user.Id,
 		Status: "running",
 	}

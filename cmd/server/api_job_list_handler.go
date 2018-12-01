@@ -9,7 +9,6 @@ import (
 type ApiJobListHandlerJob struct {
 	Id string `json:"id"`
 	Time time.Time `json:"time"`
-	Title string `json:"title"`
 	Status string `json:"status"`
 	Username string `json:"username"`
 }
@@ -30,7 +29,6 @@ func apiJobListHandler(w http.ResponseWriter, r *http.Request) {
 			jobs = append(jobs, ApiJobListHandlerJob{
 				Id: job.Id,
 				Time: job.Time,
-				Title: job.Title,
 				Status: job.Status,
 				Username: globalDb.Users[job.OwnerId].Username,
 			})

@@ -13,7 +13,6 @@ type Props = {
 };
 
 type StateConfig = {
-    title: string;
     pop_size: string;
     num_generations: string;
     mutn_rate: string;
@@ -32,7 +31,6 @@ type State = {
 
 class Component extends React.Component<Props, State> {
     fieldChangeHandlers: {
-        title: (e: React.ChangeEvent<HTMLInputElement>) => void;
         pop_size: (e: React.ChangeEvent<HTMLInputElement>) => void;
         num_generations: (e: React.ChangeEvent<HTMLInputElement>) => void;
         mutn_rate: (e: React.ChangeEvent<HTMLInputElement>) => void;
@@ -48,7 +46,6 @@ class Component extends React.Component<Props, State> {
         super(props);
 
         this.fieldChangeHandlers = {
-            title: e => this.simpleFieldChanged('title', e),
             pop_size: e => this.simpleFieldChanged('pop_size', e),
             num_generations: e => this.simpleFieldChanged('num_generations', e),
             mutn_rate: e => this.simpleFieldChanged('mutn_rate', e),
@@ -66,7 +63,6 @@ class Component extends React.Component<Props, State> {
 
         this.state = {
             defaultValues: {
-                title: '',
                 pop_size: '',
                 num_generations: '',
                 mutn_rate: '',
@@ -78,7 +74,6 @@ class Component extends React.Component<Props, State> {
                 files_to_output_allele_bins: true,
             },
             fieldValues: {
-                title: '',
                 pop_size: '',
                 num_generations: '',
                 mutn_rate: '',
@@ -115,7 +110,6 @@ class Component extends React.Component<Props, State> {
         e.preventDefault();
 
         const data = {
-            title: this.state.fieldValues.title,
             config: stateToConfig(this.state.fieldValues),
         };
 
@@ -194,21 +188,6 @@ class Component extends React.Component<Props, State> {
         return React.createElement('div', { className: 'new-job-view' },
             React.createElement('div', { className: 'new-job-view__loading' }),
             React.createElement('form', { className: 'new-job-view__form', onSubmit: this.onSubmit },
-                React.createElement('div', { className: 'new-job-view__form-section-title' }, 'Metadata'),
-
-                React.createElement('div', { className: 'new-job-view__field' },
-                    React.createElement('label', {}, 'Job title'),
-                    React.createElement('input', {
-                        type: 'text',
-                        value: this.state.fieldValues.title,
-                        onChange: this.fieldChangeHandlers.title,
-                    }),
-                    (this.state.fieldValues.title !== this.state.defaultValues.title ?
-                        React.createElement('div', { className: 'new-job-view__not-default' }) :
-                        null
-                    ),
-                ),
-
                 React.createElement('div', { className: 'new-job-view__form-section-title' }, 'Basic'),
 
                 React.createElement('div', { className: 'new-job-view__field' },
@@ -447,7 +426,6 @@ function configToState(config: any) {
     const filesToOutput = filesToOutputBooleans(config.computation.files_to_output);
 
     return {
-        title: '',
         pop_size: config.basic.pop_size.toString(),
         num_generations: config.basic.num_generations.toString(),
         mutn_rate: config.mutations.mutn_rate.toString(),

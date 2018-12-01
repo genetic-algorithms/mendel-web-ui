@@ -17,13 +17,6 @@ import (
 	"github.com/gorilla/securecookie"
 )
 
-type JobMetaData struct {
-	Version int `json:"version"`
-	JobId string `json:"job_id"`
-	Time time.Time `json:"time"`
-	Title string `json:"title"`
-}
-
 type Database struct {
 	Version int `json:"version"`
 	CookieHashKey []byte `json:"cookie_hash_key"`
@@ -35,7 +28,6 @@ type Database struct {
 type DatabaseJob struct {
 	Id string `json:"id"`
 	Time time.Time `json:"time"`
-	Title string `json:"title"`
 	OwnerId string `json:"owner_id"`
 	Status string `json:"status"` // running, cancelled, failed, succeeded
 }

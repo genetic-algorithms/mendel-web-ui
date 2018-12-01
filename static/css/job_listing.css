@@ -1,5 +1,5 @@
 .job-listing-view {
-    max-width: 1000px;
+    max-width: 700px;
     padding-left: 24px;
     padding-right: 24px;
     padding-bottom: 60px;
@@ -56,11 +56,9 @@
     background-color: #EEE;
 }
 
-.job-listing-view__labels__title,
 .job-listing-view__labels__time,
 .job-listing-view__labels__username,
 .job-listing-view__labels__status,
-.job-listing-view__job__title,
 .job-listing-view__job__time,
 .job-listing-view__job__username,
 .job-listing-view__job__status {
@@ -68,23 +66,15 @@
     font-size: 14px;
 }
 
-.job-listing-view__labels__title,
 .job-listing-view__labels__time,
 .job-listing-view__labels__username,
 .job-listing-view__labels__status {
     font-weight: 700;
 }
 
-.job-listing-view__labels__title,
-.job-listing-view__job__title {
-    width: calc(100% - 600px);
-    box-sizing: border-box;
-    padding-right: 20px;
-}
-
 .job-listing-view__labels__time,
 .job-listing-view__job__time {
-    width: 300px;
+    width: calc(100% - 300px);
 }
 
 .job-listing-view__labels__username,

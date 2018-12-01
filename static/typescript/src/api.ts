@@ -62,7 +62,6 @@ export function apiGet(
 ): Promise<{
     jobs: {
         id: string;
-        title: string;
         time: string;
         status: string;
         username: string;
@@ -264,7 +263,6 @@ export function apiPost(
 export function apiPost(
     url: '/api/create-job/',
     body: {
-        title: string;
         config: string;
     },
     dispatch: Redux.Dispatch<ReduxAction>
