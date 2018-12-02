@@ -81,6 +81,8 @@
 .job-listing-view__labels__time,
 .job-listing-view__job__time {
     width: calc(100% - 300px);
+    box-sizing: border-box;
+    padding-left: 20px;
 }
 
 .job-listing-view__labels__username,

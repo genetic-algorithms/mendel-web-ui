@@ -30,6 +30,11 @@ func apiDeleteUserHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	globalDbLock.Lock()
+	for _, job := range globalDb.Jobs {
+		if job.OwnerId == postUser.Id {
+			job.OwnerId = ""
+		}
+	}
 	delete(globalDb.Users, postUser.Id)
 	err = persistDatabase()
 	globalDbLock.Unlock()
