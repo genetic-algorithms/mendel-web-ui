@@ -789,20 +789,6 @@
             'files_to_output = ' + tomlString(filesToOutputString(state.files_to_output_fit, state.files_to_output_hst, state.files_to_output_allele_bins)),
         ].join('\n');
     }
-    function chooseFileContents(callback) {
-        var input = document.createElement('input');
-        input.setAttribute('type', 'file');
-        input.click();
-        var onChange = function () {
-            var f = assertNotNull(input.files)[0];
-            var reader = new FileReader();
-            reader.onload = function () {
-                callback(reader.result);
-            };
-            reader.readAsText(f);
-        };
-        input.addEventListener('change', onChange, { once: true });
-    }
     function configToState(config) {
         var filesToOutput = filesToOutputBooleans(config.computation.files_to_output);
         return {
@@ -870,6 +856,20 @@
     function tomlString(s) {
         return '"' + s + '"';
     }
+    function chooseFileContents(callback) {
+        var input = document.createElement('input');
+        input.setAttribute('type', 'file');
+        input.click();
+        var onChange = function () {
+            var f = assertNotNull(input.files)[0];
+            var reader = new FileReader();
+            reader.onload = function () {
+                callback(reader.result);
+            };
+            reader.readAsText(f);
+        };
+        input.addEventListener('change', onChange, { once: true });
+    }
     var NewJob = ReactRedux.connect()(Component$2);
 
     var __extends$9 = (undefined && undefined.__extends) || (function () {
@@ -893,12 +893,23 @@
             _this.fetchController = new AbortController();
             _this.state = {
                 jobs: [],
-                all: true,
+                all: false,
             };
+            _this.onImportClick = _this.onImportClick.bind(_this);
             return _this;
         }
-        Component.prototype.onClick = function (jobId) {
+        Component.prototype.onJobClick = function (jobId) {
             setRoute(this.props.dispatch, '/job-detail/' + jobId + '/');
+        };
+        Component.prototype.onImportClick = function () {
+            var _this = this;
+            chooseFileContentsBase64(function (contents) {
+                apiPost('/api/import-job/', {
+                    contents: contents,
+                }, _this.props.dispatch).then(function () {
+                    _this.fetchJobs(_this.state.all);
+                });
+            });
         };
         Component.prototype.onFilterChanged = function (e) {
             var value = e.currentTarget.value;
@@ -930,16 +941,31 @@
                 className: 'job-listing-view__filter',
                 value: this.state.all ? 'all' : 'mine',
                 onChange: this.onFilterChanged,
-            }, React.createElement('option', { value: 'mine' }, 'My Jobs'), React.createElement('option', { value: 'all' }, 'All Jobs')), React.createElement('div', { className: 'job-listing-view__jobs' }, React.createElement('div', { className: 'job-listing-view__labels' }, React.createElement('div', { className: 'job-listing-view__labels__time' }, 'Time'), React.createElement('div', { className: 'job-listing-view__labels__username' }, 'User'), React.createElement('div', { className: 'job-listing-view__labels__status' }, 'Status')), this.state.jobs.map(function (job) { return (React.createElement('div', {
+            }, React.createElement('option', { value: 'mine' }, 'My Jobs'), React.createElement('option', { value: 'all' }, 'All Jobs')), React.createElement('div', { className: 'job-listing-view__import button button--text', onClick: this.onImportClick }, 'Import'), React.createElement('div', { className: 'job-listing-view__jobs' }, React.createElement('div', { className: 'job-listing-view__labels' }, React.createElement('div', { className: 'job-listing-view__labels__time' }, 'Time'), React.createElement('div', { className: 'job-listing-view__labels__username' }, 'User'), React.createElement('div', { className: 'job-listing-view__labels__status' }, 'Status')), this.state.jobs.map(function (job) { return (React.createElement('div', {
                 className: 'job-listing-view__job',
                 key: job.id,
-                onClick: function () { return _this.onClick(job.id); },
+                onClick: function () { return _this.onJobClick(job.id); },
             }, React.createElement('div', { className: 'job-listing-view__job__time' }, moment(job.time).fromNow()), React.createElement('div', { className: 'job-listing-view__job__username' }, job.username), React.createElement('div', { className: 'job-listing-view__job__status' }, capitalizeFirstLetter(job.status)))); })));
         };
         return Component;
     }(React.Component));
     function capitalizeFirstLetter(s) {
         return s[0].toUpperCase() + s.substring(1);
+    }
+    function chooseFileContentsBase64(callback) {
+        var input = document.createElement('input');
+        input.setAttribute('type', 'file');
+        input.click();
+        var onChange = function () {
+            var f = assertNotNull(input.files)[0];
+            var reader = new FileReader();
+            reader.onload = function () {
+                var contents = assertNotNull(reader.result).split(',')[1];
+                callback(contents);
+            };
+            reader.readAsDataURL(f);
+        };
+        input.addEventListener('change', onChange, { once: true });
     }
     var JobListing = ReactRedux.connect()(Component$3);
 

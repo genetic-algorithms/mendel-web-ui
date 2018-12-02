@@ -405,23 +405,6 @@ function stateToConfig(state: StateConfig) {
     ].join('\n');
 }
 
-function chooseFileContents(callback: (content: string) => void) {
-    const input = document.createElement('input');
-    input.setAttribute('type', 'file');
-    input.click();
-
-    const onChange = () => {
-        const f = assertNotNull(input.files)[0];
-        const reader = new FileReader();
-        reader.onload = () => {
-            callback(reader.result as string);
-        };
-        reader.readAsText(f);
-    };
-
-    input.addEventListener('change', onChange, { once: true });
-}
-
 function configToState(config: any) {
     const filesToOutput = filesToOutputBooleans(config.computation.files_to_output);
 
@@ -502,6 +485,23 @@ function tomlFloat(s: string) {
 
 function tomlString(s: string) {
     return '"' + s + '"';
+}
+
+function chooseFileContents(callback: (content: string) => void) {
+    const input = document.createElement('input');
+    input.setAttribute('type', 'file');
+    input.click();
+
+    const onChange = () => {
+        const f = assertNotNull(input.files)[0];
+        const reader = new FileReader();
+        reader.onload = () => {
+            callback(reader.result as string);
+        };
+        reader.readAsText(f);
+    };
+
+    input.addEventListener('change', onChange, { once: true });
 }
 
 export const NewJob = ReactRedux.connect()(Component);

@@ -216,6 +216,8 @@ func apiHandler(w http.ResponseWriter, r *http.Request) {
 		apiGetJobConfigHandler(w, r)
 	} else if r.URL.Path == "/api/export-job/" {
 		apiExportJobHandler(w, r)
+	} else if r.URL.Path == "/api/import-job/" {
+		apiImportJobHandler(w, r)
 	} else if r.URL.Path == "/api/plot-average-mutations/" {
 		apiPlotAverageMutationsHandler(w, r)
 	} else if r.URL.Path == "/api/plot-fitness-history/" {

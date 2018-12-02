@@ -41,6 +41,12 @@
     border-color: #CCC;
 }
 
+.job-listing-view__import {
+    position: absolute;
+    right: 210px;
+    top: 39px;
+}
+
 .job-listing-view__labels {
     display: flex;
     border-bottom: 1px solid #DDD;

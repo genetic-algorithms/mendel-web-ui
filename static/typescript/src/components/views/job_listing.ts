@@ -3,8 +3,8 @@ import * as Redux from 'redux';
 import * as ReactRedux from 'react-redux';
 import moment from 'moment';
 import { ReduxAction } from '../../redux_action_types';
-import { apiGet } from '../../api';
-import { setRoute } from '../../util';
+import { apiGet, apiPost } from '../../api';
+import { setRoute, assertNotNull } from '../../util';
 
 type Job = {
     id: string;
@@ -33,12 +33,28 @@ class Component extends React.Component<Props, State> {
 
         this.state = {
             jobs: [],
-            all: true,
+            all: false,
         };
+
+        this.onImportClick = this.onImportClick.bind(this);
     }
 
-    onClick(jobId: string) {
+    onJobClick(jobId: string) {
         setRoute(this.props.dispatch, '/job-detail/' + jobId + '/');
+    }
+
+    onImportClick() {
+        chooseFileContentsBase64(contents => {
+            apiPost(
+                '/api/import-job/',
+                {
+                    contents: contents,
+                },
+                this.props.dispatch,
+            ).then(() => {
+                this.fetchJobs(this.state.all);
+            });
+        });
     }
 
     onFilterChanged(e: React.ChangeEvent<HTMLSelectElement>) {
@@ -88,6 +104,7 @@ class Component extends React.Component<Props, State> {
                 React.createElement('option', { value: 'mine' }, 'My Jobs'),
                 React.createElement('option', { value: 'all' }, 'All Jobs'),
             ),
+            React.createElement('div', { className: 'job-listing-view__import button button--text', onClick: this.onImportClick }, 'Import'),
             React.createElement('div', { className: 'job-listing-view__jobs' },
                 React.createElement('div', { className: 'job-listing-view__labels' },
                     React.createElement('div', { className: 'job-listing-view__labels__time' }, 'Time'),
@@ -100,7 +117,7 @@ class Component extends React.Component<Props, State> {
                         {
                             className: 'job-listing-view__job',
                             key: job.id,
-                            onClick: () => this.onClick(job.id),
+                            onClick: () => this.onJobClick(job.id),
                         },
                         React.createElement('div', { className: 'job-listing-view__job__time' }, moment(job.time).fromNow()),
                         React.createElement('div', { className: 'job-listing-view__job__username' }, job.username),
@@ -116,6 +133,24 @@ class Component extends React.Component<Props, State> {
 
 function capitalizeFirstLetter(s: string) {
     return s[0].toUpperCase() + s.substring(1);
+}
+
+function chooseFileContentsBase64(callback: (content: string) => void) {
+    const input = document.createElement('input');
+    input.setAttribute('type', 'file');
+    input.click();
+
+    const onChange = () => {
+        const f = assertNotNull(input.files)[0];
+        const reader = new FileReader();
+        reader.onload = () => {
+            const contents = (assertNotNull(reader.result) as string).split(',')[1];
+            callback(contents);
+        };
+        reader.readAsDataURL(f);
+    };
+
+    input.addEventListener('change', onChange, { once: true });
 }
 
 export const JobListing = ReactRedux.connect()(Component);

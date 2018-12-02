@@ -261,6 +261,16 @@ export function apiPost(
 }>;
 
 export function apiPost(
+    url: '/api/import-job/',
+    body: {
+        contents: string;
+    },
+    dispatch: Redux.Dispatch<ReduxAction>
+): Promise<{
+    job_id: string;
+}>;
+
+export function apiPost(
     url: '/api/create-job/',
     body: {
         config: string;
