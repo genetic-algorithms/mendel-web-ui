@@ -2,6 +2,8 @@ import * as React from 'react';
 import * as Redux from 'redux';
 import * as ReactRedux from 'react-redux';
 import { ReduxAction } from '../../../redux_action_types';
+import { BackIcon } from '../../icons/back';
+import { setRoute } from '../../../util';
 
 type OwnProps = {
     jobId: string;
@@ -9,7 +11,8 @@ type OwnProps = {
 };
 
 type Props = OwnProps & {
-    onClick: (slug: string) => void;
+    onLinkClick: (slug: string) => void;
+    onBackClick: () => void;
 };
 
 const LINKS = [
@@ -41,13 +44,11 @@ const LINKS = [
 
 function mapDispatchToProps(dispatch: Redux.Dispatch<ReduxAction>, ownProps: OwnProps) {
     return {
-        onClick: (slug: string) => {
-            const url = '/plots/' + ownProps.jobId + '/' + slug + '/';
-            dispatch({
-                type: 'ROUTE',
-                value: url,
-            });
-            history.pushState(null, '', url);
+        onLinkClick: (slug: string) => {
+            setRoute(dispatch, '/plots/' + ownProps.jobId + '/' + slug + '/');
+        },
+        onBackClick: () => {
+            setRoute(dispatch, '/job-detail/' + ownProps.jobId + '/');
         },
     };
 }
@@ -55,13 +56,18 @@ function mapDispatchToProps(dispatch: Redux.Dispatch<ReduxAction>, ownProps: Own
 class Component extends React.Component<Props> {
     render() {
         return React.createElement('div', { className: 'plots-view__sidebar' },
-            LINKS.map(link => (
-                React.createElement('div', {
-                    className: 'plots-view__sidebar__item ' + (this.props.activeSlug === link.slug ? 'plots-view__sidebar--active' : ''),
-                    onClick: () => this.props.onClick(link.slug),
-                    key: link.slug,
-                }, link.title)
-            )),
+            React.createElement('div', { className: 'plots-view__sidebar__back', onClick: this.props.onBackClick },
+                React.createElement(BackIcon, { width: 24, height: 24 }),
+            ),
+            React.createElement('div', { className: 'plots-view__sidebar__items' },
+                LINKS.map(link => (
+                    React.createElement('div', {
+                        className: 'plots-view__sidebar__item ' + (this.props.activeSlug === link.slug ? 'plots-view__sidebar--active' : ''),
+                        onClick: () => this.props.onLinkClick(link.slug),
+                        key: link.slug,
+                    }, link.title)
+                )),
+            ),
         );
     }
 }

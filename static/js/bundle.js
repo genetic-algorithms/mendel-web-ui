@@ -1609,6 +1609,35 @@
             d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
         };
     })();
+    var BackIcon = (function (_super) {
+        __extends$g(BackIcon, _super);
+        function BackIcon() {
+            return _super !== null && _super.apply(this, arguments) || this;
+        }
+        BackIcon.prototype.render = function () {
+            return React.createElement('svg', {
+                width: this.props.width.toString(),
+                height: this.props.height.toString(),
+                viewBox: '0 0 24 24',
+                xmlns: 'http://www.w3.org/2000/svg',
+            }, React.createElement('path', { d: 'M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z' }));
+        };
+        return BackIcon;
+    }(React.PureComponent));
+
+    var __extends$h = (undefined && undefined.__extends) || (function () {
+        var extendStatics = function (d, b) {
+            extendStatics = Object.setPrototypeOf ||
+                ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+                function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+            return extendStatics(d, b);
+        };
+        return function (d, b) {
+            extendStatics(d, b);
+            function __() { this.constructor = d; }
+            d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+        };
+    })();
     var LINKS = [
         {
             title: 'Average mutations/individual',
@@ -1637,34 +1666,32 @@
     ];
     function mapDispatchToProps$2(dispatch, ownProps) {
         return {
-            onClick: function (slug) {
-                var url = '/plots/' + ownProps.jobId + '/' + slug + '/';
-                dispatch({
-                    type: 'ROUTE',
-                    value: url,
-                });
-                history.pushState(null, '', url);
+            onLinkClick: function (slug) {
+                setRoute(dispatch, '/plots/' + ownProps.jobId + '/' + slug + '/');
+            },
+            onBackClick: function () {
+                setRoute(dispatch, '/job-detail/' + ownProps.jobId + '/');
             },
         };
     }
     var Component$9 = (function (_super) {
-        __extends$g(Component, _super);
+        __extends$h(Component, _super);
         function Component() {
             return _super !== null && _super.apply(this, arguments) || this;
         }
         Component.prototype.render = function () {
             var _this = this;
-            return React.createElement('div', { className: 'plots-view__sidebar' }, LINKS.map(function (link) { return (React.createElement('div', {
+            return React.createElement('div', { className: 'plots-view__sidebar' }, React.createElement('div', { className: 'plots-view__sidebar__back', onClick: this.props.onBackClick }, React.createElement(BackIcon, { width: 24, height: 24 })), React.createElement('div', { className: 'plots-view__sidebar__items' }, LINKS.map(function (link) { return (React.createElement('div', {
                 className: 'plots-view__sidebar__item ' + (_this.props.activeSlug === link.slug ? 'plots-view__sidebar--active' : ''),
-                onClick: function () { return _this.props.onClick(link.slug); },
+                onClick: function () { return _this.props.onLinkClick(link.slug); },
                 key: link.slug,
-            }, link.title)); }));
+            }, link.title)); })));
         };
         return Component;
     }(React.Component));
     var Sidebar = ReactRedux.connect(null, mapDispatchToProps$2)(Component$9);
 
-    var __extends$h = (undefined && undefined.__extends) || (function () {
+    var __extends$i = (undefined && undefined.__extends) || (function () {
         var extendStatics = function (d, b) {
             extendStatics = Object.setPrototypeOf ||
                 ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
@@ -1678,7 +1705,7 @@
         };
     })();
     var Component$a = (function (_super) {
-        __extends$h(Component, _super);
+        __extends$i(Component, _super);
         function Component(props) {
             var _this = _super.call(this, props) || this;
             _this.resizePlot = _this.resizePlot.bind(_this);
@@ -1747,7 +1774,7 @@
     }(React.Component));
     var AverageMutations = ReactRedux.connect()(Component$a);
 
-    var __extends$i = (undefined && undefined.__extends) || (function () {
+    var __extends$j = (undefined && undefined.__extends) || (function () {
         var extendStatics = function (d, b) {
             extendStatics = Object.setPrototypeOf ||
                 ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
@@ -1761,7 +1788,7 @@
         };
     })();
     var Component$b = (function (_super) {
-        __extends$i(Component, _super);
+        __extends$j(Component, _super);
         function Component(props) {
             var _this = _super.call(this, props) || this;
             _this.resizePlot = _this.resizePlot.bind(_this);
@@ -1827,7 +1854,7 @@
     }(React.Component));
     var FitnessHistory = ReactRedux.connect()(Component$b);
 
-    var __extends$j = (undefined && undefined.__extends) || (function () {
+    var __extends$k = (undefined && undefined.__extends) || (function () {
         var extendStatics = function (d, b) {
             extendStatics = Object.setPrototypeOf ||
                 ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
@@ -1841,7 +1868,7 @@
         };
     })();
     var Component$c = (function (_super) {
-        __extends$j(Component, _super);
+        __extends$k(Component, _super);
         function Component(props) {
             var _this = _super.call(this, props) || this;
             _this.resizePlot = _this.resizePlot.bind(_this);
@@ -1954,7 +1981,7 @@
     }(React.Component));
     var DeleteriousMutations = ReactRedux.connect()(Component$c);
 
-    var __extends$k = (undefined && undefined.__extends) || (function () {
+    var __extends$l = (undefined && undefined.__extends) || (function () {
         var extendStatics = function (d, b) {
             extendStatics = Object.setPrototypeOf ||
                 ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
@@ -1968,7 +1995,7 @@
         };
     })();
     var Component$d = (function (_super) {
-        __extends$k(Component, _super);
+        __extends$l(Component, _super);
         function Component(props) {
             var _this = _super.call(this, props) || this;
             _this.resizePlot = _this.resizePlot.bind(_this);
@@ -2080,7 +2107,7 @@
     }(React.Component));
     var BeneficialMutations = ReactRedux.connect()(Component$d);
 
-    var __extends$l = (undefined && undefined.__extends) || (function () {
+    var __extends$m = (undefined && undefined.__extends) || (function () {
         var extendStatics = function (d, b) {
             extendStatics = Object.setPrototypeOf ||
                 ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
@@ -2094,7 +2121,7 @@
         };
     })();
     var Component$e = (function (_super) {
-        __extends$l(Component, _super);
+        __extends$m(Component, _super);
         function Component(props) {
             var _this = _super.call(this, props) || this;
             _this.resizePlot = _this.resizePlot.bind(_this);
@@ -2264,7 +2291,7 @@
     }(React.Component));
     var SnpFrequencies = ReactRedux.connect()(Component$e);
 
-    var __extends$m = (undefined && undefined.__extends) || (function () {
+    var __extends$n = (undefined && undefined.__extends) || (function () {
         var extendStatics = function (d, b) {
             extendStatics = Object.setPrototypeOf ||
                 ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
@@ -2278,7 +2305,7 @@
         };
     })();
     var Component$f = (function (_super) {
-        __extends$m(Component, _super);
+        __extends$n(Component, _super);
         function Component(props) {
             var _this = _super.call(this, props) || this;
             _this.resizePlot = _this.resizePlot.bind(_this);
@@ -2489,7 +2516,7 @@
     }
     var Content = ReactRedux.connect(mapStateToProps$4)(Component$g);
 
-    var __extends$n = (undefined && undefined.__extends) || (function () {
+    var __extends$o = (undefined && undefined.__extends) || (function () {
         var extendStatics = function (d, b) {
             extendStatics = Object.setPrototypeOf ||
                 ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
@@ -2508,7 +2535,7 @@
         };
     }
     var Component$h = (function (_super) {
-        __extends$n(Component, _super);
+        __extends$o(Component, _super);
         function Component(props) {
             var _this = _super.call(this, props) || this;
             _this.state = {
@@ -2536,7 +2563,7 @@
     }(React.Component));
     var NonLogin = ReactRedux.connect(mapStateToProps$5)(Component$h);
 
-    var __extends$o = (undefined && undefined.__extends) || (function () {
+    var __extends$p = (undefined && undefined.__extends) || (function () {
         var extendStatics = function (d, b) {
             extendStatics = Object.setPrototypeOf ||
                 ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
@@ -2555,7 +2582,7 @@
         };
     }
     var Component$i = (function (_super) {
-        __extends$o(Component, _super);
+        __extends$p(Component, _super);
         function Component() {
             return _super !== null && _super.apply(this, arguments) || this;
         }

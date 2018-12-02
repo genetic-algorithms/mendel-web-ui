@@ -16,6 +16,24 @@
     overflow: auto;
 }
 
+.plots-view__sidebar__back {
+    display: inline-block;
+    vertical-align: top;
+    padding: 5px;
+    border-radius: 50%;
+    cursor: pointer;
+    margin-bottom: 10px;
+    margin-left: 10px;
+}
+
+.plots-view__sidebar__back:hover {
+    background-color: #E9E9E9;
+}
+
+.plots-view__sidebar__back svg {
+    fill: #333;
+}
+
 .plots-view__sidebar__item {
     padding: 12px 20px;
     border-right: 4px solid transparent;
