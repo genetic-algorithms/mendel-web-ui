@@ -558,6 +558,7 @@
             d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
         };
     })();
+    var HELP_URL_PREFIX = 'http://ec2-52-43-51-28.us-west-2.compute.amazonaws.com:8580/static/apps/mendel/help.html#';
     var Component$2 = (function (_super) {
         __extends$8(Component, _super);
         function Component(props) {
@@ -566,6 +567,10 @@
                 pop_size: function (e) { return _this.simpleFieldChanged('pop_size', e); },
                 num_generations: function (e) { return _this.simpleFieldChanged('num_generations', e); },
                 mutn_rate: function (e) { return _this.simpleFieldChanged('mutn_rate', e); },
+                genome_size: function (e) { return _this.simpleFieldChanged('genome_size', e); },
+                mutn_rate_model: function (e) { return _this.simpleFieldChanged('mutn_rate_model', e); },
+                frac_fav_mutn: function (e) { return _this.simpleFieldChanged('frac_fav_mutn', e); },
+                fraction_neutral: function (e) { return _this.simpleFieldChanged('fraction_neutral', e); },
                 fitness_effect_model: function (e) { return _this.simpleFieldChanged('fitness_effect_model', e); },
                 uniform_fitness_effect_del: function (e) { return _this.simpleFieldChanged('uniform_fitness_effect_del', e); },
                 uniform_fitness_effect_fav: function (e) { return _this.simpleFieldChanged('uniform_fitness_effect_fav', e); },
@@ -576,29 +581,24 @@
             _this.onSubmit = _this.onSubmit.bind(_this);
             _this.onImportClick = _this.onImportClick.bind(_this);
             _this.onExportClick = _this.onExportClick.bind(_this);
+            var emptyStateConfig = {
+                pop_size: '',
+                num_generations: '',
+                mutn_rate: '',
+                genome_size: '',
+                mutn_rate_model: 'poisson',
+                frac_fav_mutn: '',
+                fraction_neutral: '',
+                fitness_effect_model: 'weibull',
+                uniform_fitness_effect_del: '',
+                uniform_fitness_effect_fav: '',
+                files_to_output_fit: true,
+                files_to_output_hst: true,
+                files_to_output_allele_bins: true,
+            };
             _this.state = {
-                defaultValues: {
-                    pop_size: '',
-                    num_generations: '',
-                    mutn_rate: '',
-                    fitness_effect_model: 'weibull',
-                    uniform_fitness_effect_del: '',
-                    uniform_fitness_effect_fav: '',
-                    files_to_output_fit: true,
-                    files_to_output_hst: true,
-                    files_to_output_allele_bins: true,
-                },
-                fieldValues: {
-                    pop_size: '',
-                    num_generations: '',
-                    mutn_rate: '',
-                    fitness_effect_model: 'weibull',
-                    uniform_fitness_effect_del: '',
-                    uniform_fitness_effect_fav: '',
-                    files_to_output_fit: true,
-                    files_to_output_hst: true,
-                    files_to_output_allele_bins: true,
-                },
+                defaultValues: Object.assign({}, emptyStateConfig),
+                fieldValues: Object.assign({}, emptyStateConfig),
             };
             return _this;
         }
@@ -712,6 +712,52 @@
                 null), React.createElement(Help, {
                 title: 'mutn_rate',
                 content: 'This is the average number of new mutations per individual per generation. In humans, this number is believed to be approximately 100. The mutation rate can be adjusted to be proportional to the size of the functional genome. Thus if only 10% of the human genome actually functions (assuming the rest to be biologically inert), or if only 10% of the genome is modeled (as is the default), then the biologically relevant human mutation rate would be just 10. Rates of less than 1 new mutation per individual are allowed, including zero.',
+            })), React.createElement('div', { className: 'new-job-view__field' }, React.createElement('label', {}, 'Functional genome size'), React.createElement('input', {
+                type: 'number',
+                min: '100',
+                max: '10000000000000',
+                step: '1',
+                value: this.state.fieldValues.genome_size,
+                onChange: this.fieldChangeHandlers.genome_size,
+            }), (parseInt(this.state.fieldValues.genome_size) !== parseInt(this.state.defaultValues.genome_size) ?
+                React.createElement('div', { className: 'new-job-view__not-default' }) :
+                null), React.createElement(Help, {
+                title: 'genome_size',
+                content: 'The distribution of deleterious mutational effects must in some way be adjusted to account for genome size. An approximate yet reasonable means for doing this is to define the minimal mutational effect as being 1 divided by the functional haploid genome size. The result of this adjustment is that smaller genomes have “flatter” distributions of deleterious mutations, while larger genomes have “steeper” distribution curves. Because we consider all entirely neutral mutations separately, we only consider the size of the functional genome, so we choose the default genome size to be 300 million (10% of the actual human genome size).',
+                url: HELP_URL_PREFIX + 'hgs',
+            })), React.createElement('div', { className: 'new-job-view__field' }, React.createElement('label', {}, 'Mutation rate model'), React.createElement('select', {
+                value: this.state.fieldValues.mutn_rate_model,
+                onChange: this.fieldChangeHandlers.mutn_rate_model,
+            }, React.createElement('option', { value: 'fixed' }, 'Fixed'), React.createElement('option', { value: 'poisson' }, 'Poisson (default)')), (this.state.fieldValues.mutn_rate_model !== this.state.defaultValues.mutn_rate_model ?
+                React.createElement('div', { className: 'new-job-view__not-default' }) :
+                null), React.createElement(Help, {
+                title: 'mutn_rate_model',
+                content: 'Choices: "poisson" - mutn_rate is determined by a poisson distribution, or "fixed" - mutn_rate is rounded to the nearest int',
+            })), React.createElement('div', { className: 'new-job-view__field' }, React.createElement('label', {}, 'Beneficial/deleterious ratio within non-neutral mutations'), React.createElement('input', {
+                type: 'number',
+                min: '0',
+                max: '1',
+                step: 'any',
+                value: this.state.fieldValues.frac_fav_mutn,
+                onChange: this.fieldChangeHandlers.frac_fav_mutn,
+            }), (parseFloat(this.state.fieldValues.frac_fav_mutn) !== parseFloat(this.state.defaultValues.frac_fav_mutn) ?
+                React.createElement('div', { className: 'new-job-view__not-default' }) :
+                null), React.createElement(Help, {
+                title: 'frac_fav_mutn',
+                content: 'While some sources suggest this number might be as high as 1:1000, most sources suggest it is more realistically about 1:1,000,000. For studying the accumulation of only deleterious or only beneficial mutations, the fraction of beneficials can be set to zero or 1.',
+            })), React.createElement('div', { className: 'new-job-view__field' }, React.createElement('label', {}, 'Fraction of the total number of mutations that are perfectly neutral'), React.createElement('input', {
+                type: 'number',
+                min: '0',
+                max: '1',
+                step: 'any',
+                value: this.state.fieldValues.fraction_neutral,
+                onChange: this.fieldChangeHandlers.fraction_neutral,
+            }), (parseFloat(this.state.fieldValues.fraction_neutral) !== parseFloat(this.state.defaultValues.fraction_neutral) ?
+                React.createElement('div', { className: 'new-job-view__not-default' }) :
+                null), React.createElement(Help, {
+                title: 'frac_fav_mutn',
+                content: 'It is not clear that any mutations are perfectly neutral, but in the past it has often been claimed that most of the human genome is non-function “junk DNA”, and that mutations in these regions are truly neutral. For the human default, we allow (but do not believe) that 90% of the genome is junk DNA, and so 90% of all human mutations have absolutely no biological effect. Because of the computational cost of tracking so many neutral mutations we specify zero neutrals be simulated, and discount the genome size so it only reflects non-neutral mutations.',
+                url: HELP_URL_PREFIX + 'fmun',
             })), React.createElement('div', { className: 'new-job-view__field' }, React.createElement('label', {}, 'Fitness effect model'), React.createElement('select', {
                 value: this.state.fieldValues.fitness_effect_model,
                 onChange: this.fieldChangeHandlers.fitness_effect_model,
@@ -720,7 +766,7 @@
                 null), React.createElement(Help, {
                 title: 'fitness_effect_model',
                 content: 'Choices: "weibull" - the fitness effect of each mutation is determined by the Weibull distribution, "fixed" - use fixed values for mutation fitness effect as set in uniform_fitness_effect_*, or "uniform" - even distribution between 0 and uniform_fitness_effect_* as max.',
-            })), React.createElement('div', { className: 'new-job-view__field' }, React.createElement('label', {}, 'For fixed: effect for each deleterious mutation'), React.createElement('input', {
+            })), React.createElement('div', { className: 'new-job-view__field new-job-view--indented' }, React.createElement('label', {}, 'For fixed: effect for each deleterious mutation'), React.createElement('input', {
                 type: 'number',
                 min: '0',
                 max: '0.1',
@@ -733,7 +779,7 @@
                 null), React.createElement(Help, {
                 title: 'uniform_fitness_effect_del',
                 content: 'Used for fitness_effect_model=fixed. Each deleterious mutation should have this fitness effect.',
-            })), React.createElement('div', { className: 'new-job-view__field' }, React.createElement('label', {}, 'For fixed: effect for each beneficial mutation'), React.createElement('input', {
+            })), React.createElement('div', { className: 'new-job-view__field new-job-view--indented' }, React.createElement('label', {}, 'For fixed: effect for each beneficial mutation'), React.createElement('input', {
                 type: 'number',
                 min: '0',
                 max: '0.1',
@@ -781,6 +827,10 @@
             'num_generations = ' + tomlInt(state.num_generations),
             '[mutations]',
             'mutn_rate = ' + tomlFloat(state.mutn_rate),
+            'genome_size = ' + tomlInt(state.genome_size),
+            'mutn_rate_model = ' + tomlString(state.mutn_rate_model),
+            'frac_fav_mutn = ' + tomlFloat(state.frac_fav_mutn),
+            'fraction_neutral = ' + tomlFloat(state.fraction_neutral),
             'fitness_effect_model = ' + tomlString(state.fitness_effect_model),
             'uniform_fitness_effect_del = ' + tomlFloat(state.uniform_fitness_effect_del),
             'uniform_fitness_effect_fav = ' + tomlFloat(state.uniform_fitness_effect_fav),
@@ -795,6 +845,10 @@
             pop_size: config.basic.pop_size.toString(),
             num_generations: config.basic.num_generations.toString(),
             mutn_rate: config.mutations.mutn_rate.toString(),
+            genome_size: config.mutations.genome_size.toString(),
+            mutn_rate_model: config.mutations.mutn_rate_model,
+            frac_fav_mutn: config.mutations.frac_fav_mutn.toString(),
+            fraction_neutral: config.mutations.fraction_neutral.toString(),
             fitness_effect_model: config.mutations.fitness_effect_model,
             uniform_fitness_effect_del: config.mutations.uniform_fitness_effect_del.toString(),
             uniform_fitness_effect_fav: config.mutations.uniform_fitness_effect_fav.toString(),

@@ -16,6 +16,10 @@ type StateConfig = {
     pop_size: string;
     num_generations: string;
     mutn_rate: string;
+    genome_size: string;
+    mutn_rate_model: 'fixed' | 'poisson';
+    frac_fav_mutn: string;
+    fraction_neutral: string;
     fitness_effect_model: 'fixed' | 'uniform' | 'weibull';
     uniform_fitness_effect_del: string;
     uniform_fitness_effect_fav: string;
@@ -24,16 +28,42 @@ type StateConfig = {
     files_to_output_allele_bins: boolean;
 };
 
+type ServerConfig = {
+    basic: {
+        pop_size: number;
+        num_generations: number;
+    },
+    mutations: {
+        mutn_rate: number;
+        genome_size: number;
+        mutn_rate_model: 'fixed' | 'poisson';
+        frac_fav_mutn: number;
+        fraction_neutral: number;
+        fitness_effect_model: 'fixed' | 'uniform' | 'weibull';
+        uniform_fitness_effect_del: number;
+        uniform_fitness_effect_fav: number;
+    },
+    computation: {
+        files_to_output: string;
+    }
+};
+
 type State = {
     defaultValues: StateConfig;
     fieldValues: StateConfig;
 };
+
+const HELP_URL_PREFIX = 'http://ec2-52-43-51-28.us-west-2.compute.amazonaws.com:8580/static/apps/mendel/help.html#';
 
 class Component extends React.Component<Props, State> {
     fieldChangeHandlers: {
         pop_size: (e: React.ChangeEvent<HTMLInputElement>) => void;
         num_generations: (e: React.ChangeEvent<HTMLInputElement>) => void;
         mutn_rate: (e: React.ChangeEvent<HTMLInputElement>) => void;
+        genome_size: (e: React.ChangeEvent<HTMLInputElement>) => void;
+        mutn_rate_model: (e: React.ChangeEvent<HTMLInputElement>) => void;
+        frac_fav_mutn: (e: React.ChangeEvent<HTMLInputElement>) => void;
+        fraction_neutral: (e: React.ChangeEvent<HTMLInputElement>) => void;
         fitness_effect_model: (e: React.ChangeEvent<HTMLSelectElement>) => void;
         uniform_fitness_effect_del: (e: React.ChangeEvent<HTMLInputElement>) => void;
         uniform_fitness_effect_fav: (e: React.ChangeEvent<HTMLInputElement>) => void;
@@ -49,6 +79,10 @@ class Component extends React.Component<Props, State> {
             pop_size: e => this.simpleFieldChanged('pop_size', e),
             num_generations: e => this.simpleFieldChanged('num_generations', e),
             mutn_rate: e => this.simpleFieldChanged('mutn_rate', e),
+            genome_size: e => this.simpleFieldChanged('genome_size', e),
+            mutn_rate_model: e => this.simpleFieldChanged('mutn_rate_model', e),
+            frac_fav_mutn: e => this.simpleFieldChanged('frac_fav_mutn', e),
+            fraction_neutral: e => this.simpleFieldChanged('fraction_neutral', e),
             fitness_effect_model: e => this.simpleFieldChanged('fitness_effect_model', e),
             uniform_fitness_effect_del: e => this.simpleFieldChanged('uniform_fitness_effect_del', e),
             uniform_fitness_effect_fav: e => this.simpleFieldChanged('uniform_fitness_effect_fav', e),
@@ -61,35 +95,31 @@ class Component extends React.Component<Props, State> {
         this.onImportClick = this.onImportClick.bind(this);
         this.onExportClick = this.onExportClick.bind(this);
 
+        const emptyStateConfig: StateConfig = {
+            pop_size: '',
+            num_generations: '',
+            mutn_rate: '',
+            genome_size: '',
+            mutn_rate_model: 'poisson',
+            frac_fav_mutn: '',
+            fraction_neutral: '',
+            fitness_effect_model: 'weibull',
+            uniform_fitness_effect_del: '',
+            uniform_fitness_effect_fav: '',
+            files_to_output_fit: true,
+            files_to_output_hst: true,
+            files_to_output_allele_bins: true,
+        };
+
         this.state = {
-            defaultValues: {
-                pop_size: '',
-                num_generations: '',
-                mutn_rate: '',
-                fitness_effect_model: 'weibull',
-                uniform_fitness_effect_del: '',
-                uniform_fitness_effect_fav: '',
-                files_to_output_fit: true,
-                files_to_output_hst: true,
-                files_to_output_allele_bins: true,
-            },
-            fieldValues: {
-                pop_size: '',
-                num_generations: '',
-                mutn_rate: '',
-                fitness_effect_model: 'weibull',
-                uniform_fitness_effect_del: '',
-                uniform_fitness_effect_fav: '',
-                files_to_output_fit: true,
-                files_to_output_hst: true,
-                files_to_output_allele_bins: true,
-            },
+            defaultValues: Object.assign({}, emptyStateConfig),
+            fieldValues: Object.assign({}, emptyStateConfig),
         };
     }
 
     onImportClick() {
         chooseFileContents(contents => {
-            const config = toml.parse(contents);
+            const config = toml.parse(contents) as ServerConfig;
             const values = configToState(config);
 
             this.setState({
@@ -253,6 +283,88 @@ class Component extends React.Component<Props, State> {
                 ),
 
                 React.createElement('div', { className: 'new-job-view__field' },
+                    React.createElement('label', {}, 'Functional genome size'),
+                    React.createElement('input', {
+                        type: 'number',
+                        min: '100',
+                        max: '10000000000000',
+                        step: '1',
+                        value: this.state.fieldValues.genome_size,
+                        onChange: this.fieldChangeHandlers.genome_size,
+                    }),
+                    (parseInt(this.state.fieldValues.genome_size) !== parseInt(this.state.defaultValues.genome_size) ?
+                        React.createElement('div', { className: 'new-job-view__not-default' }) :
+                        null
+                    ),
+                    React.createElement(Help, {
+                        title: 'genome_size',
+                        content: 'The distribution of deleterious mutational effects must in some way be adjusted to account for genome size. An approximate yet reasonable means for doing this is to define the minimal mutational effect as being 1 divided by the functional haploid genome size. The result of this adjustment is that smaller genomes have “flatter” distributions of deleterious mutations, while larger genomes have “steeper” distribution curves. Because we consider all entirely neutral mutations separately, we only consider the size of the functional genome, so we choose the default genome size to be 300 million (10% of the actual human genome size).',
+                        url: HELP_URL_PREFIX + 'hgs',
+                    }),
+                ),
+
+                React.createElement('div', { className: 'new-job-view__field' },
+                    React.createElement('label', {}, 'Mutation rate model'),
+                    React.createElement('select',
+                        {
+                            value: this.state.fieldValues.mutn_rate_model,
+                            onChange: this.fieldChangeHandlers.mutn_rate_model,
+                        },
+                        React.createElement('option', { value: 'fixed' }, 'Fixed'),
+                        React.createElement('option', { value: 'poisson' }, 'Poisson (default)'),
+                    ),
+                    (this.state.fieldValues.mutn_rate_model !== this.state.defaultValues.mutn_rate_model ?
+                        React.createElement('div', { className: 'new-job-view__not-default' }) :
+                        null
+                    ),
+                    React.createElement(Help, {
+                        title: 'mutn_rate_model',
+                        content: 'Choices: "poisson" - mutn_rate is determined by a poisson distribution, or "fixed" - mutn_rate is rounded to the nearest int',
+                    }),
+                ),
+
+                React.createElement('div', { className: 'new-job-view__field' },
+                    React.createElement('label', {}, 'Beneficial/deleterious ratio within non-neutral mutations'),
+                    React.createElement('input', {
+                        type: 'number',
+                        min: '0',
+                        max: '1',
+                        step: 'any',
+                        value: this.state.fieldValues.frac_fav_mutn,
+                        onChange: this.fieldChangeHandlers.frac_fav_mutn,
+                    }),
+                    (parseFloat(this.state.fieldValues.frac_fav_mutn) !== parseFloat(this.state.defaultValues.frac_fav_mutn) ?
+                        React.createElement('div', { className: 'new-job-view__not-default' }) :
+                        null
+                    ),
+                    React.createElement(Help, {
+                        title: 'frac_fav_mutn',
+                        content: 'While some sources suggest this number might be as high as 1:1000, most sources suggest it is more realistically about 1:1,000,000. For studying the accumulation of only deleterious or only beneficial mutations, the fraction of beneficials can be set to zero or 1.',
+                    }),
+                ),
+
+                React.createElement('div', { className: 'new-job-view__field' },
+                    React.createElement('label', {}, 'Fraction of the total number of mutations that are perfectly neutral'),
+                    React.createElement('input', {
+                        type: 'number',
+                        min: '0',
+                        max: '1',
+                        step: 'any',
+                        value: this.state.fieldValues.fraction_neutral,
+                        onChange: this.fieldChangeHandlers.fraction_neutral,
+                    }),
+                    (parseFloat(this.state.fieldValues.fraction_neutral) !== parseFloat(this.state.defaultValues.fraction_neutral) ?
+                        React.createElement('div', { className: 'new-job-view__not-default' }) :
+                        null
+                    ),
+                    React.createElement(Help, {
+                        title: 'frac_fav_mutn',
+                        content: 'It is not clear that any mutations are perfectly neutral, but in the past it has often been claimed that most of the human genome is non-function “junk DNA”, and that mutations in these regions are truly neutral. For the human default, we allow (but do not believe) that 90% of the genome is junk DNA, and so 90% of all human mutations have absolutely no biological effect. Because of the computational cost of tracking so many neutral mutations we specify zero neutrals be simulated, and discount the genome size so it only reflects non-neutral mutations.',
+                        url: HELP_URL_PREFIX + 'fmun',
+                    }),
+                ),
+
+                React.createElement('div', { className: 'new-job-view__field' },
                     React.createElement('label', {}, 'Fitness effect model'),
                     React.createElement('select',
                         {
@@ -273,7 +385,7 @@ class Component extends React.Component<Props, State> {
                     }),
                 ),
 
-                React.createElement('div', { className: 'new-job-view__field' },
+                React.createElement('div', { className: 'new-job-view__field new-job-view--indented' },
                     React.createElement('label', {}, 'For fixed: effect for each deleterious mutation'),
                     React.createElement('input', {
                         type: 'number',
@@ -294,7 +406,7 @@ class Component extends React.Component<Props, State> {
                     }),
                 ),
 
-                React.createElement('div', { className: 'new-job-view__field' },
+                React.createElement('div', { className: 'new-job-view__field new-job-view--indented' },
                     React.createElement('label', {}, 'For fixed: effect for each beneficial mutation'),
                     React.createElement('input', {
                         type: 'number',
@@ -389,6 +501,10 @@ function stateToConfig(state: StateConfig) {
 
         '[mutations]',
         'mutn_rate = ' + tomlFloat(state.mutn_rate),
+        'genome_size = ' + tomlInt(state.genome_size),
+        'mutn_rate_model = ' + tomlString(state.mutn_rate_model),
+        'frac_fav_mutn = ' + tomlFloat(state.frac_fav_mutn),
+        'fraction_neutral = ' + tomlFloat(state.fraction_neutral),
         'fitness_effect_model = ' + tomlString(state.fitness_effect_model),
         'uniform_fitness_effect_del = ' + tomlFloat(state.uniform_fitness_effect_del),
         'uniform_fitness_effect_fav = ' + tomlFloat(state.uniform_fitness_effect_fav),
@@ -405,13 +521,17 @@ function stateToConfig(state: StateConfig) {
     ].join('\n');
 }
 
-function configToState(config: any) {
+function configToState(config: ServerConfig) {
     const filesToOutput = filesToOutputBooleans(config.computation.files_to_output);
 
     return {
         pop_size: config.basic.pop_size.toString(),
         num_generations: config.basic.num_generations.toString(),
         mutn_rate: config.mutations.mutn_rate.toString(),
+        genome_size: config.mutations.genome_size.toString(),
+        mutn_rate_model: config.mutations.mutn_rate_model,
+        frac_fav_mutn: config.mutations.frac_fav_mutn.toString(),
+        fraction_neutral: config.mutations.fraction_neutral.toString(),
         fitness_effect_model: config.mutations.fitness_effect_model,
         uniform_fitness_effect_del: config.mutations.uniform_fitness_effect_del.toString(),
         uniform_fitness_effect_fav: config.mutations.uniform_fitness_effect_fav.toString(),
