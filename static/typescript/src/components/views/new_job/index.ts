@@ -496,7 +496,7 @@ class Component extends React.Component<Props, State> {
                         value: this.state.fieldValues.genome_size,
                         onChange: this.fieldChangeHandlers.genome_size,
                     }),
-                    (parseInt(this.state.fieldValues.genome_size) !== parseInt(this.state.defaultValues.genome_size) ?
+                    (parseFloat(this.state.fieldValues.genome_size) !== parseFloat(this.state.defaultValues.genome_size) ?
                         React.createElement('div', { className: 'new-job-view__not-default' }) :
                         null
                     ),
@@ -617,7 +617,10 @@ class Component extends React.Component<Props, State> {
                         min: '0',
                         max: '0.1',
                         step: 'any',
-                        disabled: this.state.fieldValues.fitness_effect_model !== 'fixed',
+                        disabled: (
+                            this.state.fieldValues.fitness_effect_model !== 'fixed' ||
+                            parseFloat(this.state.fieldValues.frac_fav_mutn) === 0
+                        ),
                         value: this.state.fieldValues.uniform_fitness_effect_fav,
                         onChange: this.fieldChangeHandlers.uniform_fitness_effect_fav,
                     }),
@@ -678,6 +681,7 @@ class Component extends React.Component<Props, State> {
                         min: '0',
                         max: '1',
                         step: 'any',
+                        disabled: parseFloat(this.state.fieldValues.frac_fav_mutn) === 0,
                         value: this.state.fieldValues.max_fav_fitness_gain,
                         onChange: this.fieldChangeHandlers.max_fav_fitness_gain,
                     }),
@@ -820,6 +824,7 @@ class Component extends React.Component<Props, State> {
                         min: '0',
                         max: '1',
                         step: 'any',
+                        disabled: this.state.fieldValues.selection_model !== 'partialtrunc',
                         value: this.state.fieldValues.partial_truncation_value,
                         onChange: this.fieldChangeHandlers.partial_truncation_value,
                     }),
@@ -903,6 +908,7 @@ class Component extends React.Component<Props, State> {
                         min: '0',
                         max: '100',
                         step: '1',
+                        disabled: this.state.fieldValues.crossover_model !== 'partial',
                         value: this.state.fieldValues.mean_num_crossovers,
                         onChange: this.fieldChangeHandlers.mean_num_crossovers,
                     }),
@@ -983,6 +989,7 @@ class Component extends React.Component<Props, State> {
                         min: '0',
                         max: '100000',
                         step: 'any',
+                        disabled: parseFloat(this.state.fieldValues.num_contrasting_alleles) === 0,
                         value: this.state.fieldValues.max_total_fitness_increase,
                         onChange: this.fieldChangeHandlers.max_total_fitness_increase,
                     }),
@@ -1000,6 +1007,7 @@ class Component extends React.Component<Props, State> {
                     React.createElement('label', {}, 'Initial Alleles model'),
                     React.createElement('select',
                         {
+                            disabled: parseFloat(this.state.fieldValues.num_contrasting_alleles) === 0,
                             value: this.state.fieldValues.initial_allele_fitness_model,
                             onChange: this.fieldChangeHandlers.initial_allele_fitness_model,
                         },
@@ -1023,6 +1031,10 @@ class Component extends React.Component<Props, State> {
                         min: '0',
                         max: '1',
                         step: 'any',
+                        disabled: (
+                            parseFloat(this.state.fieldValues.num_contrasting_alleles) === 0 ||
+                            this.state.fieldValues.initial_allele_fitness_model === 'variablefreq'
+                        ),
                         value: this.state.fieldValues.initial_alleles_pop_frac,
                         onChange: this.fieldChangeHandlers.initial_alleles_pop_frac,
                     }),
@@ -1040,6 +1052,10 @@ class Component extends React.Component<Props, State> {
                     React.createElement('label', {}, 'For Variable Frequencies: alleleFraction1:frequency1, alleleFraction2:frequency2, ...'),
                     React.createElement('input', {
                         type: 'text',
+                        disabled: (
+                            parseFloat(this.state.fieldValues.num_contrasting_alleles) === 0 ||
+                            this.state.fieldValues.initial_allele_fitness_model === 'allunique'
+                        ),
                         value: this.state.fieldValues.initial_alleles_frequencies,
                         onChange: this.fieldChangeHandlers.initial_alleles_frequencies,
                     }),
@@ -1083,6 +1099,10 @@ class Component extends React.Component<Props, State> {
                         min: '0',
                         max: '10',
                         step: 'any',
+                        disabled: (
+                            this.state.fieldValues.pop_growth_model === 'none' ||
+                            this.state.fieldValues.pop_growth_model === 'multi-bottleneck'
+                        ),
                         value: this.state.fieldValues.pop_growth_rate,
                         onChange: this.fieldChangeHandlers.pop_growth_rate,
                     }),
@@ -1103,6 +1123,7 @@ class Component extends React.Component<Props, State> {
                         min: '0',
                         max: '10',
                         step: 'any',
+                        disabled: this.state.fieldValues.pop_growth_model !== 'founders',
                         value: this.state.fieldValues.pop_growth_rate2,
                         onChange: this.fieldChangeHandlers.pop_growth_rate2,
                     }),
@@ -1123,6 +1144,7 @@ class Component extends React.Component<Props, State> {
                         min: '0',
                         max: '100000',
                         step: '1',
+                        disabled: this.state.fieldValues.pop_growth_model !== 'exponential',
                         value: this.state.fieldValues.max_pop_size,
                         onChange: this.fieldChangeHandlers.max_pop_size,
                     }),
@@ -1143,6 +1165,11 @@ class Component extends React.Component<Props, State> {
                         min: '10',
                         max: '100000',
                         step: '1',
+                        disabled: (
+                            this.state.fieldValues.pop_growth_model === 'none' ||
+                            this.state.fieldValues.pop_growth_model === 'exponential' ||
+                            this.state.fieldValues.pop_growth_model === 'multi-bottleneck'
+                        ),
                         value: this.state.fieldValues.carrying_capacity,
                         onChange: this.fieldChangeHandlers.carrying_capacity,
                     }),
@@ -1164,6 +1191,7 @@ class Component extends React.Component<Props, State> {
                         min: '0',
                         max: '100000',
                         step: '1',
+                        disabled: this.state.fieldValues.pop_growth_model !== 'founders',
                         value: this.state.fieldValues.bottleneck_generation,
                         onChange: this.fieldChangeHandlers.bottleneck_generation,
                     }),
@@ -1184,6 +1212,7 @@ class Component extends React.Component<Props, State> {
                         min: '0',
                         max: '100000',
                         step: '1',
+                        disabled: this.state.fieldValues.pop_growth_model !== 'founders',
                         value: this.state.fieldValues.bottleneck_pop_size,
                         onChange: this.fieldChangeHandlers.bottleneck_pop_size,
                     }),
@@ -1200,6 +1229,7 @@ class Component extends React.Component<Props, State> {
                         min: '0',
                         max: '100000',
                         step: '1',
+                        disabled: this.state.fieldValues.pop_growth_model !== 'founders',
                         value: this.state.fieldValues.num_bottleneck_generations,
                         onChange: this.fieldChangeHandlers.num_bottleneck_generations,
                     }),
@@ -1213,6 +1243,7 @@ class Component extends React.Component<Props, State> {
                     React.createElement('label', {}, 'For Multiple Bottlenecks: growth-rate:max-pop:bottle-start:bottle-size:bottle-gens, …'),
                     React.createElement('input', {
                         type: 'text',
+                        disabled: this.state.fieldValues.pop_growth_model !== 'multi-bottleneck',
                         value: this.state.fieldValues.multiple_bottlenecks,
                         onChange: this.fieldChangeHandlers.multiple_bottlenecks,
                     }),
@@ -1291,6 +1322,7 @@ class Component extends React.Component<Props, State> {
                         min: '0',
                         max: '10',
                         step: 'any',
+                        disabled: !this.state.fieldValues.files_to_output_allele_bins,
                         value: this.state.fieldValues.tracking_threshold,
                         onChange: this.fieldChangeHandlers.tracking_threshold,
                     }),
@@ -1349,6 +1381,7 @@ class Component extends React.Component<Props, State> {
                         min: '0',
                         max: '100000',
                         step: '1',
+                        disabled: !this.state.fieldValues.files_to_output_allele_bins,
                         value: this.state.fieldValues.plot_allele_gens,
                         onChange: this.fieldChangeHandlers.plot_allele_gens,
                     }),
@@ -1366,6 +1399,7 @@ class Component extends React.Component<Props, State> {
                     React.createElement('label', {}, 'Omit the 1st allele bin'),
                     React.createElement('div', { className: 'new-job-view__checkbox-wrapper' },
                         React.createElement(Checkbox, {
+                            disabled: !this.state.fieldValues.files_to_output_allele_bins,
                             checked: this.state.fieldValues.omit_first_allele_bin,
                             onChange: this.fieldChangeHandlers.omit_first_allele_bin,
                         }),
@@ -1498,7 +1532,7 @@ function stateToConfig(state: StateConfig) {
 
         '[mutations]',
         'mutn_rate = ' + tomlFloat(state.mutn_rate),
-        'genome_size = ' + tomlInt(state.genome_size),
+        'genome_size = ' + tomlFloat(state.genome_size),
         'mutn_rate_model = ' + tomlString(state.mutn_rate_model),
         'frac_fav_mutn = ' + tomlFloat(state.frac_fav_mutn),
         'fraction_neutral = ' + tomlFloat(state.fraction_neutral),

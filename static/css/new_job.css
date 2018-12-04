@@ -99,6 +99,11 @@
     margin-left: -8px;
 }
 
+.new-job-view__form .checkbox--disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
 .new-job-view__form .checkbox svg {
     display: inline-block;
     vertical-align: top;

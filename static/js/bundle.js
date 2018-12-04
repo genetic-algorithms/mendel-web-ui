@@ -446,11 +446,17 @@
             return _this;
         }
         Checkbox.prototype.onClick = function () {
-            this.props.onChange(!this.props.checked);
+            if (!this.props.disabled) {
+                this.props.onChange(!this.props.checked);
+            }
         };
         Checkbox.prototype.render = function () {
             return React.createElement('div', {
-                className: 'checkbox ' + (this.props.checked ? 'checkbox--checked' : ''),
+                className: [
+                    'checkbox',
+                    this.props.checked ? 'checkbox--checked' : '',
+                    this.props.disabled ? 'checkbox--disabled' : '',
+                ].join(' '),
                 onClick: this.onClick,
             }, (this.props.checked ?
                 React.createElement(CheckboxCheckedIcon, { width: 24, height: 24 }) :
@@ -799,7 +805,7 @@
                 step: '1',
                 value: this.state.fieldValues.genome_size,
                 onChange: this.fieldChangeHandlers.genome_size,
-            }), (parseInt(this.state.fieldValues.genome_size) !== parseInt(this.state.defaultValues.genome_size) ?
+            }), (parseFloat(this.state.fieldValues.genome_size) !== parseFloat(this.state.defaultValues.genome_size) ?
                 React.createElement('div', { className: 'new-job-view__not-default' }) :
                 null), React.createElement(Help, {
                 title: 'genome_size',
@@ -864,7 +870,8 @@
                 min: '0',
                 max: '0.1',
                 step: 'any',
-                disabled: this.state.fieldValues.fitness_effect_model !== 'fixed',
+                disabled: (this.state.fieldValues.fitness_effect_model !== 'fixed' ||
+                    parseFloat(this.state.fieldValues.frac_fav_mutn) === 0),
                 value: this.state.fieldValues.uniform_fitness_effect_fav,
                 onChange: this.fieldChangeHandlers.uniform_fitness_effect_fav,
             }), (parseFloat(this.state.fieldValues.uniform_fitness_effect_fav) !== parseFloat(this.state.defaultValues.uniform_fitness_effect_fav) ?
@@ -901,6 +908,7 @@
                 min: '0',
                 max: '1',
                 step: 'any',
+                disabled: parseFloat(this.state.fieldValues.frac_fav_mutn) === 0,
                 value: this.state.fieldValues.max_fav_fitness_gain,
                 onChange: this.fieldChangeHandlers.max_fav_fitness_gain,
             }), (parseFloat(this.state.fieldValues.max_fav_fitness_gain) !== parseFloat(this.state.defaultValues.max_fav_fitness_gain) ?
@@ -980,6 +988,7 @@
                 min: '0',
                 max: '1',
                 step: 'any',
+                disabled: this.state.fieldValues.selection_model !== 'partialtrunc',
                 value: this.state.fieldValues.partial_truncation_value,
                 onChange: this.fieldChangeHandlers.partial_truncation_value,
             }), (parseFloat(this.state.fieldValues.partial_truncation_value) !== parseFloat(this.state.defaultValues.partial_truncation_value) ?
@@ -1020,6 +1029,7 @@
                 min: '0',
                 max: '100',
                 step: '1',
+                disabled: this.state.fieldValues.crossover_model !== 'partial',
                 value: this.state.fieldValues.mean_num_crossovers,
                 onChange: this.fieldChangeHandlers.mean_num_crossovers,
             }), (parseInt(this.state.fieldValues.mean_num_crossovers) !== parseInt(this.state.defaultValues.mean_num_crossovers) ?
@@ -1068,6 +1078,7 @@
                 min: '0',
                 max: '100000',
                 step: 'any',
+                disabled: parseFloat(this.state.fieldValues.num_contrasting_alleles) === 0,
                 value: this.state.fieldValues.max_total_fitness_increase,
                 onChange: this.fieldChangeHandlers.max_total_fitness_increase,
             }), (parseFloat(this.state.fieldValues.max_total_fitness_increase) !== parseFloat(this.state.defaultValues.max_total_fitness_increase) ?
@@ -1076,6 +1087,7 @@
                 title: 'max_total_fitness_increase',
                 content: 'Used along with num_contrasting_alleles to set the total fitness effect of all of the favorable initial alleles in an individual.',
             })), React.createElement('div', { className: 'new-job-view__field new-job-view--indented' }, React.createElement('label', {}, 'Initial Alleles model'), React.createElement('select', {
+                disabled: parseFloat(this.state.fieldValues.num_contrasting_alleles) === 0,
                 value: this.state.fieldValues.initial_allele_fitness_model,
                 onChange: this.fieldChangeHandlers.initial_allele_fitness_model,
             }, React.createElement('option', { value: 'variablefreq' }, 'Variable Frequencies (default)'), React.createElement('option', { value: 'allunique' }, 'All Unique Alleles')), (this.state.fieldValues.initial_allele_fitness_model !== this.state.defaultValues.initial_allele_fitness_model ?
@@ -1088,6 +1100,8 @@
                 min: '0',
                 max: '1',
                 step: 'any',
+                disabled: (parseFloat(this.state.fieldValues.num_contrasting_alleles) === 0 ||
+                    this.state.fieldValues.initial_allele_fitness_model === 'variablefreq'),
                 value: this.state.fieldValues.initial_alleles_pop_frac,
                 onChange: this.fieldChangeHandlers.initial_alleles_pop_frac,
             }), (parseFloat(this.state.fieldValues.initial_alleles_pop_frac) !== parseFloat(this.state.defaultValues.initial_alleles_pop_frac) ?
@@ -1097,6 +1111,8 @@
                 content: 'Used for All Unique model along with num_contrasting_alleles to set the fraction of the initial population that should have num_contrasting_alleles alleles',
             })), React.createElement('div', { className: 'new-job-view__field new-job-view--indented' }, React.createElement('label', {}, 'For Variable Frequencies: alleleFraction1:frequency1, alleleFraction2:frequency2, ...'), React.createElement('input', {
                 type: 'text',
+                disabled: (parseFloat(this.state.fieldValues.num_contrasting_alleles) === 0 ||
+                    this.state.fieldValues.initial_allele_fitness_model === 'allunique'),
                 value: this.state.fieldValues.initial_alleles_frequencies,
                 onChange: this.fieldChangeHandlers.initial_alleles_frequencies,
             }), (this.state.fieldValues.initial_alleles_frequencies !== this.state.defaultValues.initial_alleles_frequencies ?
@@ -1117,6 +1133,8 @@
                 min: '0',
                 max: '10',
                 step: 'any',
+                disabled: (this.state.fieldValues.pop_growth_model === 'none' ||
+                    this.state.fieldValues.pop_growth_model === 'multi-bottleneck'),
                 value: this.state.fieldValues.pop_growth_rate,
                 onChange: this.fieldChangeHandlers.pop_growth_rate,
             }), (parseFloat(this.state.fieldValues.pop_growth_rate) !== parseFloat(this.state.defaultValues.pop_growth_rate) ?
@@ -1129,6 +1147,7 @@
                 min: '0',
                 max: '10',
                 step: 'any',
+                disabled: this.state.fieldValues.pop_growth_model !== 'founders',
                 value: this.state.fieldValues.pop_growth_rate2,
                 onChange: this.fieldChangeHandlers.pop_growth_rate2,
             }), (parseFloat(this.state.fieldValues.pop_growth_rate2) !== parseFloat(this.state.defaultValues.pop_growth_rate2) ?
@@ -1141,6 +1160,7 @@
                 min: '0',
                 max: '100000',
                 step: '1',
+                disabled: this.state.fieldValues.pop_growth_model !== 'exponential',
                 value: this.state.fieldValues.max_pop_size,
                 onChange: this.fieldChangeHandlers.max_pop_size,
             }), (parseInt(this.state.fieldValues.max_pop_size) !== parseInt(this.state.defaultValues.max_pop_size) ?
@@ -1153,6 +1173,9 @@
                 min: '10',
                 max: '100000',
                 step: '1',
+                disabled: (this.state.fieldValues.pop_growth_model === 'none' ||
+                    this.state.fieldValues.pop_growth_model === 'exponential' ||
+                    this.state.fieldValues.pop_growth_model === 'multi-bottleneck'),
                 value: this.state.fieldValues.carrying_capacity,
                 onChange: this.fieldChangeHandlers.carrying_capacity,
             }), (parseInt(this.state.fieldValues.carrying_capacity) !== parseInt(this.state.defaultValues.carrying_capacity) ?
@@ -1166,6 +1189,7 @@
                 min: '0',
                 max: '100000',
                 step: '1',
+                disabled: this.state.fieldValues.pop_growth_model !== 'founders',
                 value: this.state.fieldValues.bottleneck_generation,
                 onChange: this.fieldChangeHandlers.bottleneck_generation,
             }), (parseInt(this.state.fieldValues.bottleneck_generation) !== parseInt(this.state.defaultValues.bottleneck_generation) ?
@@ -1178,6 +1202,7 @@
                 min: '0',
                 max: '100000',
                 step: '1',
+                disabled: this.state.fieldValues.pop_growth_model !== 'founders',
                 value: this.state.fieldValues.bottleneck_pop_size,
                 onChange: this.fieldChangeHandlers.bottleneck_pop_size,
             }), (parseInt(this.state.fieldValues.bottleneck_pop_size) !== parseInt(this.state.defaultValues.bottleneck_pop_size) ?
@@ -1187,12 +1212,14 @@
                 min: '0',
                 max: '100000',
                 step: '1',
+                disabled: this.state.fieldValues.pop_growth_model !== 'founders',
                 value: this.state.fieldValues.num_bottleneck_generations,
                 onChange: this.fieldChangeHandlers.num_bottleneck_generations,
             }), (parseInt(this.state.fieldValues.num_bottleneck_generations) !== parseInt(this.state.defaultValues.num_bottleneck_generations) ?
                 React.createElement('div', { className: 'new-job-view__not-default' }) :
                 null)), React.createElement('div', { className: 'new-job-view__field new-job-view--indented' }, React.createElement('label', {}, 'For Multiple Bottlenecks: growth-rate:max-pop:bottle-start:bottle-size:bottle-gens, …'), React.createElement('input', {
                 type: 'text',
+                disabled: this.state.fieldValues.pop_growth_model !== 'multi-bottleneck',
                 value: this.state.fieldValues.multiple_bottlenecks,
                 onChange: this.fieldChangeHandlers.multiple_bottlenecks,
             }), (this.state.fieldValues.multiple_bottlenecks !== this.state.defaultValues.multiple_bottlenecks ?
@@ -1229,6 +1256,7 @@
                 min: '0',
                 max: '10',
                 step: 'any',
+                disabled: !this.state.fieldValues.files_to_output_allele_bins,
                 value: this.state.fieldValues.tracking_threshold,
                 onChange: this.fieldChangeHandlers.tracking_threshold,
             }), (parseFloat(this.state.fieldValues.tracking_threshold) !== parseFloat(this.state.defaultValues.tracking_threshold) ?
@@ -1261,6 +1289,7 @@
                 min: '0',
                 max: '100000',
                 step: '1',
+                disabled: !this.state.fieldValues.files_to_output_allele_bins,
                 value: this.state.fieldValues.plot_allele_gens,
                 onChange: this.fieldChangeHandlers.plot_allele_gens,
             }), (parseInt(this.state.fieldValues.plot_allele_gens) !== parseInt(this.state.defaultValues.plot_allele_gens) ?
@@ -1269,6 +1298,7 @@
                 title: 'plot_allele_gens',
                 content: 'A value of 0 means only plot alleles for the last generation.',
             })), React.createElement('div', { className: 'new-job-view__field' }, React.createElement('label', {}, 'Omit the 1st allele bin'), React.createElement('div', { className: 'new-job-view__checkbox-wrapper' }, React.createElement(Checkbox, {
+                disabled: !this.state.fieldValues.files_to_output_allele_bins,
                 checked: this.state.fieldValues.omit_first_allele_bin,
                 onChange: this.fieldChangeHandlers.omit_first_allele_bin,
             })), (this.state.fieldValues.omit_first_allele_bin !== this.state.defaultValues.omit_first_allele_bin ?
@@ -1343,7 +1373,7 @@
             'num_generations = ' + tomlInt(state.num_generations),
             '[mutations]',
             'mutn_rate = ' + tomlFloat(state.mutn_rate),
-            'genome_size = ' + tomlInt(state.genome_size),
+            'genome_size = ' + tomlFloat(state.genome_size),
             'mutn_rate_model = ' + tomlString(state.mutn_rate_model),
             'frac_fav_mutn = ' + tomlFloat(state.frac_fav_mutn),
             'fraction_neutral = ' + tomlFloat(state.fraction_neutral),
