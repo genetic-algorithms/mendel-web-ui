@@ -59,6 +59,7 @@
 .new-job-view__form input[type=text]:disabled,
 .new-job-view__form input[type=number]:disabled {
     opacity: 0.5;
+    cursor: not-allowed;
     background-color: transparent;
 }
 
@@ -86,6 +87,12 @@
 .new-job-view__form select:focus {
     outline: none;
     border-color: #CCC;
+}
+
+.new-job-view__form select:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    background-color: transparent;
 }
 
 .new-job-view__form .new-job-view__checkbox-wrapper {
