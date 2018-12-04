@@ -434,7 +434,7 @@ class Component extends React.Component<Props, State> {
                         value: this.state.fieldValues.pop_size,
                         onChange: this.fieldChangeHandlers.pop_size,
                     }),
-                    (this.state.fieldValues.pop_size !== this.state.defaultValues.pop_size ?
+                    (parseInt(this.state.fieldValues.pop_size) !== parseInt(this.state.defaultValues.pop_size) ?
                         React.createElement('div', { className: 'new-job-view__not-default' }) :
                         null
                     ),
@@ -454,7 +454,7 @@ class Component extends React.Component<Props, State> {
                         value: this.state.fieldValues.num_generations,
                         onChange: this.fieldChangeHandlers.num_generations,
                     }),
-                    (this.state.fieldValues.num_generations !== this.state.defaultValues.num_generations ?
+                    (parseInt(this.state.fieldValues.num_generations) !== parseInt(this.state.defaultValues.num_generations) ?
                         React.createElement('div', { className: 'new-job-view__not-default' }) :
                         null
                     ),
@@ -906,7 +906,7 @@ class Component extends React.Component<Props, State> {
                         value: this.state.fieldValues.mean_num_crossovers,
                         onChange: this.fieldChangeHandlers.mean_num_crossovers,
                     }),
-                    (parseFloat(this.state.fieldValues.mean_num_crossovers) !== parseFloat(this.state.defaultValues.mean_num_crossovers) ?
+                    (parseInt(this.state.fieldValues.mean_num_crossovers) !== parseInt(this.state.defaultValues.mean_num_crossovers) ?
                         React.createElement('div', { className: 'new-job-view__not-default' }) :
                         null
                     ),
@@ -926,7 +926,7 @@ class Component extends React.Component<Props, State> {
                         value: this.state.fieldValues.haploid_chromosome_number,
                         onChange: this.fieldChangeHandlers.haploid_chromosome_number,
                     }),
-                    (parseFloat(this.state.fieldValues.haploid_chromosome_number) !== parseFloat(this.state.defaultValues.haploid_chromosome_number) ?
+                    (parseInt(this.state.fieldValues.haploid_chromosome_number) !== parseInt(this.state.defaultValues.haploid_chromosome_number) ?
                         React.createElement('div', { className: 'new-job-view__not-default' }) :
                         null
                     ),
@@ -946,7 +946,7 @@ class Component extends React.Component<Props, State> {
                         value: this.state.fieldValues.num_linkage_subunits,
                         onChange: this.fieldChangeHandlers.num_linkage_subunits,
                     }),
-                    (parseFloat(this.state.fieldValues.num_linkage_subunits) !== parseFloat(this.state.defaultValues.num_linkage_subunits) ?
+                    (parseInt(this.state.fieldValues.num_linkage_subunits) !== parseInt(this.state.defaultValues.num_linkage_subunits) ?
                         React.createElement('div', { className: 'new-job-view__not-default' }) :
                         null
                     ),
@@ -966,7 +966,7 @@ class Component extends React.Component<Props, State> {
                         value: this.state.fieldValues.num_contrasting_alleles,
                         onChange: this.fieldChangeHandlers.num_contrasting_alleles,
                     }),
-                    (parseFloat(this.state.fieldValues.num_contrasting_alleles) !== parseFloat(this.state.defaultValues.num_contrasting_alleles) ?
+                    (parseInt(this.state.fieldValues.num_contrasting_alleles) !== parseInt(this.state.defaultValues.num_contrasting_alleles) ?
                         React.createElement('div', { className: 'new-job-view__not-default' }) :
                         null
                     ),
@@ -1126,7 +1126,7 @@ class Component extends React.Component<Props, State> {
                         value: this.state.fieldValues.max_pop_size,
                         onChange: this.fieldChangeHandlers.max_pop_size,
                     }),
-                    (parseFloat(this.state.fieldValues.max_pop_size) !== parseFloat(this.state.defaultValues.max_pop_size) ?
+                    (parseInt(this.state.fieldValues.max_pop_size) !== parseInt(this.state.defaultValues.max_pop_size) ?
                         React.createElement('div', { className: 'new-job-view__not-default' }) :
                         null
                     ),
@@ -1146,7 +1146,7 @@ class Component extends React.Component<Props, State> {
                         value: this.state.fieldValues.carrying_capacity,
                         onChange: this.fieldChangeHandlers.carrying_capacity,
                     }),
-                    (parseFloat(this.state.fieldValues.carrying_capacity) !== parseFloat(this.state.defaultValues.carrying_capacity) ?
+                    (parseInt(this.state.fieldValues.carrying_capacity) !== parseInt(this.state.defaultValues.carrying_capacity) ?
                         React.createElement('div', { className: 'new-job-view__not-default' }) :
                         null
                     ),
@@ -1167,7 +1167,7 @@ class Component extends React.Component<Props, State> {
                         value: this.state.fieldValues.bottleneck_generation,
                         onChange: this.fieldChangeHandlers.bottleneck_generation,
                     }),
-                    (parseFloat(this.state.fieldValues.bottleneck_generation) !== parseFloat(this.state.defaultValues.bottleneck_generation) ?
+                    (parseInt(this.state.fieldValues.bottleneck_generation) !== parseInt(this.state.defaultValues.bottleneck_generation) ?
                         React.createElement('div', { className: 'new-job-view__not-default' }) :
                         null
                     ),
@@ -1187,7 +1187,7 @@ class Component extends React.Component<Props, State> {
                         value: this.state.fieldValues.bottleneck_pop_size,
                         onChange: this.fieldChangeHandlers.bottleneck_pop_size,
                     }),
-                    (parseFloat(this.state.fieldValues.bottleneck_pop_size) !== parseFloat(this.state.defaultValues.bottleneck_pop_size) ?
+                    (parseInt(this.state.fieldValues.bottleneck_pop_size) !== parseInt(this.state.defaultValues.bottleneck_pop_size) ?
                         React.createElement('div', { className: 'new-job-view__not-default' }) :
                         null
                     ),
@@ -1203,7 +1203,7 @@ class Component extends React.Component<Props, State> {
                         value: this.state.fieldValues.num_bottleneck_generations,
                         onChange: this.fieldChangeHandlers.num_bottleneck_generations,
                     }),
-                    (parseFloat(this.state.fieldValues.num_bottleneck_generations) !== parseFloat(this.state.defaultValues.num_bottleneck_generations) ?
+                    (parseInt(this.state.fieldValues.num_bottleneck_generations) !== parseInt(this.state.defaultValues.num_bottleneck_generations) ?
                         React.createElement('div', { className: 'new-job-view__not-default' }) :
                         null
                     ),
@@ -1352,7 +1352,7 @@ class Component extends React.Component<Props, State> {
                         value: this.state.fieldValues.plot_allele_gens,
                         onChange: this.fieldChangeHandlers.plot_allele_gens,
                     }),
-                    (parseFloat(this.state.fieldValues.plot_allele_gens) !== parseFloat(this.state.defaultValues.plot_allele_gens) ?
+                    (parseInt(this.state.fieldValues.plot_allele_gens) !== parseInt(this.state.defaultValues.plot_allele_gens) ?
                         React.createElement('div', { className: 'new-job-view__not-default' }) :
                         null
                     ),
@@ -1390,7 +1390,7 @@ class Component extends React.Component<Props, State> {
                         value: this.state.fieldValues.verbosity,
                         onChange: this.fieldChangeHandlers.verbosity,
                     }),
-                    (parseFloat(this.state.fieldValues.verbosity) !== parseFloat(this.state.defaultValues.verbosity) ?
+                    (parseInt(this.state.fieldValues.verbosity) !== parseInt(this.state.defaultValues.verbosity) ?
                         React.createElement('div', { className: 'new-job-view__not-default' }) :
                         null
                     ),
@@ -1412,7 +1412,7 @@ class Component extends React.Component<Props, State> {
                         value: this.state.fieldValues.random_number_seed,
                         onChange: this.fieldChangeHandlers.random_number_seed,
                     }),
-                    (parseFloat(this.state.fieldValues.random_number_seed) !== parseFloat(this.state.defaultValues.random_number_seed) ?
+                    (parseInt(this.state.fieldValues.random_number_seed) !== parseInt(this.state.defaultValues.random_number_seed) ?
                         React.createElement('div', { className: 'new-job-view__not-default' }) :
                         null
                     ),
@@ -1432,7 +1432,7 @@ class Component extends React.Component<Props, State> {
                         value: this.state.fieldValues.num_threads,
                         onChange: this.fieldChangeHandlers.num_threads,
                     }),
-                    (parseFloat(this.state.fieldValues.num_threads) !== parseFloat(this.state.defaultValues.num_threads) ?
+                    (parseInt(this.state.fieldValues.num_threads) !== parseInt(this.state.defaultValues.num_threads) ?
                         React.createElement('div', { className: 'new-job-view__not-default' }) :
                         null
                     ),
@@ -1470,7 +1470,7 @@ class Component extends React.Component<Props, State> {
                         value: this.state.fieldValues.allele_count_gc_interval,
                         onChange: this.fieldChangeHandlers.allele_count_gc_interval,
                     }),
-                    (parseFloat(this.state.fieldValues.allele_count_gc_interval) !== parseFloat(this.state.defaultValues.allele_count_gc_interval) ?
+                    (parseInt(this.state.fieldValues.allele_count_gc_interval) !== parseInt(this.state.defaultValues.allele_count_gc_interval) ?
                         React.createElement('div', { className: 'new-job-view__not-default' }) :
                         null
                     ),
@@ -1522,10 +1522,10 @@ function stateToConfig(state: StateConfig) {
         'reproductive_rate = ' + tomlFloat(state.reproductive_rate),
         'num_offspring_model = ' + tomlString(state.num_offspring_model),
         'crossover_model = ' + tomlString(state.crossover_model),
-        'mean_num_crossovers = ' + tomlFloat(state.mean_num_crossovers),
-        'haploid_chromosome_number = ' + tomlFloat(state.haploid_chromosome_number),
-        'num_linkage_subunits = ' + tomlFloat(state.num_linkage_subunits),
-        'num_contrasting_alleles = ' + tomlFloat(state.num_contrasting_alleles),
+        'mean_num_crossovers = ' + tomlInt(state.mean_num_crossovers),
+        'haploid_chromosome_number = ' + tomlInt(state.haploid_chromosome_number),
+        'num_linkage_subunits = ' + tomlInt(state.num_linkage_subunits),
+        'num_contrasting_alleles = ' + tomlInt(state.num_contrasting_alleles),
         'max_total_fitness_increase = ' + tomlFloat(state.max_total_fitness_increase),
         'initial_allele_fitness_model = ' + tomlString(state.initial_allele_fitness_model),
         'initial_alleles_pop_frac = ' + tomlFloat(state.initial_alleles_pop_frac),
@@ -1533,11 +1533,11 @@ function stateToConfig(state: StateConfig) {
         'pop_growth_model = ' + tomlString(state.pop_growth_model),
         'pop_growth_rate = ' + tomlFloat(state.pop_growth_rate),
         'pop_growth_rate2 = ' + tomlFloat(state.pop_growth_rate2),
-        'max_pop_size = ' + tomlFloat(state.max_pop_size),
-        'carrying_capacity = ' + tomlFloat(state.carrying_capacity),
-        'bottleneck_generation = ' + tomlFloat(state.bottleneck_generation),
-        'bottleneck_pop_size = ' + tomlFloat(state.bottleneck_pop_size),
-        'num_bottleneck_generations = ' + tomlFloat(state.num_bottleneck_generations),
+        'max_pop_size = ' + tomlInt(state.max_pop_size),
+        'carrying_capacity = ' + tomlInt(state.carrying_capacity),
+        'bottleneck_generation = ' + tomlInt(state.bottleneck_generation),
+        'bottleneck_pop_size = ' + tomlInt(state.bottleneck_pop_size),
+        'num_bottleneck_generations = ' + tomlInt(state.num_bottleneck_generations),
         'multiple_bottlenecks = ' + tomlString(state.multiple_bottlenecks),
 
         '[computation]',
@@ -1551,13 +1551,13 @@ function stateToConfig(state: StateConfig) {
         'tracking_threshold = ' + tomlFloat(state.tracking_threshold),
         'track_neutrals = ' + tomlBoolean(state.track_neutrals),
         'extinction_threshold = ' + tomlFloat(state.extinction_threshold),
-        'plot_allele_gens = ' + tomlFloat(state.plot_allele_gens),
+        'plot_allele_gens = ' + tomlInt(state.plot_allele_gens),
         'omit_first_allele_bin = ' + tomlBoolean(state.omit_first_allele_bin),
-        'verbosity = ' + tomlFloat(state.verbosity),
-        'random_number_seed = ' + tomlFloat(state.random_number_seed),
-        'num_threads = ' + tomlFloat(state.num_threads),
+        'verbosity = ' + tomlInt(state.verbosity),
+        'random_number_seed = ' + tomlInt(state.random_number_seed),
+        'num_threads = ' + tomlInt(state.num_threads),
         'force_gc = ' + tomlBoolean(state.force_gc),
-        'allele_count_gc_interval = ' + tomlFloat(state.allele_count_gc_interval),
+        'allele_count_gc_interval = ' + tomlInt(state.allele_count_gc_interval),
     ].join('\n');
 }
 
