@@ -33,9 +33,39 @@ type StateConfig = {
     heritability: string;
     non_scaling_noise: string;
     partial_truncation_value: string;
+    reproductive_rate: string;
+    num_offspring_model: 'uniform' | 'fixed';
+    crossover_model: 'none' | 'partial' | 'full';
+    mean_num_crossovers: string;
+    haploid_chromosome_number: string;
+    num_linkage_subunits: string;
+    num_contrasting_alleles: string;
+    max_total_fitness_increase: string;
+    initial_allele_fitness_model: 'variablefreq' | 'allunique';
+    initial_alleles_pop_frac: string;
+    initial_alleles_frequencies: string;
+    pop_growth_model: 'none' | 'exponential' | 'capacity' | 'founders' | 'multi-bottleneck';
+    pop_growth_rate: string;
+    pop_growth_rate2: string;
+    max_pop_size: string;
+    carrying_capacity: string;
+    bottleneck_generation: string;
+    bottleneck_pop_size: string;
+    num_bottleneck_generations: string;
+    multiple_bottlenecks: string;
     files_to_output_fit: boolean;
     files_to_output_hst: boolean;
     files_to_output_allele_bins: boolean;
+    tracking_threshold: string;
+    track_neutrals: boolean;
+    extinction_threshold: string;
+    plot_allele_gens: string;
+    omit_first_allele_bin: boolean;
+    verbosity: string;
+    random_number_seed: string;
+    num_threads: string;
+    force_gc: boolean;
+    allele_count_gc_interval: string;
 };
 
 type ServerConfig = {
@@ -65,8 +95,40 @@ type ServerConfig = {
         non_scaling_noise: number;
         partial_truncation_value: number;
     },
+    population: {
+        reproductive_rate: number;
+        num_offspring_model: 'uniform' | 'fixed';
+        crossover_model: 'none' | 'partial' | 'full';
+        mean_num_crossovers: number;
+        haploid_chromosome_number: number;
+        num_linkage_subunits: number;
+        num_contrasting_alleles: number;
+        max_total_fitness_increase: number;
+        initial_allele_fitness_model: 'variablefreq' | 'allunique';
+        initial_alleles_pop_frac: number;
+        initial_alleles_frequencies: string;
+        pop_growth_model: 'none' | 'exponential' | 'capacity' | 'founders' | 'multi-bottleneck';
+        pop_growth_rate: number;
+        pop_growth_rate2: number;
+        max_pop_size: number;
+        carrying_capacity: number;
+        bottleneck_generation: number;
+        bottleneck_pop_size: number;
+        num_bottleneck_generations: number;
+        multiple_bottlenecks: string;
+    },
     computation: {
         files_to_output: string;
+        tracking_threshold: number;
+        track_neutrals: boolean;
+        extinction_threshold: number;
+        plot_allele_gens: number;
+        omit_first_allele_bin: boolean;
+        verbosity: number;
+        random_number_seed: number;
+        num_threads: number;
+        force_gc: boolean;
+        allele_count_gc_interval: number;
     }
 };
 
@@ -99,9 +161,39 @@ class Component extends React.Component<Props, State> {
         heritability: (e: React.ChangeEvent<HTMLInputElement>) => void;
         non_scaling_noise: (e: React.ChangeEvent<HTMLInputElement>) => void;
         partial_truncation_value: (e: React.ChangeEvent<HTMLInputElement>) => void;
+        reproductive_rate: (e: React.ChangeEvent<HTMLInputElement>) => void;
+        num_offspring_model: (e: React.ChangeEvent<HTMLInputElement>) => void;
+        crossover_model: (e: React.ChangeEvent<HTMLInputElement>) => void;
+        mean_num_crossovers: (e: React.ChangeEvent<HTMLInputElement>) => void;
+        haploid_chromosome_number: (e: React.ChangeEvent<HTMLInputElement>) => void;
+        num_linkage_subunits: (e: React.ChangeEvent<HTMLInputElement>) => void;
+        num_contrasting_alleles: (e: React.ChangeEvent<HTMLInputElement>) => void;
+        max_total_fitness_increase: (e: React.ChangeEvent<HTMLInputElement>) => void;
+        initial_allele_fitness_model: (e: React.ChangeEvent<HTMLInputElement>) => void;
+        initial_alleles_pop_frac: (e: React.ChangeEvent<HTMLInputElement>) => void;
+        initial_alleles_frequencies: (e: React.ChangeEvent<HTMLInputElement>) => void;
+        pop_growth_model: (e: React.ChangeEvent<HTMLInputElement>) => void;
+        pop_growth_rate: (e: React.ChangeEvent<HTMLInputElement>) => void;
+        pop_growth_rate2: (e: React.ChangeEvent<HTMLInputElement>) => void;
+        max_pop_size: (e: React.ChangeEvent<HTMLInputElement>) => void;
+        carrying_capacity: (e: React.ChangeEvent<HTMLInputElement>) => void;
+        bottleneck_generation: (e: React.ChangeEvent<HTMLInputElement>) => void;
+        bottleneck_pop_size: (e: React.ChangeEvent<HTMLInputElement>) => void;
+        num_bottleneck_generations: (e: React.ChangeEvent<HTMLInputElement>) => void;
+        multiple_bottlenecks: (e: React.ChangeEvent<HTMLInputElement>) => void;
         files_to_output_fit: (checked: boolean) => void;
         files_to_output_hst: (checked: boolean) => void;
         files_to_output_allele_bins: (checked: boolean) => void;
+        tracking_threshold: (e: React.ChangeEvent<HTMLInputElement>) => void;
+        track_neutrals: (checked: boolean) => void;
+        extinction_threshold: (e: React.ChangeEvent<HTMLInputElement>) => void;
+        plot_allele_gens: (e: React.ChangeEvent<HTMLInputElement>) => void;
+        omit_first_allele_bin: (checked: boolean) => void;
+        verbosity: (e: React.ChangeEvent<HTMLInputElement>) => void;
+        random_number_seed: (e: React.ChangeEvent<HTMLInputElement>) => void;
+        num_threads: (e: React.ChangeEvent<HTMLInputElement>) => void;
+        force_gc: (checked: boolean) => void;
+        allele_count_gc_interval: (e: React.ChangeEvent<HTMLInputElement>) => void;
     };
 
     constructor(props: Props) {
@@ -128,9 +220,39 @@ class Component extends React.Component<Props, State> {
             heritability: e => this.simpleFieldChanged('heritability', e),
             non_scaling_noise: e => this.simpleFieldChanged('non_scaling_noise', e),
             partial_truncation_value: e => this.simpleFieldChanged('partial_truncation_value', e),
+            reproductive_rate: e => this.simpleFieldChanged('reproductive_rate', e),
+            num_offspring_model: e => this.simpleFieldChanged('num_offspring_model', e),
+            crossover_model: e => this.simpleFieldChanged('crossover_model', e),
+            mean_num_crossovers: e => this.simpleFieldChanged('mean_num_crossovers', e),
+            haploid_chromosome_number: e => this.simpleFieldChanged('haploid_chromosome_number', e),
+            num_linkage_subunits: e => this.simpleFieldChanged('num_linkage_subunits', e),
+            num_contrasting_alleles: e => this.simpleFieldChanged('num_contrasting_alleles', e),
+            max_total_fitness_increase: e => this.simpleFieldChanged('max_total_fitness_increase', e),
+            initial_allele_fitness_model: e => this.simpleFieldChanged('initial_allele_fitness_model', e),
+            initial_alleles_pop_frac: e => this.simpleFieldChanged('initial_alleles_pop_frac', e),
+            initial_alleles_frequencies: e => this.simpleFieldChanged('initial_alleles_frequencies', e),
+            pop_growth_model: e => this.simpleFieldChanged('pop_growth_model', e),
+            pop_growth_rate: e => this.simpleFieldChanged('pop_growth_rate', e),
+            pop_growth_rate2: e => this.simpleFieldChanged('pop_growth_rate2', e),
+            max_pop_size: e => this.simpleFieldChanged('max_pop_size', e),
+            carrying_capacity: e => this.simpleFieldChanged('carrying_capacity', e),
+            bottleneck_generation: e => this.simpleFieldChanged('bottleneck_generation', e),
+            bottleneck_pop_size: e => this.simpleFieldChanged('bottleneck_pop_size', e),
+            num_bottleneck_generations: e => this.simpleFieldChanged('num_bottleneck_generations', e),
+            multiple_bottlenecks: e => this.simpleFieldChanged('multiple_bottlenecks', e),
             files_to_output_fit: checked => this.checkboxFieldChanged('files_to_output_fit', checked),
             files_to_output_hst: checked => this.checkboxFieldChanged('files_to_output_hst', checked),
             files_to_output_allele_bins: checked => this.checkboxFieldChanged('files_to_output_allele_bins', checked),
+            tracking_threshold: e => this.simpleFieldChanged('tracking_threshold', e),
+            track_neutrals: checked => this.checkboxFieldChanged('track_neutrals', checked),
+            extinction_threshold: e => this.simpleFieldChanged('extinction_threshold', e),
+            plot_allele_gens: e => this.simpleFieldChanged('plot_allele_gens', e),
+            omit_first_allele_bin: checked => this.checkboxFieldChanged('omit_first_allele_bin', checked),
+            verbosity: e => this.simpleFieldChanged('verbosity', e),
+            random_number_seed: e => this.simpleFieldChanged('random_number_seed', e),
+            num_threads: e => this.simpleFieldChanged('num_threads', e),
+            force_gc: checked => this.checkboxFieldChanged('force_gc', checked),
+            allele_count_gc_interval: e => this.simpleFieldChanged('allele_count_gc_interval', e),
         };
 
         this.onSubmit = this.onSubmit.bind(this);
@@ -158,9 +280,39 @@ class Component extends React.Component<Props, State> {
             heritability: '',
             non_scaling_noise: '',
             partial_truncation_value: '',
+            reproductive_rate: '',
+            num_offspring_model: 'fixed',
+            crossover_model: 'partial',
+            mean_num_crossovers: '',
+            haploid_chromosome_number: '',
+            num_linkage_subunits: '',
+            num_contrasting_alleles: '',
+            max_total_fitness_increase: '',
+            initial_allele_fitness_model: 'variablefreq',
+            initial_alleles_pop_frac: '',
+            initial_alleles_frequencies: '',
+            pop_growth_model: 'none',
+            pop_growth_rate: '',
+            pop_growth_rate2: '',
+            max_pop_size: '',
+            carrying_capacity: '',
+            bottleneck_generation: '',
+            bottleneck_pop_size: '',
+            num_bottleneck_generations: '',
+            multiple_bottlenecks: '',
             files_to_output_fit: true,
             files_to_output_hst: true,
             files_to_output_allele_bins: true,
+            tracking_threshold: '',
+            track_neutrals: false,
+            extinction_threshold: '',
+            plot_allele_gens: '',
+            omit_first_allele_bin: false,
+            verbosity: '',
+            random_number_seed: '',
+            num_threads: '',
+            force_gc: false,
+            allele_count_gc_interval: '',
         };
 
         this.state = {
@@ -662,7 +814,7 @@ class Component extends React.Component<Props, State> {
                 ),
 
                 React.createElement('div', { className: 'new-job-view__field' },
-                    React.createElement('label', {}, 'For partial truncation: partial truncation value'),
+                    React.createElement('label', {}, 'For Partial Truncation: partial truncation value'),
                     React.createElement('input', {
                         type: 'number',
                         min: '0',
@@ -678,6 +830,399 @@ class Component extends React.Component<Props, State> {
                     React.createElement(Help, {
                         title: 'partial_truncation_value',
                         content: 'Used in Parial Truncation selection, an individuals fitness is divided by: partial_truncation_value + (1. - partial_truncation_value)*randomnum(1).',
+                    }),
+                ),
+
+                React.createElement('div', { className: 'new-job-view__form-section-title' }, 'Population'),
+
+                React.createElement('div', { className: 'new-job-view__field' },
+                    React.createElement('label', {}, 'Reproductive rate'),
+                    React.createElement('input', {
+                        type: 'number',
+                        min: '1',
+                        max: '25',
+                        step: 'any',
+                        value: this.state.fieldValues.reproductive_rate,
+                        onChange: this.fieldChangeHandlers.reproductive_rate,
+                    }),
+                    (parseFloat(this.state.fieldValues.reproductive_rate) !== parseFloat(this.state.defaultValues.reproductive_rate) ?
+                        React.createElement('div', { className: 'new-job-view__not-default' }) :
+                        null
+                    ),
+                    React.createElement(Help, {
+                        title: 'reproductive_rate',
+                        content: 'This is the number of offspring per reproducing individual. When population size is constant, this variable defines the maximum amount of selection. There must be an average of at least one offspring per individual (after the selection process) for the population to maintain its size and avoid rapid extinction. Except where random death is considered, the entire surplus population is removed based upon phenotypic selection. The typical value for humans is two offspring per selected individual (or four offspring per reproducing female).',
+                    }),
+                ),
+
+                React.createElement('div', { className: 'new-job-view__field' },
+                    React.createElement('label', {}, 'Num offspring model'),
+                    React.createElement('select',
+                        {
+                            value: this.state.fieldValues.num_offspring_model,
+                            onChange: this.fieldChangeHandlers.num_offspring_model,
+                        },
+                        React.createElement('option', { value: 'uniform' }, 'Uniform'),
+                        React.createElement('option', { value: 'fixed' }, 'Fixed (default)'),
+                    ),
+                    (this.state.fieldValues.num_offspring_model !== this.state.defaultValues.num_offspring_model ?
+                        React.createElement('div', { className: 'new-job-view__not-default' }) :
+                        null
+                    ),
+                    React.createElement(Help, {
+                        title: 'num_offspring_model',
+                        content: 'Choices: "fixed" - reproductive_rate rounded to the nearest integer, or "uniform" - an even distribution such that the mean is reproductive_rate',
+                    }),
+                ),
+
+                React.createElement('div', { className: 'new-job-view__field' },
+                    React.createElement('label', {}, 'Crossover model'),
+                    React.createElement('select',
+                        {
+                            value: this.state.fieldValues.crossover_model,
+                            onChange: this.fieldChangeHandlers.crossover_model,
+                        },
+                        React.createElement('option', { value: 'none' }, 'None'),
+                        React.createElement('option', { value: 'partial' }, 'Partial (default)'),
+                        React.createElement('option', { value: 'full' }, 'Full'),
+                    ),
+                    (this.state.fieldValues.crossover_model !== this.state.defaultValues.crossover_model ?
+                        React.createElement('div', { className: 'new-job-view__not-default' }) :
+                        null
+                    ),
+                    React.createElement(Help, {
+                        title: 'crossover_model',
+                        content: 'Choices: "partial" - mean_num_crossovers per chromosome pair, "none" - no crossover, or "full" - each LB has a 50/50 chance of coming from dad or mom',
+                    }),
+                ),
+
+                React.createElement('div', { className: 'new-job-view__field new-job-view--indented' },
+                    React.createElement('label', {}, 'For Partial: Mean crossovers per chromosome pair'),
+                    React.createElement('input', {
+                        type: 'number',
+                        min: '0',
+                        max: '100',
+                        step: '1',
+                        value: this.state.fieldValues.mean_num_crossovers,
+                        onChange: this.fieldChangeHandlers.mean_num_crossovers,
+                    }),
+                    (parseFloat(this.state.fieldValues.mean_num_crossovers) !== parseFloat(this.state.defaultValues.mean_num_crossovers) ?
+                        React.createElement('div', { className: 'new-job-view__not-default' }) :
+                        null
+                    ),
+                    React.createElement(Help, {
+                        title: 'mean_num_crossovers',
+                        content: 'Used only for crossover_model=partial. The average number of crossovers per chromosome PAIR during Meiosis 1 Metaphase.',
+                    }),
+                ),
+
+                React.createElement('div', { className: 'new-job-view__field' },
+                    React.createElement('label', {}, 'Haploid chromosome number'),
+                    React.createElement('input', {
+                        type: 'number',
+                        min: '1',
+                        max: '100',
+                        step: '1',
+                        value: this.state.fieldValues.haploid_chromosome_number,
+                        onChange: this.fieldChangeHandlers.haploid_chromosome_number,
+                    }),
+                    (parseFloat(this.state.fieldValues.haploid_chromosome_number) !== parseFloat(this.state.defaultValues.haploid_chromosome_number) ?
+                        React.createElement('div', { className: 'new-job-view__not-default' }) :
+                        null
+                    ),
+                    React.createElement(Help, {
+                        title: 'haploid_chromosome_number',
+                        content: 'The number of linkage blocks is evenly distributed over a user-specified haploid number of chromosomes (default=23).',
+                    }),
+                ),
+
+                React.createElement('div', { className: 'new-job-view__field' },
+                    React.createElement('label', {}, 'Number of linkage subunits per individual'),
+                    React.createElement('input', {
+                        type: 'number',
+                        min: '1',
+                        max: '100000',
+                        step: '1',
+                        value: this.state.fieldValues.num_linkage_subunits,
+                        onChange: this.fieldChangeHandlers.num_linkage_subunits,
+                    }),
+                    (parseFloat(this.state.fieldValues.num_linkage_subunits) !== parseFloat(this.state.defaultValues.num_linkage_subunits) ?
+                        React.createElement('div', { className: 'new-job-view__not-default' }) :
+                        null
+                    ),
+                    React.createElement(Help, {
+                        title: 'num_linkage_subunits',
+                        content: 'The number of linkage blocks. The number of linkage blocks should be an integer multiple of the number of chromosome (e.g. the default value of 989 is 43 times the default 23 chromosomes).',
+                    }),
+                ),
+
+                React.createElement('div', { className: 'new-job-view__field' },
+                    React.createElement('label', {}, 'Number of initial contrasting alleles per individual'),
+                    React.createElement('input', {
+                        type: 'number',
+                        min: '0',
+                        max: '1000000000',
+                        step: '1',
+                        value: this.state.fieldValues.num_contrasting_alleles,
+                        onChange: this.fieldChangeHandlers.num_contrasting_alleles,
+                    }),
+                    (parseFloat(this.state.fieldValues.num_contrasting_alleles) !== parseFloat(this.state.defaultValues.num_contrasting_alleles) ?
+                        React.createElement('div', { className: 'new-job-view__not-default' }) :
+                        null
+                    ),
+                    React.createElement(Help, {
+                        title: 'num_contrasting_alleles',
+                        content: 'Number of initial contrasting alleles (pairs) given to each individual. Used to start the population with pre-existing diversity.',
+                    }),
+                ),
+
+                React.createElement('div', { className: 'new-job-view__field new-job-view--indented' },
+                    React.createElement('label', {}, 'The total fitness effect of all of the favorable initial alleles in an individual'),
+                    React.createElement('input', {
+                        type: 'number',
+                        min: '0',
+                        max: '100000',
+                        step: 'any',
+                        value: this.state.fieldValues.max_total_fitness_increase,
+                        onChange: this.fieldChangeHandlers.max_total_fitness_increase,
+                    }),
+                    (parseFloat(this.state.fieldValues.max_total_fitness_increase) !== parseFloat(this.state.defaultValues.max_total_fitness_increase) ?
+                        React.createElement('div', { className: 'new-job-view__not-default' }) :
+                        null
+                    ),
+                    React.createElement(Help, {
+                        title: 'max_total_fitness_increase',
+                        content: 'Used along with num_contrasting_alleles to set the total fitness effect of all of the favorable initial alleles in an individual.',
+                    }),
+                ),
+
+                React.createElement('div', { className: 'new-job-view__field new-job-view--indented' },
+                    React.createElement('label', {}, 'Initial Alleles model'),
+                    React.createElement('select',
+                        {
+                            value: this.state.fieldValues.initial_allele_fitness_model,
+                            onChange: this.fieldChangeHandlers.initial_allele_fitness_model,
+                        },
+                        React.createElement('option', { value: 'variablefreq' }, 'Variable Frequencies (default)'),
+                        React.createElement('option', { value: 'allunique' }, 'All Unique Alleles'),
+                    ),
+                    (this.state.fieldValues.initial_allele_fitness_model !== this.state.defaultValues.initial_allele_fitness_model ?
+                        React.createElement('div', { className: 'new-job-view__not-default' }) :
+                        null
+                    ),
+                    React.createElement(Help, {
+                        title: 'initial_allele_fitness_model',
+                        content: 'Choices: "variablefreq" - different frequenceis for different fraction of the alleles like 0.25:0.1, 0.5:0.25, 0.25:0.5, "allunique" - unique allele pairs in every indiv',
+                    }),
+                ),
+
+                React.createElement('div', { className: 'new-job-view__field new-job-view--indented' },
+                    React.createElement('label', {}, 'For All Unique: Fraction of the population with initial alleles'),
+                    React.createElement('input', {
+                        type: 'number',
+                        min: '0',
+                        max: '1',
+                        step: 'any',
+                        value: this.state.fieldValues.initial_alleles_pop_frac,
+                        onChange: this.fieldChangeHandlers.initial_alleles_pop_frac,
+                    }),
+                    (parseFloat(this.state.fieldValues.initial_alleles_pop_frac) !== parseFloat(this.state.defaultValues.initial_alleles_pop_frac) ?
+                        React.createElement('div', { className: 'new-job-view__not-default' }) :
+                        null
+                    ),
+                    React.createElement(Help, {
+                        title: 'initial_alleles_pop_frac',
+                        content: 'Used for All Unique model along with num_contrasting_alleles to set the fraction of the initial population that should have num_contrasting_alleles alleles',
+                    }),
+                ),
+
+                React.createElement('div', { className: 'new-job-view__field new-job-view--indented' },
+                    React.createElement('label', {}, 'For Variable Frequencies: alleleFraction1:frequency1, alleleFraction2:frequency2, ...'),
+                    React.createElement('input', {
+                        type: 'text',
+                        value: this.state.fieldValues.initial_alleles_frequencies,
+                        onChange: this.fieldChangeHandlers.initial_alleles_frequencies,
+                    }),
+                    (this.state.fieldValues.initial_alleles_frequencies !== this.state.defaultValues.initial_alleles_frequencies ?
+                        React.createElement('div', { className: 'new-job-view__not-default' }) :
+                        null
+                    ),
+                    React.createElement(Help, {
+                        title: 'initial_alleles_frequencies',
+                        content: 'Used for Variable Frequencies model along with num_contrasting_alleles to define portions of the total num_contrasting_alleles alleles and what frequency each should have',
+                    }),
+                ),
+
+                React.createElement('div', { className: 'new-job-view__field' },
+                    React.createElement('label', {}, 'Population growth model'),
+                    React.createElement('select',
+                        {
+                            value: this.state.fieldValues.pop_growth_model,
+                            onChange: this.fieldChangeHandlers.pop_growth_model,
+                        },
+                        React.createElement('option', { value: 'none' }, 'None (default)'),
+                        React.createElement('option', { value: 'exponential' }, 'Exponential'),
+                        React.createElement('option', { value: 'capacity' }, 'Carrying capacity'),
+                        React.createElement('option', { value: 'founders' }, 'Founders effect'),
+                        React.createElement('option', { value: 'multi-bottleneck' }, 'Multiple bottlenecks'),
+                    ),
+                    (this.state.fieldValues.pop_growth_model !== this.state.defaultValues.pop_growth_model ?
+                        React.createElement('div', { className: 'new-job-view__not-default' }) :
+                        null
+                    ),
+                    React.createElement(Help, {
+                        title: 'pop_growth_model',
+                        content: 'Choices: "none" - no population growth, "exponential" - exponential growth model until max pop or number of generations, "capacity" - pop growth to asymptotically approach the pop carrying capacity, "founders" - exponential growth until bottleneck generations, a 2nd exponential growth rate after bottleneck until the carrying capacity or number of generations is reached, "multi-bottleneck" - like founders except an arbitrary number of comma-separated 5-tuples growth-rate:max-pop:bottle-start:bottle-size:bottle-gens',
+                    }),
+                ),
+
+                React.createElement('div', { className: 'new-job-view__field new-job-view--indented' },
+                    React.createElement('label', {}, 'Population growth rate each generation'),
+                    React.createElement('input', {
+                        type: 'number',
+                        min: '0',
+                        max: '10',
+                        step: 'any',
+                        value: this.state.fieldValues.pop_growth_rate,
+                        onChange: this.fieldChangeHandlers.pop_growth_rate,
+                    }),
+                    (parseFloat(this.state.fieldValues.pop_growth_rate) !== parseFloat(this.state.defaultValues.pop_growth_rate) ?
+                        React.createElement('div', { className: 'new-job-view__not-default' }) :
+                        null
+                    ),
+                    React.createElement(Help, {
+                        title: 'pop_growth_rate',
+                        content: 'Population growth rate each generation (e.g. 1.05 is 5% increase). Used for pop_growth_model==Exponential, Carrying capacity, and Founders effect.',
+                    }),
+                ),
+
+                React.createElement('div', { className: 'new-job-view__field new-job-view--indented' },
+                    React.createElement('label', {}, 'For Founders: Population growth rate after the bottleneck'),
+                    React.createElement('input', {
+                        type: 'number',
+                        min: '0',
+                        max: '10',
+                        step: 'any',
+                        value: this.state.fieldValues.pop_growth_rate2,
+                        onChange: this.fieldChangeHandlers.pop_growth_rate2,
+                    }),
+                    (parseFloat(this.state.fieldValues.pop_growth_rate2) !== parseFloat(this.state.defaultValues.pop_growth_rate2) ?
+                        React.createElement('div', { className: 'new-job-view__not-default' }) :
+                        null
+                    ),
+                    React.createElement(Help, {
+                        title: 'pop_growth_rate2',
+                        content: 'Population growth rate after the population bottleneck. Used for pop_growth_model==Founders effect.',
+                    }),
+                ),
+
+                React.createElement('div', { className: 'new-job-view__field new-job-view--indented' },
+                    React.createElement('label', {}, 'For Exponential: Maximum population size'),
+                    React.createElement('input', {
+                        type: 'number',
+                        min: '0',
+                        max: '100000',
+                        step: '1',
+                        value: this.state.fieldValues.max_pop_size,
+                        onChange: this.fieldChangeHandlers.max_pop_size,
+                    }),
+                    (parseFloat(this.state.fieldValues.max_pop_size) !== parseFloat(this.state.defaultValues.max_pop_size) ?
+                        React.createElement('div', { className: 'new-job-view__not-default' }) :
+                        null
+                    ),
+                    React.createElement(Help, {
+                        title: 'max_pop_size',
+                        content: 'The run will stop when this population size is reached or num_generations is reached, whichever comes first. Set to 0 for no max. Used for pop_growth_model==exponential.',
+                    }),
+                ),
+
+                React.createElement('div', { className: 'new-job-view__field new-job-view--indented' },
+                    React.createElement('label', {}, 'Population carrying capacity'),
+                    React.createElement('input', {
+                        type: 'number',
+                        min: '10',
+                        max: '100000',
+                        step: '1',
+                        value: this.state.fieldValues.carrying_capacity,
+                        onChange: this.fieldChangeHandlers.carrying_capacity,
+                    }),
+                    (parseFloat(this.state.fieldValues.carrying_capacity) !== parseFloat(this.state.defaultValues.carrying_capacity) ?
+                        React.createElement('div', { className: 'new-job-view__not-default' }) :
+                        null
+                    ),
+                    React.createElement(Help, {
+                        title: 'carrying_capacity',
+                        content: 'The limit that the population size should approach. Used for pop_growth_model==Carrying capacity and Founders effect.',
+                        url: 'https://en.wikipedia.org/wiki/Carrying_capacity',
+                    }),
+                ),
+
+                React.createElement('div', { className: 'new-job-view__field new-job-view--indented' },
+                    React.createElement('label', {}, 'Generation number of a population bottleneck'),
+                    React.createElement('input', {
+                        type: 'number',
+                        min: '0',
+                        max: '100000',
+                        step: '1',
+                        value: this.state.fieldValues.bottleneck_generation,
+                        onChange: this.fieldChangeHandlers.bottleneck_generation,
+                    }),
+                    (parseFloat(this.state.fieldValues.bottleneck_generation) !== parseFloat(this.state.defaultValues.bottleneck_generation) ?
+                        React.createElement('div', { className: 'new-job-view__not-default' }) :
+                        null
+                    ),
+                    React.createElement(Help, {
+                        title: 'bottleneck_generation',
+                        content: 'The generation number at which the population size bottleneck should start. Use 0 for no bottleneck. Currently only used for pop_growth_model==founders',
+                    }),
+                ),
+
+                React.createElement('div', { className: 'new-job-view__field new-job-view--indented' },
+                    React.createElement('label', {}, 'The population size during the bottleneck'),
+                    React.createElement('input', {
+                        type: 'number',
+                        min: '0',
+                        max: '100000',
+                        step: '1',
+                        value: this.state.fieldValues.bottleneck_pop_size,
+                        onChange: this.fieldChangeHandlers.bottleneck_pop_size,
+                    }),
+                    (parseFloat(this.state.fieldValues.bottleneck_pop_size) !== parseFloat(this.state.defaultValues.bottleneck_pop_size) ?
+                        React.createElement('div', { className: 'new-job-view__not-default' }) :
+                        null
+                    ),
+                ),
+
+                React.createElement('div', { className: 'new-job-view__field new-job-view--indented' },
+                    React.createElement('label', {}, 'The number of generations the bottleneck should last'),
+                    React.createElement('input', {
+                        type: 'number',
+                        min: '0',
+                        max: '100000',
+                        step: '1',
+                        value: this.state.fieldValues.num_bottleneck_generations,
+                        onChange: this.fieldChangeHandlers.num_bottleneck_generations,
+                    }),
+                    (parseFloat(this.state.fieldValues.num_bottleneck_generations) !== parseFloat(this.state.defaultValues.num_bottleneck_generations) ?
+                        React.createElement('div', { className: 'new-job-view__not-default' }) :
+                        null
+                    ),
+                ),
+
+                React.createElement('div', { className: 'new-job-view__field new-job-view--indented' },
+                    React.createElement('label', {}, 'For Multiple Bottlenecks: growth-rate:max-pop:bottle-start:bottle-size:bottle-gens, …'),
+                    React.createElement('input', {
+                        type: 'text',
+                        value: this.state.fieldValues.multiple_bottlenecks,
+                        onChange: this.fieldChangeHandlers.multiple_bottlenecks,
+                    }),
+                    (this.state.fieldValues.multiple_bottlenecks !== this.state.defaultValues.multiple_bottlenecks ?
+                        React.createElement('div', { className: 'new-job-view__not-default' }) :
+                        null
+                    ),
+                    React.createElement(Help, {
+                        title: 'multiple_bottlenecks',
+                        content: 'Used for Multiple Bottlenecks population growth model, instead of any of the other population growth and bottleneck parameters.',
                     }),
                 ),
 
@@ -737,6 +1282,204 @@ class Component extends React.Component<Props, State> {
                     }),
                 ),
 
+                React.createElement('div', { className: 'new-job-view__form-section-title' }, 'Computation'),
+
+                React.createElement('div', { className: 'new-job-view__field' },
+                    React.createElement('label', {}, 'Do not track mutations below this fitness effect'),
+                    React.createElement('input', {
+                        type: 'number',
+                        min: '0',
+                        max: '10',
+                        step: 'any',
+                        value: this.state.fieldValues.tracking_threshold,
+                        onChange: this.fieldChangeHandlers.tracking_threshold,
+                    }),
+                    (parseFloat(this.state.fieldValues.tracking_threshold) !== parseFloat(this.state.defaultValues.tracking_threshold) ?
+                        React.createElement('div', { className: 'new-job-view__not-default' }) :
+                        null
+                    ),
+                    React.createElement(Help, {
+                        title: 'tracking_threshold',
+                        content: 'Below this fitness effect value, near neutral mutations will be pooled into the cumulative fitness of the LB, instead of tracked individually. This saves on memory and computation time, but some stats will not be available. This value is automatically set to a high value if allele output is not requested, because there is no benefit to tracking in that case.',
+                    }),
+                ),
+
+                React.createElement('div', { className: 'new-job-view__field' },
+                    React.createElement('label', {}, 'Track neutral mutations'),
+                    React.createElement('div', { className: 'new-job-view__checkbox-wrapper' },
+                        React.createElement(Checkbox, {
+                            checked: this.state.fieldValues.track_neutrals,
+                            onChange: this.fieldChangeHandlers.track_neutrals,
+                        }),
+                    ),
+                    (this.state.fieldValues.track_neutrals !== this.state.defaultValues.track_neutrals ?
+                        React.createElement('div', { className: 'new-job-view__not-default' }) :
+                        null
+                    ),
+                    React.createElement(Help, {
+                        title: 'track_neutrals',
+                        content: 'Checking this box will cause Mendel to track neutral mutations as long as tracking_threshold is also set to 0.0. This button must be checked if neutral mutations are to be simulated.',
+                    }),
+                ),
+
+                React.createElement('div', { className: 'new-job-view__field' },
+                    React.createElement('label', {}, 'End simulation if population fitness falls to this'),
+                    React.createElement('input', {
+                        type: 'number',
+                        min: '0',
+                        max: '1',
+                        step: 'any',
+                        value: this.state.fieldValues.extinction_threshold,
+                        onChange: this.fieldChangeHandlers.extinction_threshold,
+                    }),
+                    (parseFloat(this.state.fieldValues.extinction_threshold) !== parseFloat(this.state.defaultValues.extinction_threshold) ?
+                        React.createElement('div', { className: 'new-job-view__not-default' }) :
+                        null
+                    ),
+                    React.createElement(Help, {
+                        title: 'extinction_threshold',
+                        content: 'If the mean fitness of the population falls to this value or below, it is considered mutational meltdown and the simulation is stopped.',
+                    }),
+                ),
+
+                React.createElement('div', { className: 'new-job-view__field' },
+                    React.createElement('label', {}, 'Plot alleles every n generations'),
+                    React.createElement('input', {
+                        type: 'number',
+                        min: '0',
+                        max: '100000',
+                        step: '1',
+                        value: this.state.fieldValues.plot_allele_gens,
+                        onChange: this.fieldChangeHandlers.plot_allele_gens,
+                    }),
+                    (parseFloat(this.state.fieldValues.plot_allele_gens) !== parseFloat(this.state.defaultValues.plot_allele_gens) ?
+                        React.createElement('div', { className: 'new-job-view__not-default' }) :
+                        null
+                    ),
+                    React.createElement(Help, {
+                        title: 'plot_allele_gens',
+                        content: 'A value of 0 means only plot alleles for the last generation.',
+                    }),
+                ),
+
+                React.createElement('div', { className: 'new-job-view__field' },
+                    React.createElement('label', {}, 'Omit the 1st allele bin'),
+                    React.createElement('div', { className: 'new-job-view__checkbox-wrapper' },
+                        React.createElement(Checkbox, {
+                            checked: this.state.fieldValues.omit_first_allele_bin,
+                            onChange: this.fieldChangeHandlers.omit_first_allele_bin,
+                        }),
+                    ),
+                    (this.state.fieldValues.omit_first_allele_bin !== this.state.defaultValues.omit_first_allele_bin ?
+                        React.createElement('div', { className: 'new-job-view__not-default' }) :
+                        null
+                    ),
+                    React.createElement(Help, {
+                        title: 'omit_first_allele_bin',
+                        content: 'If checked, do not output the 0-1% allele bin for allele plots. This is consistent with the way most geneticists plot this data.',
+                    }),
+                ),
+
+                React.createElement('div', { className: 'new-job-view__field' },
+                    React.createElement('label', {}, 'The verbosity of the output'),
+                    React.createElement('input', {
+                        type: 'number',
+                        min: '0',
+                        max: '100000',
+                        step: '1',
+                        value: this.state.fieldValues.verbosity,
+                        onChange: this.fieldChangeHandlers.verbosity,
+                    }),
+                    (parseFloat(this.state.fieldValues.verbosity) !== parseFloat(this.state.defaultValues.verbosity) ?
+                        React.createElement('div', { className: 'new-job-view__not-default' }) :
+                        null
+                    ),
+                    React.createElement(Help, {
+                        title: 'verbosity',
+                        content: 'A value of 1 is recommended. Higher values will output more information, but will also take longer to gather.',
+                    }),
+                ),
+
+                React.createElement('div', { className: 'new-job-view__form-section-title' }, 'Advanced Options'),
+
+                React.createElement('div', { className: 'new-job-view__field' },
+                    React.createElement('label', {}, 'Random number generator (RNG) seed'),
+                    React.createElement('input', {
+                        type: 'number',
+                        min: '-9223372036854775808',
+                        max: '9223372036854775807',
+                        step: '1',
+                        value: this.state.fieldValues.random_number_seed,
+                        onChange: this.fieldChangeHandlers.random_number_seed,
+                    }),
+                    (parseFloat(this.state.fieldValues.random_number_seed) !== parseFloat(this.state.defaultValues.random_number_seed) ?
+                        React.createElement('div', { className: 'new-job-view__not-default' }) :
+                        null
+                    ),
+                    React.createElement(Help, {
+                        title: 'random_number_seed',
+                        content: 'At several stages within the MENDEL program, a random number generator is required. When an experiment needs to be independently replicated, the “random number seed” must be changed. If this is not done, the second experiment will be an exact duplicate of the earlier run. Or you can set this value to 0 and get a unique seed every time.',
+                    }),
+                ),
+
+                React.createElement('div', { className: 'new-job-view__field' },
+                    React.createElement('label', {}, 'Number of CPUs to use for the simulation'),
+                    React.createElement('input', {
+                        type: 'number',
+                        min: '0',
+                        max: '100000',
+                        step: '1',
+                        value: this.state.fieldValues.num_threads,
+                        onChange: this.fieldChangeHandlers.num_threads,
+                    }),
+                    (parseFloat(this.state.fieldValues.num_threads) !== parseFloat(this.state.defaultValues.num_threads) ?
+                        React.createElement('div', { className: 'new-job-view__not-default' }) :
+                        null
+                    ),
+                    React.createElement(Help, {
+                        title: 'num_threads',
+                        content: 'The number of concurrent CPU threads that should be used in the simulation. If this is set to 0 (recommended) it will automatically use all available CPUs.',
+                    }),
+                ),
+
+                React.createElement('div', { className: 'new-job-view__field' },
+                    React.createElement('label', {}, 'Force system garbage collection each generation'),
+                    React.createElement('div', { className: 'new-job-view__checkbox-wrapper' },
+                        React.createElement(Checkbox, {
+                            checked: this.state.fieldValues.force_gc,
+                            onChange: this.fieldChangeHandlers.force_gc,
+                        }),
+                    ),
+                    (this.state.fieldValues.force_gc !== this.state.defaultValues.force_gc ?
+                        React.createElement('div', { className: 'new-job-view__not-default' }) :
+                        null
+                    ),
+                    React.createElement(Help, {
+                        title: 'force_gc',
+                        content: 'Check this box to explicitly run Go garbage collection after mating each generation. (Otherwise Go decides when to run gargage collection.) Setting this can cut memory usage, sometimes as much as 40%, but it also increases the run time.',
+                    }),
+                ),
+
+                React.createElement('div', { className: 'new-job-view__field' },
+                    React.createElement('label', {}, 'Run Go garbage collection during allele counting after this %'),
+                    React.createElement('input', {
+                        type: 'number',
+                        min: '0',
+                        max: '100000',
+                        step: '1',
+                        value: this.state.fieldValues.allele_count_gc_interval,
+                        onChange: this.fieldChangeHandlers.allele_count_gc_interval,
+                    }),
+                    (parseFloat(this.state.fieldValues.allele_count_gc_interval) !== parseFloat(this.state.defaultValues.allele_count_gc_interval) ?
+                        React.createElement('div', { className: 'new-job-view__not-default' }) :
+                        null
+                    ),
+                    React.createElement(Help, {
+                        title: 'allele_count_gc_interval',
+                        content: 'if 0 < n < 100 explicitly call Go garbage collection after counting this percent of individuals (with a min bound of 100 individuals and max bound of 500), or if n >= 100 call GC after counting alleles from this many individuals. This helps memory not balloon right at the end of a long run, but will take a little longer.',
+                    }),
+                ),
+
                 React.createElement('div', { className: 'new-job-view__actions' },
                     React.createElement('input', { className: 'new-job-view__action button', type: 'submit', value: 'Start' }),
                     React.createElement('div', { className: 'new-job-view__action button button--text', onClick: this.onImportClick }, 'Import'),
@@ -775,8 +1518,29 @@ function stateToConfig(state: StateConfig) {
         'non_scaling_noise = ' + tomlFloat(state.non_scaling_noise),
         'partial_truncation_value = ' + tomlFloat(state.partial_truncation_value),
 
+        '[population]',
+        'reproductive_rate = ' + tomlFloat(state.reproductive_rate),
+        'num_offspring_model = ' + tomlString(state.num_offspring_model),
+        'crossover_model = ' + tomlString(state.crossover_model),
+        'mean_num_crossovers = ' + tomlFloat(state.mean_num_crossovers),
+        'haploid_chromosome_number = ' + tomlFloat(state.haploid_chromosome_number),
+        'num_linkage_subunits = ' + tomlFloat(state.num_linkage_subunits),
+        'num_contrasting_alleles = ' + tomlFloat(state.num_contrasting_alleles),
+        'max_total_fitness_increase = ' + tomlFloat(state.max_total_fitness_increase),
+        'initial_allele_fitness_model = ' + tomlString(state.initial_allele_fitness_model),
+        'initial_alleles_pop_frac = ' + tomlFloat(state.initial_alleles_pop_frac),
+        'initial_alleles_frequencies = ' + tomlString(state.initial_alleles_frequencies),
+        'pop_growth_model = ' + tomlString(state.pop_growth_model),
+        'pop_growth_rate = ' + tomlFloat(state.pop_growth_rate),
+        'pop_growth_rate2 = ' + tomlFloat(state.pop_growth_rate2),
+        'max_pop_size = ' + tomlFloat(state.max_pop_size),
+        'carrying_capacity = ' + tomlFloat(state.carrying_capacity),
+        'bottleneck_generation = ' + tomlFloat(state.bottleneck_generation),
+        'bottleneck_pop_size = ' + tomlFloat(state.bottleneck_pop_size),
+        'num_bottleneck_generations = ' + tomlFloat(state.num_bottleneck_generations),
+        'multiple_bottlenecks = ' + tomlString(state.multiple_bottlenecks),
+
         '[computation]',
-        'plot_allele_gens = 1',
         'files_to_output = ' + tomlString(
             filesToOutputString(
                 state.files_to_output_fit,
@@ -784,6 +1548,16 @@ function stateToConfig(state: StateConfig) {
                 state.files_to_output_allele_bins
             )
         ),
+        'tracking_threshold = ' + tomlFloat(state.tracking_threshold),
+        'track_neutrals = ' + tomlBoolean(state.track_neutrals),
+        'extinction_threshold = ' + tomlFloat(state.extinction_threshold),
+        'plot_allele_gens = ' + tomlFloat(state.plot_allele_gens),
+        'omit_first_allele_bin = ' + tomlBoolean(state.omit_first_allele_bin),
+        'verbosity = ' + tomlFloat(state.verbosity),
+        'random_number_seed = ' + tomlFloat(state.random_number_seed),
+        'num_threads = ' + tomlFloat(state.num_threads),
+        'force_gc = ' + tomlBoolean(state.force_gc),
+        'allele_count_gc_interval = ' + tomlFloat(state.allele_count_gc_interval),
     ].join('\n');
 }
 
@@ -811,9 +1585,39 @@ function configToState(config: ServerConfig) {
         heritability: config.selection.heritability.toString(),
         non_scaling_noise: config.selection.non_scaling_noise.toString(),
         partial_truncation_value: config.selection.partial_truncation_value.toString(),
+        reproductive_rate: config.population.reproductive_rate.toString(),
+        num_offspring_model: config.population.num_offspring_model,
+        crossover_model: config.population.crossover_model,
+        mean_num_crossovers: config.population.mean_num_crossovers.toString(),
+        haploid_chromosome_number: config.population.haploid_chromosome_number.toString(),
+        num_linkage_subunits: config.population.num_linkage_subunits.toString(),
+        num_contrasting_alleles: config.population.num_contrasting_alleles.toString(),
+        max_total_fitness_increase: config.population.max_total_fitness_increase.toString(),
+        initial_allele_fitness_model: config.population.initial_allele_fitness_model,
+        initial_alleles_pop_frac: config.population.initial_alleles_pop_frac.toString(),
+        initial_alleles_frequencies: config.population.initial_alleles_frequencies,
+        pop_growth_model: config.population.pop_growth_model,
+        pop_growth_rate: config.population.pop_growth_rate.toString(),
+        pop_growth_rate2: config.population.pop_growth_rate2.toString(),
+        max_pop_size: config.population.max_pop_size.toString(),
+        carrying_capacity: config.population.carrying_capacity.toString(),
+        bottleneck_generation: config.population.bottleneck_generation.toString(),
+        bottleneck_pop_size: config.population.bottleneck_pop_size.toString(),
+        num_bottleneck_generations: config.population.num_bottleneck_generations.toString(),
+        multiple_bottlenecks: config.population.multiple_bottlenecks,
         files_to_output_fit: filesToOutput.fit,
         files_to_output_hst: filesToOutput.hst,
         files_to_output_allele_bins: filesToOutput.alleles,
+        tracking_threshold: config.computation.tracking_threshold.toString(),
+        track_neutrals: config.computation.track_neutrals,
+        extinction_threshold: config.computation.extinction_threshold.toString(),
+        plot_allele_gens: config.computation.plot_allele_gens.toString(),
+        omit_first_allele_bin: config.computation.omit_first_allele_bin,
+        verbosity: config.computation.verbosity.toString(),
+        random_number_seed: config.computation.random_number_seed.toString(),
+        num_threads: config.computation.num_threads.toString(),
+        force_gc: config.computation.force_gc,
+        allele_count_gc_interval: config.computation.allele_count_gc_interval.toString(),
     };
 }
 
@@ -881,6 +1685,10 @@ function tomlFloat(s: string) {
 
 function tomlString(s: string) {
     return '"' + s + '"';
+}
+
+function tomlBoolean(b: boolean) {
+    return b ? 'true' : 'false';
 }
 
 function chooseFileContents(callback: (content: string) => void) {

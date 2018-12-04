@@ -32,6 +32,9 @@
     display: block;
     font-size: 14px;
     flex-grow: 1;
+    flex-shrink: 1;
+    line-height: calc(100% + 6px);
+    padding-right: 20px;
 }
 
 .new-job-view__form input[type=text],
@@ -44,6 +47,7 @@
     color: #333;
     box-sizing: border-box;
     padding: 8px 10px;
+    flex-shrink: 0;
 }
 
 .new-job-view__form input[type=text]:focus,
@@ -76,6 +80,7 @@
     background-image: url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0Ij4KICAgIDxwYXRoIGQ9Ik03IDEwbDUgNSA1LTV6IiBmaWxsPSIjMzMzIiAvPgo8L3N2Zz4K);
     background-repeat: no-repeat;
     background-position: right center;
+    flex-shrink: 0;
 }
 
 .new-job-view__form select:focus {
@@ -91,6 +96,7 @@
     display: inline-block;
     vertical-align: top;
     padding: 5px;
+    margin-left: -8px;
 }
 
 .new-job-view__form .checkbox svg {
