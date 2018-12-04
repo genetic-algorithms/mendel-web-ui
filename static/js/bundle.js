@@ -574,6 +574,12 @@
                 fitness_effect_model: function (e) { return _this.simpleFieldChanged('fitness_effect_model', e); },
                 uniform_fitness_effect_del: function (e) { return _this.simpleFieldChanged('uniform_fitness_effect_del', e); },
                 uniform_fitness_effect_fav: function (e) { return _this.simpleFieldChanged('uniform_fitness_effect_fav', e); },
+                high_impact_mutn_fraction: function (e) { return _this.simpleFieldChanged('high_impact_mutn_fraction', e); },
+                high_impact_mutn_threshold: function (e) { return _this.simpleFieldChanged('high_impact_mutn_threshold', e); },
+                max_fav_fitness_gain: function (e) { return _this.simpleFieldChanged('max_fav_fitness_gain', e); },
+                fraction_recessive: function (e) { return _this.simpleFieldChanged('fraction_recessive', e); },
+                recessive_hetero_expression: function (e) { return _this.simpleFieldChanged('recessive_hetero_expression', e); },
+                dominant_hetero_expression: function (e) { return _this.simpleFieldChanged('dominant_hetero_expression', e); },
                 files_to_output_fit: function (checked) { return _this.checkboxFieldChanged('files_to_output_fit', checked); },
                 files_to_output_hst: function (checked) { return _this.checkboxFieldChanged('files_to_output_hst', checked); },
                 files_to_output_allele_bins: function (checked) { return _this.checkboxFieldChanged('files_to_output_allele_bins', checked); },
@@ -592,6 +598,12 @@
                 fitness_effect_model: 'weibull',
                 uniform_fitness_effect_del: '',
                 uniform_fitness_effect_fav: '',
+                high_impact_mutn_fraction: '',
+                high_impact_mutn_threshold: '',
+                max_fav_fitness_gain: '',
+                fraction_recessive: '',
+                recessive_hetero_expression: '',
+                dominant_hetero_expression: '',
                 files_to_output_fit: true,
                 files_to_output_hst: true,
                 files_to_output_allele_bins: true,
@@ -792,6 +804,79 @@
                 null), React.createElement(Help, {
                 title: 'uniform_fitness_effect_fav',
                 content: 'Used for fitness_effect_model=fixed. Each beneficial mutation should have this fitness effect.',
+            })), React.createElement('div', { className: 'new-job-view__field' }, React.createElement('label', {}, 'Fraction of deleterious mutations with “major effect”'), React.createElement('input', {
+                type: 'number',
+                min: '0.000000001',
+                max: '0.9',
+                step: 'any',
+                value: this.state.fieldValues.high_impact_mutn_fraction,
+                onChange: this.fieldChangeHandlers.high_impact_mutn_fraction,
+            }), (parseFloat(this.state.fieldValues.high_impact_mutn_fraction) !== parseFloat(this.state.defaultValues.high_impact_mutn_fraction) ?
+                React.createElement('div', { className: 'new-job-view__not-default' }) :
+                null), React.createElement(Help, {
+                title: 'high_impact_mutn_fraction',
+                content: 'Most mutations have an effect on fitness that is too small to measure directly. However, mutations will have measurable effects in the far “tail” of the mutation distribution curve. By utilizing the frequency and distribution of “measurable” mutation effects, one can constrain the most significant portion of the distribution curve as it relates to the selection process. For most species, there may not yet be enough data, even for the major mutations, to accurately model the exact distribution of mutations. When such data is not yet available, we are forced to simply estimate, to the best of our ability and based on data from other organisms, the fraction of “major mutations”.  The human default is 0.001.',
+            })), React.createElement('div', { className: 'new-job-view__field' }, React.createElement('label', {}, 'Minimum deleterious effect defined as “major”'), React.createElement('input', {
+                type: 'number',
+                min: '0.0001',
+                max: '0.9',
+                step: 'any',
+                value: this.state.fieldValues.high_impact_mutn_threshold,
+                onChange: this.fieldChangeHandlers.high_impact_mutn_threshold,
+            }), (parseFloat(this.state.fieldValues.high_impact_mutn_threshold) !== parseFloat(this.state.defaultValues.high_impact_mutn_threshold) ?
+                React.createElement('div', { className: 'new-job-view__not-default' }) :
+                null), React.createElement(Help, {
+                title: 'high_impact_mutn_threshold',
+                content: 'A somewhat arbitrary level must be selected for defining what constitutes a “measurable”, or “major”, mutation effect. MENDEL uses a default value for this cut-off of 0.10. This is because under realistic clinical conditions, it is questionable that we can reliably measure a single mutation’s fitness effect when it changes fitness by less than 10%.',
+            })), React.createElement('div', { className: 'new-job-view__field' }, React.createElement('label', {}, 'Maximum beneficial fitness effect'), React.createElement('input', {
+                type: 'number',
+                min: '0',
+                max: '1',
+                step: 'any',
+                value: this.state.fieldValues.max_fav_fitness_gain,
+                onChange: this.fieldChangeHandlers.max_fav_fitness_gain,
+            }), (parseFloat(this.state.fieldValues.max_fav_fitness_gain) !== parseFloat(this.state.defaultValues.max_fav_fitness_gain) ?
+                React.createElement('div', { className: 'new-job-view__not-default' }) :
+                null), React.createElement(Help, {
+                title: 'max_fav_fitness_gain',
+                content: 'A realistic upper limit must be placed upon beneficial mutations. This is because a single nucleotide change can expand total biological functionality of an organism only to a limited degree. The larger the genome and the greater the total genomic information, the less a single nucleotide is likely to increase the total. Researchers must make a judgment for themselves of what is a reasonable maximal value for a single base change. The MENDEL default value for this limit is 0.01. This limit implies that a single point mutation can increase total biological functionality by as much as 1%.',
+                url: HELP_URL_PREFIX + 'rdbm',
+            })), React.createElement('div', { className: 'new-job-view__field' }, React.createElement('label', {}, 'Fraction recessive (rest dominant)'), React.createElement('input', {
+                type: 'number',
+                min: '0',
+                max: '1',
+                step: 'any',
+                value: this.state.fieldValues.fraction_recessive,
+                onChange: this.fieldChangeHandlers.fraction_recessive,
+            }), (parseFloat(this.state.fieldValues.fraction_recessive) !== parseFloat(this.state.defaultValues.fraction_recessive) ?
+                React.createElement('div', { className: 'new-job-view__not-default' }) :
+                null), React.createElement(Help, {
+                title: 'fraction_recessive',
+                content: 'This parameter simply specifies the percentage of mutations that are recessive. If set to 0.8, then 80% of mutations are recessive, so the remaining 20% will automatically be made dominant.',
+            })), React.createElement('div', { className: 'new-job-view__field' }, React.createElement('label', {}, 'Expression of recessive mutations (in heterozygote)'), React.createElement('input', {
+                type: 'number',
+                min: '0',
+                max: '0.5',
+                step: 'any',
+                value: this.state.fieldValues.recessive_hetero_expression,
+                onChange: this.fieldChangeHandlers.recessive_hetero_expression,
+            }), (parseFloat(this.state.fieldValues.recessive_hetero_expression) !== parseFloat(this.state.defaultValues.recessive_hetero_expression) ?
+                React.createElement('div', { className: 'new-job-view__not-default' }) :
+                null), React.createElement(Help, {
+                title: 'recessive_hetero_expression',
+                content: 'It is widely believed that recessive mutations are not completely silent in the heterozygous condition, but are still expressed at some low level. Although the co-dominance value is 0.5 expression, a reasonable setting would be 0.05.',
+            })), React.createElement('div', { className: 'new-job-view__field' }, React.createElement('label', {}, 'Expression of dominant mutations (in heterozygote)'), React.createElement('input', {
+                type: 'number',
+                min: '0.5',
+                max: '1',
+                step: 'any',
+                value: this.state.fieldValues.dominant_hetero_expression,
+                onChange: this.fieldChangeHandlers.dominant_hetero_expression,
+            }), (parseFloat(this.state.fieldValues.dominant_hetero_expression) !== parseFloat(this.state.defaultValues.dominant_hetero_expression) ?
+                React.createElement('div', { className: 'new-job-view__not-default' }) :
+                null), React.createElement(Help, {
+                title: 'dominant_hetero_expression',
+                content: 'It is widely believed that dominant mutations are not completely dominant in the heterozygous condition, but are only expressed only at some very high level. Although the co-dominance value is 0.5, a reasonable setting would be 0.95.',
             })), React.createElement('div', { className: 'new-job-view__form-section-title' }, 'Output Files'), React.createElement('div', { className: 'new-job-view__field' }, React.createElement('label', {}, 'mendel.fit'), React.createElement('div', { className: 'new-job-view__checkbox-wrapper' }, React.createElement(Checkbox, {
                 checked: this.state.fieldValues.files_to_output_fit,
                 onChange: this.fieldChangeHandlers.files_to_output_fit,
@@ -834,6 +919,12 @@
             'fitness_effect_model = ' + tomlString(state.fitness_effect_model),
             'uniform_fitness_effect_del = ' + tomlFloat(state.uniform_fitness_effect_del),
             'uniform_fitness_effect_fav = ' + tomlFloat(state.uniform_fitness_effect_fav),
+            'high_impact_mutn_fraction = ' + tomlFloat(state.high_impact_mutn_fraction),
+            'high_impact_mutn_threshold = ' + tomlFloat(state.high_impact_mutn_threshold),
+            'max_fav_fitness_gain = ' + tomlFloat(state.max_fav_fitness_gain),
+            'fraction_recessive = ' + tomlFloat(state.fraction_recessive),
+            'recessive_hetero_expression = ' + tomlFloat(state.recessive_hetero_expression),
+            'dominant_hetero_expression = ' + tomlFloat(state.dominant_hetero_expression),
             '[computation]',
             'plot_allele_gens = 1',
             'files_to_output = ' + tomlString(filesToOutputString(state.files_to_output_fit, state.files_to_output_hst, state.files_to_output_allele_bins)),
@@ -852,6 +943,12 @@
             fitness_effect_model: config.mutations.fitness_effect_model,
             uniform_fitness_effect_del: config.mutations.uniform_fitness_effect_del.toString(),
             uniform_fitness_effect_fav: config.mutations.uniform_fitness_effect_fav.toString(),
+            high_impact_mutn_fraction: config.mutations.high_impact_mutn_fraction.toString(),
+            high_impact_mutn_threshold: config.mutations.high_impact_mutn_threshold.toString(),
+            max_fav_fitness_gain: config.mutations.max_fav_fitness_gain.toString(),
+            fraction_recessive: config.mutations.fraction_recessive.toString(),
+            recessive_hetero_expression: config.mutations.recessive_hetero_expression.toString(),
+            dominant_hetero_expression: config.mutations.dominant_hetero_expression.toString(),
             files_to_output_fit: filesToOutput.fit,
             files_to_output_hst: filesToOutput.hst,
             files_to_output_allele_bins: filesToOutput.alleles,
