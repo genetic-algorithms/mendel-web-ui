@@ -580,6 +580,10 @@
                 fraction_recessive: function (e) { return _this.simpleFieldChanged('fraction_recessive', e); },
                 recessive_hetero_expression: function (e) { return _this.simpleFieldChanged('recessive_hetero_expression', e); },
                 dominant_hetero_expression: function (e) { return _this.simpleFieldChanged('dominant_hetero_expression', e); },
+                selection_model: function (e) { return _this.simpleFieldChanged('selection_model', e); },
+                heritability: function (e) { return _this.simpleFieldChanged('heritability', e); },
+                non_scaling_noise: function (e) { return _this.simpleFieldChanged('non_scaling_noise', e); },
+                partial_truncation_value: function (e) { return _this.simpleFieldChanged('partial_truncation_value', e); },
                 files_to_output_fit: function (checked) { return _this.checkboxFieldChanged('files_to_output_fit', checked); },
                 files_to_output_hst: function (checked) { return _this.checkboxFieldChanged('files_to_output_hst', checked); },
                 files_to_output_allele_bins: function (checked) { return _this.checkboxFieldChanged('files_to_output_allele_bins', checked); },
@@ -604,6 +608,10 @@
                 fraction_recessive: '',
                 recessive_hetero_expression: '',
                 dominant_hetero_expression: '',
+                selection_model: 'spps',
+                heritability: '',
+                non_scaling_noise: '',
+                partial_truncation_value: '',
                 files_to_output_fit: true,
                 files_to_output_hst: true,
                 files_to_output_allele_bins: true,
@@ -877,6 +885,48 @@
                 null), React.createElement(Help, {
                 title: 'dominant_hetero_expression',
                 content: 'It is widely believed that dominant mutations are not completely dominant in the heterozygous condition, but are only expressed only at some very high level. Although the co-dominance value is 0.5, a reasonable setting would be 0.95.',
+            })), React.createElement('div', { className: 'new-job-view__form-section-title' }, 'Selection'), React.createElement('div', { className: 'new-job-view__field' }, React.createElement('label', {}, 'Selection model'), React.createElement('select', {
+                value: this.state.fieldValues.selection_model,
+                onChange: this.fieldChangeHandlers.selection_model,
+            }, React.createElement('option', { value: 'fulltrunc' }, 'Full truncation'), React.createElement('option', { value: 'ups' }, 'Unrestricted probability selection'), React.createElement('option', { value: 'spps' }, 'Strict proportionality probability selection (default)'), React.createElement('option', { value: 'partialtrunc' }, 'Partial truncation')), (this.state.fieldValues.selection_model !== this.state.defaultValues.selection_model ?
+                React.createElement('div', { className: 'new-job-view__not-default' }) :
+                null)), React.createElement('div', { className: 'new-job-view__field' }, React.createElement('label', {}, 'Heritability'), React.createElement('input', {
+                type: 'number',
+                min: '0',
+                max: '1',
+                step: 'any',
+                value: this.state.fieldValues.heritability,
+                onChange: this.fieldChangeHandlers.heritability,
+            }), (parseFloat(this.state.fieldValues.heritability) !== parseFloat(this.state.defaultValues.heritability) ?
+                React.createElement('div', { className: 'new-job-view__not-default' }) :
+                null), React.createElement(Help, {
+                title: 'heritability',
+                content: 'Because a large part of phenotypic performance is affected by an individual’s circumstances (the “environment”), selection in nature is less effective than would be predicted simply from genotypic fitness values. Non-heritable environmental effects on phenotypic performance must be modeled realistically. A heritability value of 0.2 implies that on average, only 20% of an individual’s phenotypic performance is passed on to the next generation, with the rest being due to non-heritable factors. For a very general character such as reproductive fitness, 0.2 is an extremely generous heritability value. In most field contexts, it is in fact usually lower than this, typically being below the limit of detection.',
+            })), React.createElement('div', { className: 'new-job-view__field' }, React.createElement('label', {}, 'Non-scaling noise'), React.createElement('input', {
+                type: 'number',
+                min: '0',
+                max: '1',
+                step: 'any',
+                value: this.state.fieldValues.non_scaling_noise,
+                onChange: this.fieldChangeHandlers.non_scaling_noise,
+            }), (parseFloat(this.state.fieldValues.non_scaling_noise) !== parseFloat(this.state.defaultValues.non_scaling_noise) ?
+                React.createElement('div', { className: 'new-job-view__not-default' }) :
+                null), React.createElement(Help, {
+                title: 'non_scaling_noise',
+                content: 'If a population’s fitness is increasing or declining, heritability (as calculated in the normal way), tends to scale with fitness, and so the implied “environmental noise” diminishes or increases as fitness diminishes or increases. This seems counter-intuitive. Also, with truncation selection, phenotypic variance becomes un-naturally small. For these reasons, it is desirable to model a component of environmental noise that does not scale with fitness variation. The units for this non-scaling noise parameter are based upon standard deviations from the initial fitness of 1.0. For simplicity, a reasonable value is 0.05, but reasonable values probably exceed 0.01 and might exceed 0.1.',
+                url: HELP_URL_PREFIX + 'nsn',
+            })), React.createElement('div', { className: 'new-job-view__field' }, React.createElement('label', {}, 'For partial truncation: partial truncation value'), React.createElement('input', {
+                type: 'number',
+                min: '0',
+                max: '1',
+                step: 'any',
+                value: this.state.fieldValues.partial_truncation_value,
+                onChange: this.fieldChangeHandlers.partial_truncation_value,
+            }), (parseFloat(this.state.fieldValues.partial_truncation_value) !== parseFloat(this.state.defaultValues.partial_truncation_value) ?
+                React.createElement('div', { className: 'new-job-view__not-default' }) :
+                null), React.createElement(Help, {
+                title: 'partial_truncation_value',
+                content: 'Used in Parial Truncation selection, an individuals fitness is divided by: partial_truncation_value + (1. - partial_truncation_value)*randomnum(1).',
             })), React.createElement('div', { className: 'new-job-view__form-section-title' }, 'Output Files'), React.createElement('div', { className: 'new-job-view__field' }, React.createElement('label', {}, 'mendel.fit'), React.createElement('div', { className: 'new-job-view__checkbox-wrapper' }, React.createElement(Checkbox, {
                 checked: this.state.fieldValues.files_to_output_fit,
                 onChange: this.fieldChangeHandlers.files_to_output_fit,
@@ -925,6 +975,11 @@
             'fraction_recessive = ' + tomlFloat(state.fraction_recessive),
             'recessive_hetero_expression = ' + tomlFloat(state.recessive_hetero_expression),
             'dominant_hetero_expression = ' + tomlFloat(state.dominant_hetero_expression),
+            '[selection]',
+            'selection_model = ' + tomlString(state.selection_model),
+            'heritability = ' + tomlFloat(state.heritability),
+            'non_scaling_noise = ' + tomlFloat(state.non_scaling_noise),
+            'partial_truncation_value = ' + tomlFloat(state.partial_truncation_value),
             '[computation]',
             'plot_allele_gens = 1',
             'files_to_output = ' + tomlString(filesToOutputString(state.files_to_output_fit, state.files_to_output_hst, state.files_to_output_allele_bins)),
@@ -949,6 +1004,10 @@
             fraction_recessive: config.mutations.fraction_recessive.toString(),
             recessive_hetero_expression: config.mutations.recessive_hetero_expression.toString(),
             dominant_hetero_expression: config.mutations.dominant_hetero_expression.toString(),
+            selection_model: config.selection.selection_model,
+            heritability: config.selection.heritability.toString(),
+            non_scaling_noise: config.selection.non_scaling_noise.toString(),
+            partial_truncation_value: config.selection.partial_truncation_value.toString(),
             files_to_output_fit: filesToOutput.fit,
             files_to_output_hst: filesToOutput.hst,
             files_to_output_allele_bins: filesToOutput.alleles,
