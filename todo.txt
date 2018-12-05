@@ -1,1 +1,0 @@
-Handler the case where user is deleted but we keep the jobs and null the OwnerId

@@ -51,13 +51,14 @@ var globalDefaultConfigPath string
 
 
 func main() {
-	if len(os.Args) < 3 {
-		fmt.Println("Usage: ./cmd/server/server binary default_config")
+	if len(os.Args) < 4 {
+		fmt.Println("Usage: ./cmd/server/server port binary default_config")
 		return
 	}
 
-	globalMendelGoBinaryPath = os.Args[1]
-	globalDefaultConfigPath = os.Args[2]
+	port := os.Args[1]
+	globalMendelGoBinaryPath = os.Args[2]
+	globalDefaultConfigPath = os.Args[3]
 
 	globalRunningJobsOutput = make(map[string]*strings.Builder)
 
@@ -71,7 +72,7 @@ func main() {
 	http.HandleFunc("/", rootHandler)
 	http.HandleFunc("/api/", apiHandler)
 
-	log.Fatal(http.ListenAndServe(":8580", nil))
+	log.Fatal(http.ListenAndServe(":" + port, nil))
 }
 
 func loadDatabase() Database {
