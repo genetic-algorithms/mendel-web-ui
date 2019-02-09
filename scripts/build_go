@@ -1,4 +1,4 @@
 #!/bin/bash
 
 glide --quiet install
-(cd ./cmd/server && go build)
+(cd ./cmd/server && go build -o mendel-web-ui)

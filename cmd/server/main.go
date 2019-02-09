@@ -52,7 +52,7 @@ var globalDefaultConfigPath string
 
 func main() {
 	if len(os.Args) < 4 {
-		fmt.Println("Usage: ./cmd/server/server port binary default_config")
+		fmt.Println("Usage: ./cmd/server/mendel-go-ui port binary default_config")
 		return
 	}
 

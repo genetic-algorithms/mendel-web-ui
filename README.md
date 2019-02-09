@@ -6,14 +6,26 @@
 
 # Run
 
-Usage:
+To start the web UI server:
 
 ```
-./cmd/server/server port binary default_config
+scripts start-mendel-ui.sh {dev|prod}
+```
+
+To stop the web UI server:
+
+```
+scripts stop-mendel-ui.sh
+```
+
+Or if you want to start it manually:
+
+```
+./cmd/server/mendel-web-ui <port> <binary> <default_config>
 ```
 
 Example:
 
 ```
-./cmd/server/server 8580 ../mendel-go/mendel-go ../mendel-go/mendel-defaults.ini
+./cmd/server/mendel-web-ui 8590 ../mendel-go/mendel-go ../mendel-go/mendel-defaults.ini
 ```

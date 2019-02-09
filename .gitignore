@@ -1,6 +1,10 @@
-/cmd/server/server
+/cmd/server/mendel-web-ui
 /vendor/
 /output/
 /database/
 /.vscode/
 /static/typescript/out/
+/node_modules/
+
+# Intellij GoLand files
+/.idea/

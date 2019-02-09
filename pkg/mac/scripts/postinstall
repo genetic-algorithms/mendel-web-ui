@@ -1,0 +1,19 @@
+#!/bin/sh
+# Create sym links from we where we install the mendel-web-ui files to where they need to be under /usr/local
+# Note: this file must be given the executable permissions before giving it to pkgbuild
+
+SRCDIR=/Users/Shared
+DESTDIR=/usr/local
+
+mkdir -p $DESTDIR/bin $DESTDIR/share
+ln -sf $SRCDIR/mendel-web-ui/bin/mendel-web-ui $DESTDIR/bin
+ln -sf $SRCDIR/mendel-web-ui/bin/start-mendel-ui.sh $DESTDIR/bin
+ln -sf $SRCDIR/mendel-web-ui/bin/stop-mendel-ui.sh $DESTDIR/bin
+ln -sf $SRCDIR/mendel-web-ui/share/mendel-web-ui $DESTDIR/share
+# this takes care of the static, database, and output subdirs
+ln -sf $SRCDIR/mendel-web-ui/mendel-web-ui $DESTDIR/mendel-web-ui
+
+mkdir -p /var/log/mendel-web-ui
+chmod 777 /var/log/mendel-web-ui
+
+exit 0

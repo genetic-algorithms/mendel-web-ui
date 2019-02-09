@@ -1,0 +1,16 @@
+# This is used to exclude files when building the tar file for the rpm package build.
+# This should exclude run time dirs/files and artifacts built during dev (those will be recreated during rpm build).
+# This should *not* exclude any source files necessary for building.
+.tarignore
+Makefile
+cmd/server/mendel-web-ui
+vendor/
+node_modules/
+output/
+database/
+.vscode/
+#static/typescript/out/
+.idea/
+scripts/watch
+#pkg/rpm/mendel-web-ui.spec
+pgk/mac
