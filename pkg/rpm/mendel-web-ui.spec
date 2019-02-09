@@ -54,6 +54,8 @@ cp pkg/upstart/mendel-web-ui.conf $RPM_BUILD_ROOT/etc/init
 /etc/init/mendel-web-ui.conf
 
 %post
+mkdir -p /var/log/mendel-web-ui
+chmod 777 /var/log/mendel-web-ui  # not sure if this is necessary
 initctl reload-configuration
 initctl start mendel-web-ui
 

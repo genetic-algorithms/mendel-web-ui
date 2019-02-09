@@ -6,7 +6,7 @@
 runEnv=${1:-prod}
 
 if [[ "$runEnv" == "prod" ]]; then
-	port=8590
+	port=8581
 	logDir="/var/log/mendel-web-ui"
 	cd /usr/local/mendel-web-ui    # this gives it access to the dirs: static, node_modules, database, output
 	/usr/local/bin/mendel-web-ui $port /usr/local/bin/mendel-go /usr/local/share/mendel-go/mendel-defaults.ini > $logDir/stdout.log 2> $logDir/stderr.log &
@@ -15,7 +15,7 @@ if [[ "$runEnv" == "prod" ]]; then
 	fi
 elif [[ "$runEnv" == "dev" ]]; then
 	# We assume they run this in the mendel-web-ui github dir
-	port=8590
+	port=8581
 	logDir="$HOME/log/mendel-web-ui"
 	mkdir -p $logDir
 	cmd/server/mendel-web-ui $port ../mendel-go/mendel-go ../mendel-go/mendel-defaults.ini > $logDir/stdout.log 2> $logDir/stderr.log &
