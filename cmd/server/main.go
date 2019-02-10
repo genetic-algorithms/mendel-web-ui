@@ -63,6 +63,10 @@ func main() {
 	globalStaticPath = "static"
 	if len(os.Args) >= 5 {
 		globalStaticPath = strings.TrimSuffix(os.Args[4], "/")  // make sure it does not have a trailing / because we combine it with a path
+		_, err := os.Stat(globalStaticPath)
+		if err != nil {
+			panic(err)
+		}
 		fmt.Printf("Using static directory %s\n", globalStaticPath)
 	}
 
