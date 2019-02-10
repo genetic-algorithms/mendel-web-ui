@@ -13,7 +13,8 @@ ln -sf $SRCDIR/mendel-web-ui/share/mendel-web-ui $DESTDIR/share
 # this takes care of the static, database, and output subdirs
 ln -sf $SRCDIR/mendel-web-ui/mendel-web-ui $DESTDIR/mendel-web-ui
 
-mkdir -p /var/log/mendel-web-ui
-chmod 777 /var/log/mendel-web-ui
+mkdir -p /var/log/mendel-web-ui /var/run/mendel-web-ui
+# this is needed because these 2 dirs are created by root during install, but will be written to by whatever user runs the web ui
+chmod 777 /var/log/mendel-web-ui /var/run/mendel-web-ui
 
 exit 0

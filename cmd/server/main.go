@@ -45,20 +45,26 @@ var globalDbLock sync.RWMutex
 var globalSecureCookie *securecookie.SecureCookie
 var globalRunningJobsOutput map[string]*strings.Builder
 var globalRunningJobsLock sync.RWMutex
-var globalJobsDir string = "output/jobs"
+var globalJobsDir = "output/jobs"
 var globalMendelGoBinaryPath string
 var globalDefaultConfigPath string
+var globalStaticPath string
 
 
 func main() {
 	if len(os.Args) < 4 {
-		fmt.Println("Usage: ./cmd/server/mendel-go-ui port binary default_config")
+		fmt.Println("Usage: ./cmd/server/mendel-go-ui port binary default_config [static_dir]")
 		return
 	}
 
 	port := os.Args[1]
 	globalMendelGoBinaryPath = os.Args[2]
 	globalDefaultConfigPath = os.Args[3]
+	globalStaticPath = "static"
+	if len(os.Args) >= 5 {
+		globalStaticPath = strings.TrimSuffix(os.Args[4], "/")  // make sure it does not have a trailing / because we combine it with a path
+		fmt.Printf("Using static directory %s\n", globalStaticPath)
+	}
 
 	globalRunningJobsOutput = make(map[string]*strings.Builder)
 
@@ -67,7 +73,7 @@ func main() {
 
 	globalSecureCookie = securecookie.New(globalDb.CookieHashKey, globalDb.CookieBlockKey)
 
-	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
+	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir(globalStaticPath))))
 
 	http.HandleFunc("/", rootHandler)
 	http.HandleFunc("/api/", apiHandler)
@@ -87,13 +93,13 @@ func loadDatabase() Database {
 	_, err = os.Stat("./database/database.json")
 	if err != nil {
 		cookieHashKey := make([]byte, 64)
-		_, err = rand.Read(cookieHashKey);
+		_, err = rand.Read(cookieHashKey)
 		if err != nil {
 			panic(err)
 		}
 
 		cookieBlockKey := make([]byte, 32)
-		_, err = rand.Read(cookieBlockKey);
+		_, err = rand.Read(cookieBlockKey)
 		if err != nil {
 			panic(err)
 		}
@@ -160,7 +166,7 @@ func loadDatabase() Database {
 	return db
 }
 
-func rootHandler(w http.ResponseWriter, r *http.Request) {
+func rootHandler(w http.ResponseWriter, _ *http.Request) {
 	type Context struct {
 		CssFiles []string
 		JsFiles []string
@@ -168,22 +174,22 @@ func rootHandler(w http.ResponseWriter, r *http.Request) {
 
 	context := Context{
 		CssFiles: []string{
-			staticMtime("static/css/main.css"),
-			staticMtime("static/css/button.css"),
-			staticMtime("static/css/snackbar.css"),
-			staticMtime("static/css/non_login.css"),
-			staticMtime("static/css/header.css"),
-			staticMtime("static/css/login.css"),
-			staticMtime("static/css/new_job.css"),
-			staticMtime("static/css/job_detail.css"),
-			staticMtime("static/css/job_listing.css"),
-			staticMtime("static/css/user_listing.css"),
-			staticMtime("static/css/create_edit_user.css"),
-			staticMtime("static/css/plots.css"),
-			staticMtime("static/css/confirmation_dialog.css"),
+			staticMtime(globalStaticPath+"/css/main.css"),
+			staticMtime(globalStaticPath+"/css/button.css"),
+			staticMtime(globalStaticPath+"/css/snackbar.css"),
+			staticMtime(globalStaticPath+"/css/non_login.css"),
+			staticMtime(globalStaticPath+"/css/header.css"),
+			staticMtime(globalStaticPath+"/css/login.css"),
+			staticMtime(globalStaticPath+"/css/new_job.css"),
+			staticMtime(globalStaticPath+"/css/job_detail.css"),
+			staticMtime(globalStaticPath+"/css/job_listing.css"),
+			staticMtime(globalStaticPath+"/css/user_listing.css"),
+			staticMtime(globalStaticPath+"/css/create_edit_user.css"),
+			staticMtime(globalStaticPath+"/css/plots.css"),
+			staticMtime(globalStaticPath+"/css/confirmation_dialog.css"),
 		},
 		JsFiles: []string{
-			staticMtime("static/js/bundle.js"),
+			staticMtime(globalStaticPath+"/js/bundle.js"),
 		},
 	}
 
@@ -293,7 +299,7 @@ func getAuthenticatedUser(r *http.Request) DatabaseUser {
 func generateUuid() (string, error) {
 	bytes := make([]byte, 16)
 
-	_, err := rand.Read(bytes);
+	_, err := rand.Read(bytes)
 	if err != nil {
 		return "", err
 	}
