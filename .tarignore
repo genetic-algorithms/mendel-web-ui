@@ -9,8 +9,8 @@ node_modules/
 output/
 database/
 .vscode/
-#static/typescript/out/
+static/typescript/out/
 .idea/
-scripts/watch
+#scripts/watch
 #pkg/rpm/mendel-web-ui.spec
 pgk/mac

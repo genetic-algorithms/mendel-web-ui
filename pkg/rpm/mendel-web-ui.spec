@@ -36,9 +36,7 @@ GOPATH=$RPM_BUILD_DIR scripts/build_go
 # The $RPM_BUILD_ROOT is a simulated root file system and usually has a value like: ~/rpmbuild/BUILDROOT/mendel-web-ui-1.0.0-1.x86_64
 # Following the LSB Filesystem Hierarchy Standard: https://refspecs.linuxfoundation.org/FHS_3.0/fhs-3.0.pdf
 rm -rf $RPM_BUILD_ROOT
-mkdir -p $RPM_BUILD_ROOT%{prefix}/bin $RPM_BUILD_ROOT%{prefix}/share/mendel-web-ui $RPM_BUILD_ROOT%{prefix}/mendel-web-ui/database $RPM_BUILD_ROOT%{prefix}/mendel-web-ui/output $RPM_BUILD_ROOT/etc/init
-#todo: remove this after adding database and output flags to mendel-web-ui
-chmod 777 $RPM_BUILD_ROOT%{prefix}/mendel-web-ui/database $RPM_BUILD_ROOT%{prefix}/mendel-web-ui/output
+mkdir -p $RPM_BUILD_ROOT%{prefix}/bin $RPM_BUILD_ROOT%{prefix}/share/mendel-web-ui $RPM_BUILD_ROOT%{prefix}/mendel-web-ui $RPM_BUILD_ROOT/etc/init
 cp cmd/server/mendel-web-ui $RPM_BUILD_ROOT%{prefix}/bin
 cp LICENSE COPYRIGHT $RPM_BUILD_ROOT%{prefix}/share/mendel-web-ui
 cp -a static rollup.config.js *.json $RPM_BUILD_ROOT%{prefix}/mendel-web-ui
@@ -54,10 +52,16 @@ cp pkg/upstart/mendel-web-ui.conf $RPM_BUILD_ROOT/etc/init
 /etc/init/mendel-web-ui.conf
 
 %post
-mkdir -p /var/log/mendel-web-ui
-chmod 777 /var/log/mendel-web-ui  # not sure if this is necessary
+mkdir -p /var/log/mendel-web-ui /var/run/mendel-web-ui/output/jobs  # main.go will create the database dir
+# this is needed because these dirs are created by root during install, but will be written to by whatever user runs the web ui
+chmod 777 /var/log/mendel-web-ui /var/run/mendel-web-ui /var/run/mendel-web-ui/output /var/run/mendel-web-ui/output/jobs
 initctl reload-configuration
 initctl start mendel-web-ui
+
+%preun
+if [ "$1" = "0" ]; then
+  initctl stop mendel-web-ui || true
+fi
 
 
 %clean

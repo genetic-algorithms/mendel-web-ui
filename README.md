@@ -1,8 +1,16 @@
 # Build
 
+Compile the go code:
 ```
 ./scripts/build_go
 ```
+
+Bundle to typescript code while you are developing:
+```
+watch
+```
+
+That last command creates `static/js/bundle.js`, which for now should be committed to git.
 
 # Run
 
