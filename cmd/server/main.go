@@ -13,6 +13,7 @@ import (
 	"strings"
 	"sync"
 	"time"
+	"path/filepath"
 	"golang.org/x/crypto/bcrypt"
 	"github.com/gorilla/securecookie"
 )
@@ -178,22 +179,22 @@ func rootHandler(w http.ResponseWriter, _ *http.Request) {
 
 	context := Context{
 		CssFiles: []string{
-			staticMtime(globalStaticPath+"/css/main.css"),
-			staticMtime(globalStaticPath+"/css/button.css"),
-			staticMtime(globalStaticPath+"/css/snackbar.css"),
-			staticMtime(globalStaticPath+"/css/non_login.css"),
-			staticMtime(globalStaticPath+"/css/header.css"),
-			staticMtime(globalStaticPath+"/css/login.css"),
-			staticMtime(globalStaticPath+"/css/new_job.css"),
-			staticMtime(globalStaticPath+"/css/job_detail.css"),
-			staticMtime(globalStaticPath+"/css/job_listing.css"),
-			staticMtime(globalStaticPath+"/css/user_listing.css"),
-			staticMtime(globalStaticPath+"/css/create_edit_user.css"),
-			staticMtime(globalStaticPath+"/css/plots.css"),
-			staticMtime(globalStaticPath+"/css/confirmation_dialog.css"),
+			staticMtime("css/main.css"),
+			staticMtime("css/button.css"),
+			staticMtime("css/snackbar.css"),
+			staticMtime("css/non_login.css"),
+			staticMtime("css/header.css"),
+			staticMtime("css/login.css"),
+			staticMtime("css/new_job.css"),
+			staticMtime("css/job_detail.css"),
+			staticMtime("css/job_listing.css"),
+			staticMtime("css/user_listing.css"),
+			staticMtime("css/create_edit_user.css"),
+			staticMtime("css/plots.css"),
+			staticMtime("css/confirmation_dialog.css"),
 		},
 		JsFiles: []string{
-			staticMtime(globalStaticPath+"/js/bundle.js"),
+			staticMtime("js/bundle.js"),
 		},
 	}
 
@@ -312,12 +313,13 @@ func generateUuid() (string, error) {
 }
 
 func staticMtime(path string) string {
-	fileInfo, err := os.Stat(path)
+	fullPath := filepath.Join(globalStaticPath, path)
+	fileInfo, err := os.Stat(fullPath)
 	if err != nil {
-		log.Println("cannot stat file", path)
+		log.Println("cannot stat file", fullPath)
 	}
 
-	return fmt.Sprint("/", path, "?v=", fileInfo.ModTime().Unix())
+	return fmt.Sprint("/static/", path, "?v=", fileInfo.ModTime().Unix())
 }
 
 func persistDatabase() error {
