@@ -1,15 +1,15 @@
 package main
 
 import (
-	"time"
-	"encoding/json"
-	"net/http"
 	"archive/zip"
 	"bytes"
 	"encoding/base64"
-	"path/filepath"
-	"os"
+	"encoding/json"
 	"io"
+	"net/http"
+	"os"
+	"path/filepath"
+	"time"
 )
 
 func apiImportJobHandler(w http.ResponseWriter, r *http.Request) {
@@ -40,7 +40,7 @@ func apiImportJobHandler(w http.ResponseWriter, r *http.Request) {
 	bytesReader := bytes.NewReader(contentsBytes)
 	zipReader, err := zip.NewReader(bytesReader, int64(len(contentsBytes)))
 
-	jobId, err := generateUuid()
+	jobId, err := generateJobId()
 	if err != nil {
 		http.Error(w, "500 Internal Server Error (could not generate jobId)", http.StatusInternalServerError)
 		return
@@ -75,10 +75,10 @@ func apiImportJobHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	job := DatabaseJob{
-		Id: jobId,
-		Time: time.Now().UTC(),
+		Id:      jobId,
+		Time:    time.Now().UTC(),
 		OwnerId: user.Id,
-		Status: "succeeded",
+		Status:  "succeeded",
 	}
 
 	globalDbLock.Lock()
