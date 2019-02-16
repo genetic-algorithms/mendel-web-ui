@@ -16,6 +16,11 @@ import { SnpFrequencies } from './views/plots/snp_frequencies';
 import { MinorAlleleFrequencies } from './views/plots/minor_allele_frequencies';
 import { ReduxState } from '../redux_state_types';
 
+/*
+The Content component is the main body of the page. It includes a component inside it that is appropriate for
+the current virtual page, based on the current route.
+ */
+
 type Props = {
     route: string;
 };

@@ -40,7 +40,7 @@ func apiImportJobHandler(w http.ResponseWriter, r *http.Request) {
 	bytesReader := bytes.NewReader(contentsBytes)
 	zipReader, err := zip.NewReader(bytesReader, int64(len(contentsBytes)))
 
-	jobId, err := generateUuid()
+	jobId, err := generateJobId()
 	if err != nil {
 		http.Error(w, "500 Internal Server Error (could not generate jobId)", http.StatusInternalServerError)
 		return

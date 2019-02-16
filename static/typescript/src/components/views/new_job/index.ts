@@ -7,6 +7,10 @@ import { apiPost, apiGet } from '../../../api';
 import { setRoute, assertNotNull } from '../../../util';
 import { Help } from './help';
 
+/*
+The NewJob component displays the virtual page to fill in the job parameters.
+ */
+
 type Props = {
     jobId: string | null;
     dispatch: Redux.Dispatch<ReduxAction>;
@@ -376,6 +380,7 @@ class Component extends React.Component<Props, State> {
         });
     }
 
+    // Initialize the fields with values from the defaults file, or from the relevant job
     componentDidMount() {
         if (this.props.jobId === null) {
             apiGet(
