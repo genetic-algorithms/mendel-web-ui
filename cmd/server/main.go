@@ -327,6 +327,18 @@ func generateUuid() (string, error) {
 	return hex.EncodeToString(bytes), nil
 }
 
+// Used to generate the id for each job run
+func generateJobId() (string, error) {
+	bytes := make([]byte, 4) // 8 hex chars
+
+	_, err := rand.Read(bytes)
+	if err != nil {
+		return "", err
+	}
+
+	return hex.EncodeToString(bytes), nil
+}
+
 func staticMtime(path string) string {
 	fullPath := filepath.Join(globalStaticPath, path)
 	fileInfo, err := os.Stat(fullPath)
