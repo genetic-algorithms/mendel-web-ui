@@ -10,36 +10,42 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"path/filepath"
 	"strings"
 	"sync"
 	"time"
-	"path/filepath"
-	"golang.org/x/crypto/bcrypt"
+
 	"github.com/gorilla/securecookie"
+	"golang.org/x/crypto/bcrypt"
 )
 
+/*
+The main of the web ui server.
+*/
+
 type Database struct {
-	Version int `json:"version"`
-	CookieHashKey []byte `json:"cookie_hash_key"`
-	CookieBlockKey []byte `json:"cookie_block_key"`
-	Jobs map[string]DatabaseJob `json:"jobs"`
-	Users map[string]DatabaseUser `json:"users"`
+	Version        int                     `json:"version"`
+	CookieHashKey  []byte                  `json:"cookie_hash_key"`
+	CookieBlockKey []byte                  `json:"cookie_block_key"`
+	Jobs           map[string]DatabaseJob  `json:"jobs"`
+	Users          map[string]DatabaseUser `json:"users"`
 }
 
 type DatabaseJob struct {
-	Id string `json:"id"`
-	Time time.Time `json:"time"`
-	OwnerId string `json:"owner_id"`
-	Status string `json:"status"` // running, cancelled, failed, succeeded
+	Id      string    `json:"id"`
+	Time    time.Time `json:"time"`
+	OwnerId string    `json:"owner_id"`
+	Status  string    `json:"status"` // running, cancelled, failed, succeeded
 }
 
 type DatabaseUser struct {
-	Id string `json:"id"`
+	Id       string `json:"id"`
 	Username string `json:"username"`
 	Password []byte `json:"password"`
-	IsAdmin bool `json:"is_admin"`
+	IsAdmin  bool   `json:"is_admin"`
 }
 
+// These global vars are necessary because the handler functions are not given any context
 var globalBaseTemplateParsed *template.Template
 var globalDb Database
 var globalDbLock sync.RWMutex
@@ -50,7 +56,6 @@ var globalJobsDir = "output/jobs"
 var globalMendelGoBinaryPath string
 var globalDefaultConfigPath string
 var globalStaticPath string
-
 
 func main() {
 	if len(os.Args) < 4 {
@@ -63,7 +68,7 @@ func main() {
 	globalDefaultConfigPath = os.Args[3]
 	globalStaticPath = "static"
 	if len(os.Args) >= 5 {
-		globalStaticPath = strings.TrimSuffix(os.Args[4], "/")  // make sure it does not have a trailing / because we combine it with a path
+		globalStaticPath = strings.TrimSuffix(os.Args[4], "/") // make sure it does not have a trailing / because we combine it with a path
 		_, err := os.Stat(globalStaticPath)
 		if err != nil {
 			panic(err)
@@ -78,12 +83,18 @@ func main() {
 
 	globalSecureCookie = securecookie.New(globalDb.CookieHashKey, globalDb.CookieBlockKey)
 
+	/*
+		There are 3 routes this web ui server responds to:
+		  - /static/*: request from browser for css files and bundle.js (all of our typescript compiled to javascript)
+		  - /api/*: requests from browser for data (users, jobs, plot file data, etc.)
+		  - /*: request for the initial page (exact content sent depends on the rest of the url)
+	*/
 	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir(globalStaticPath))))
 
 	http.HandleFunc("/", rootHandler)
 	http.HandleFunc("/api/", apiHandler)
 
-	log.Fatal(http.ListenAndServe(":" + port, nil))
+	log.Fatal(http.ListenAndServe(":"+port, nil))
 }
 
 func loadDatabase() Database {
@@ -123,21 +134,21 @@ func loadDatabase() Database {
 		}
 
 		dbUser := DatabaseUser{
-			Id: dbUserId,
+			Id:       dbUserId,
 			Username: "admin",
 			Password: dbUserPasswordHash,
-			IsAdmin: true,
+			IsAdmin:  true,
 		}
 
 		dbUsers := make(map[string]DatabaseUser)
 		dbUsers[dbUser.Id] = dbUser
 
 		db := Database{
-			Version: 1,
-			CookieHashKey: cookieHashKey,
+			Version:        1,
+			CookieHashKey:  cookieHashKey,
 			CookieBlockKey: cookieBlockKey,
-			Jobs: make(map[string]DatabaseJob),
-			Users: dbUsers,
+			Jobs:           make(map[string]DatabaseJob),
+			Users:          dbUsers,
 		}
 
 		dbJson, err := json.Marshal(db)
@@ -171,10 +182,12 @@ func loadDatabase() Database {
 	return db
 }
 
+// Responds to / or any other route (except api or static) with the same single app page
+// (but customized to the virtual page indicated by the rest of the route)
 func rootHandler(w http.ResponseWriter, _ *http.Request) {
 	type Context struct {
 		CssFiles []string
-		JsFiles []string
+		JsFiles  []string
 	}
 
 	context := Context{
@@ -201,6 +214,7 @@ func rootHandler(w http.ResponseWriter, _ *http.Request) {
 	globalBaseTemplateParsed.Execute(w, context)
 }
 
+// API routes that the front end javascript calls to get data like users, jobs, plot data
 func apiHandler(w http.ResponseWriter, r *http.Request) {
 	if r.URL.Path == "/api/login/" {
 		apiLoginHandler(w, r)
@@ -301,8 +315,9 @@ func getAuthenticatedUser(r *http.Request) DatabaseUser {
 	return user
 }
 
+// Used to generate ids to store users in the db with
 func generateUuid() (string, error) {
-	bytes := make([]byte, 16)
+	bytes := make([]byte, 16) // 32 hex chars
 
 	_, err := rand.Read(bytes)
 	if err != nil {

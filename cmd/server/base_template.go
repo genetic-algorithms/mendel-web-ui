@@ -1,5 +1,10 @@
 package main
 
+/*
+The html for the SPA (single page app). This is the only html sent from the svr to the browser.
+All of the javascript components are not ours are loaded from unpkg.
+This html is parsed with the context provided in main.rootHandler(), which replaces the {{}} sections.
+*/
 var baseTemplate = `
 	<!DOCTYPE html>
 	<html lang="en">

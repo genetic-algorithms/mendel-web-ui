@@ -7,6 +7,10 @@ import { ReduxState } from '../redux_state_types';
 import { ReduxAction } from '../redux_action_types';
 import { apiGet } from '../api';
 
+/*
+Renders the standard virtual page with header and content for every except the login page.
+*/
+
 type Props = {
     route: string;
     dispatch: Redux.Dispatch<ReduxAction>;

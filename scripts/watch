@@ -1,7 +1,9 @@
 #!/bin/bash
 
+# Compiles typescript code when files are modified, bundles it into static/js/bundle.js, and starts or refeshes browser
+
 ./node_modules/.bin/tsc -w --preserveWatchOutput &
 
 ./node_modules/.bin/rollup --config ./rollup.config.js --watch &
 
-./node_modules/.bin/browser-sync start --no-online --no-open --no-ghost-mode --no-ui --no-notify --proxy localhost:8580 --files 'static/css/**/*.css'
+./node_modules/.bin/browser-sync start --no-online --no-open --no-ghost-mode --no-ui --no-notify --proxy localhost:8581 --files 'static/css/**/*.css'
