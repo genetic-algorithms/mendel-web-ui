@@ -43,7 +43,7 @@ func apiCreateJobHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	jobId, err := generateJobId()
+	jobId, err := generateUuid()
 	if err != nil {
 		http.Error(w, "500 Internal Server Error (could not generate jobId)", http.StatusInternalServerError)
 		return
