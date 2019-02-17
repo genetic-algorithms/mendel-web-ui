@@ -4,6 +4,7 @@ import (
 	"net/http"
 )
 
+// Called for /api/get-user/ route
 func apiGetUserHandler(w http.ResponseWriter, r *http.Request) {
 	user := getAuthenticatedUser(r)
 	if user.Id == "" {
@@ -23,7 +24,7 @@ func apiGetUserHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	writeJsonResponse(w, map[string]interface{}{
-		"id": user.Id,
+		"id":       user.Id,
 		"username": user.Username,
 		"is_admin": user.IsAdmin,
 	})

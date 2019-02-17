@@ -1,13 +1,14 @@
 package main
 
 import (
-	"net/http"
 	"io/ioutil"
-	"path/filepath"
 	"log"
+	"net/http"
+	"path/filepath"
 	"strconv"
 )
 
+// Called for /api/plot-average-mutations/ route
 func apiPlotAverageMutationsHandler(w http.ResponseWriter, r *http.Request) {
 	user := getAuthenticatedUser(r)
 	if user.Id == "" {
@@ -71,7 +72,7 @@ func apiPlotAverageMutationsHandler(w http.ResponseWriter, r *http.Request) {
 	writeJsonResponse(w, map[string]interface{}{
 		"generations": generations,
 		"deleterious": deleterious,
-		"neutral": neutral,
-		"favorable": favorable,
+		"neutral":     neutral,
+		"favorable":   favorable,
 	})
 }

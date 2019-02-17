@@ -2,10 +2,11 @@ package main
 
 import (
 	"io/ioutil"
-	"path/filepath"
 	"net/http"
+	"path/filepath"
 )
 
+// Called for /api/job-config/ route
 func apiGetJobConfigHandler(w http.ResponseWriter, r *http.Request) {
 	user := getAuthenticatedUser(r)
 	if user.Id == "" {
@@ -22,7 +23,13 @@ func apiGetJobConfigHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Also get description from db and fill in below
+	globalDbLock.RLock()
+	jobDescription := globalDb.Jobs[jobId].Description
+	globalDbLock.RUnlock()
+
 	writeJsonResponse(w, map[string]string{
-		"config": string(bytes),
+		"description": jobDescription,
+		"config":      string(bytes),
 	})
 }

@@ -3,15 +3,17 @@ package main
 import (
 	"encoding/json"
 	"net/http"
+
 	"golang.org/x/crypto/bcrypt"
 )
 
+// Called for /api/create-edit-user/ route
 func apiCreateEditUserHandler(w http.ResponseWriter, r *http.Request) {
 	type PostUser struct {
-		Id string `json:"id"`
+		Id       string `json:"id"`
 		Username string `json:"username"`
 		Password string `json:"password"`
-		IsAdmin bool `json:"is_admin"`
+		IsAdmin  bool   `json:"is_admin"`
 	}
 
 	user := getAuthenticatedUser(r)
@@ -75,10 +77,10 @@ func apiCreateEditUserHandler(w http.ResponseWriter, r *http.Request) {
 		}
 
 		newUser = DatabaseUser{
-			Id: userId,
+			Id:       userId,
 			Username: postUser.Username,
 			Password: hashedPassword,
-			IsAdmin: postUser.IsAdmin,
+			IsAdmin:  postUser.IsAdmin,
 		}
 	} else {
 		// Edit user

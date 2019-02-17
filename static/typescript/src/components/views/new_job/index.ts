@@ -16,8 +16,11 @@ type Props = {
     dispatch: Redux.Dispatch<ReduxAction>;
 };
 
+// Used to store the state of the NewJob component for both default values and current field values.
+// Also used for a set of empty values used to initialize state.
+// Note: StateConfig is distinguished from ServerConfig in that the latter doesnt include meta data like description.
 type StateConfig = {
-    description: string;
+    description: string;    // this is meta data stored in our db, not passed to mendel-go in the config file
     pop_size: string;
     num_generations: string;
     mutn_rate: string;
@@ -73,6 +76,7 @@ type StateConfig = {
     allele_count_gc_interval: string;
 };
 
+// The format that the server will pass to mendel-go. Does not include meta data like description.
 type ServerConfig = {
     basic: {
         pop_size: number;
@@ -137,14 +141,18 @@ type ServerConfig = {
     }
 };
 
+// The state of the NewJob component
 type State = {
     defaultValues: StateConfig;
     fieldValues: StateConfig;
 };
 
+// This is the help file that SPC is serving on t2.medium. We should probably grab this and put it in our repo.
 const HELP_URL_PREFIX = 'http://ec2-52-43-51-28.us-west-2.compute.amazonaws.com:8580/static/apps/mendel/help.html#';
 
+// The component that renders all of the job input params
 class Component extends React.Component<Props, State> {
+    // The place in the component that we are storing all the event handlers for the fields
     fieldChangeHandlers: {
         description: (e: React.ChangeEvent<HTMLInputElement>) => void;
         pop_size: (e: React.ChangeEvent<HTMLInputElement>) => void;
@@ -205,6 +213,7 @@ class Component extends React.Component<Props, State> {
     constructor(props: Props) {
         super(props);
 
+        // Set all the event handlers, according to the type of each field
         this.fieldChangeHandlers = {
             description: e => this.simpleFieldChanged('description', e),
             pop_size: e => this.simpleFieldChanged('pop_size', e),
@@ -266,7 +275,9 @@ class Component extends React.Component<Props, State> {
         this.onImportClick = this.onImportClick.bind(this);
         this.onExportClick = this.onExportClick.bind(this);
 
+        // Used to initialize the components state
         const emptyStateConfig: StateConfig = {
+            description: '',
             pop_size: '',
             num_generations: '',
             mutn_rate: '',
@@ -328,10 +339,12 @@ class Component extends React.Component<Props, State> {
         };
     }
 
+    // Import field values (job config and meta data) from a file
     onImportClick() {
         chooseFileContents(contents => {
             const config = toml.parse(contents) as ServerConfig;
             const values = configToState(config);
+            //todo: also need to get description from the import file
 
             this.setState({
                 fieldValues: values,
@@ -339,8 +352,10 @@ class Component extends React.Component<Props, State> {
         });
     }
 
+    // Export current field values to file export.toml
     onExportClick() {
         const output = stateToConfig(this.state.fieldValues);
+        //todo: also need to export description
         const a = document.createElement('a');
         a.setAttribute('download', 'export.toml');
         a.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(output));
@@ -420,8 +435,11 @@ class Component extends React.Component<Props, State> {
             ).then(response => {
                 const config = toml.parse(response.config);
 
+                const fieldVals = configToState(config);
+                fieldVals['description'] = response.description
+
                 this.setState({
-                    fieldValues: configToState(config),
+                    fieldValues: fieldVals,
                 });
             });
         }
@@ -432,6 +450,19 @@ class Component extends React.Component<Props, State> {
             React.createElement('div', { className: 'new-job-view__loading' }),
             React.createElement('form', { className: 'new-job-view__form', onSubmit: this.onSubmit },
                 React.createElement('div', { className: 'new-job-view__form-section-title' }, 'Basic'),
+
+                React.createElement('div', { className: 'new-job-view__field' },
+                    React.createElement('label', {}, 'Job description'),
+                    React.createElement('input', {
+                        type: 'text',
+                        value: this.state.fieldValues.description,
+                        onChange: this.fieldChangeHandlers.description,
+                    }),
+                    (this.state.fieldValues.description !== this.state.defaultValues.description ?
+                        React.createElement('div', { className: 'new-job-view__not-default' }) :
+                        null
+                    ),
+                ),
 
                 React.createElement('div', { className: 'new-job-view__field' },
                     React.createElement('label', {}, 'Population size (initial or fixed)'),
@@ -1533,8 +1564,10 @@ class Component extends React.Component<Props, State> {
     }
 }
 
+// Convert our component state (current field values) to job config (exclude job meta data)
 function stateToConfig(state: StateConfig) {
     return [
+        // intentionally omitting description
         '[basic]',
         'pop_size = ' + tomlInt(state.pop_size),
         'num_generations = ' + tomlInt(state.num_generations),
@@ -1604,11 +1637,12 @@ function stateToConfig(state: StateConfig) {
     ].join('\n');
 }
 
+// Convert the job config to our component state (doesnt include job meta data)
 function configToState(config: ServerConfig) {
     const filesToOutput = filesToOutputBooleans(config.computation.files_to_output);
 
     return {
-        description: '',
+        description: '',    // because this is part of the StateConfig type. Will be filled in later
         pop_size: config.basic.pop_size.toString(),
         num_generations: config.basic.num_generations.toString(),
         mutn_rate: config.mutations.mutn_rate.toString(),

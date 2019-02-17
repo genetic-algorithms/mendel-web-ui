@@ -3,9 +3,11 @@ package main
 import (
 	"encoding/json"
 	"net/http"
+
 	"golang.org/x/crypto/bcrypt"
 )
 
+// Called for /api/login/ route
 func apiLoginHandler(w http.ResponseWriter, r *http.Request) {
 	if !isValidPostJson(r) {
 		http.Error(w, "400 Bad Request (method or content-type)", http.StatusBadRequest)
@@ -59,16 +61,16 @@ func apiLoginHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	http.SetCookie(w, &http.Cookie{
-		Name:  "session",
-		Value: encoded,
-		Path:  "/",
+		Name:     "session",
+		Value:    encoded,
+		Path:     "/",
 		HttpOnly: true,
 	})
 
 	responseJson, err := json.Marshal(map[string]interface{}{
 		"status": "success",
 		"user": map[string]interface{}{
-			"id": user.Id,
+			"id":       user.Id,
 			"username": user.Username,
 			"is_admin": user.IsAdmin,
 		},

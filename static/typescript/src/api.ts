@@ -165,7 +165,7 @@ export function apiGet(
     },
     dispatch: Redux.Dispatch<ReduxAction>,
     signal?: AbortSignal,
-): Promise<{ config: string }>;
+): Promise<{ description: string, config: string }>;
 
 export function apiGet(
     url: '/api/export-job/',
@@ -249,7 +249,6 @@ export function apiPost(
     user: User,
 }>;
 
-//todo: is this really correct???
 export function apiPost(
     url: '/api/import-job/',
     body: {

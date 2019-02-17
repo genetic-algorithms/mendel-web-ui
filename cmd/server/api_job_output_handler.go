@@ -1,12 +1,13 @@
 package main
 
 import (
-	"net/http"
-	"strconv"
-	"path/filepath"
 	"io/ioutil"
+	"net/http"
+	"path/filepath"
+	"strconv"
 )
 
+// Called for /api/job-output/ route
 func apiJobOutputHandler(w http.ResponseWriter, r *http.Request) {
 	user := getAuthenticatedUser(r)
 	if user.Id == "" {
@@ -42,6 +43,6 @@ func apiJobOutputHandler(w http.ResponseWriter, r *http.Request) {
 
 	writeJsonResponse(w, map[string]interface{}{
 		"output": offsetOutput,
-		"done": !inProgress,
+		"done":   !inProgress,
 	})
 }

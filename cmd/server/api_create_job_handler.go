@@ -15,6 +15,7 @@ import (
 	"github.com/BurntSushi/toml"
 )
 
+// Called for /api/create-job/ route
 func apiCreateJobHandler(w http.ResponseWriter, r *http.Request) {
 	user := getAuthenticatedUser(r)
 	if user.Id == "" {

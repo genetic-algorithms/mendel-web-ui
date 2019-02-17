@@ -1,13 +1,14 @@
 package main
 
 import (
-	"net/http"
 	"io/ioutil"
-	"path/filepath"
 	"log"
+	"net/http"
+	"path/filepath"
 	"strconv"
 )
 
+// Called for /api/plot-fitness-history/ route
 func apiPlotFitnessHistoryHandler(w http.ResponseWriter, r *http.Request) {
 	user := getAuthenticatedUser(r)
 	if user.Id == "" {
@@ -62,7 +63,7 @@ func apiPlotFitnessHistoryHandler(w http.ResponseWriter, r *http.Request) {
 
 	writeJsonResponse(w, map[string]interface{}{
 		"generations": generations,
-		"pop_size": popSize,
-		"fitness": fitness,
+		"pop_size":    popSize,
+		"fitness":     fitness,
 	})
 }

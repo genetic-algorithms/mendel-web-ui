@@ -570,6 +570,7 @@
         function Component(props) {
             var _this = _super.call(this, props) || this;
             _this.fieldChangeHandlers = {
+                description: function (e) { return _this.simpleFieldChanged('description', e); },
                 pop_size: function (e) { return _this.simpleFieldChanged('pop_size', e); },
                 num_generations: function (e) { return _this.simpleFieldChanged('num_generations', e); },
                 mutn_rate: function (e) { return _this.simpleFieldChanged('mutn_rate', e); },
@@ -628,6 +629,7 @@
             _this.onImportClick = _this.onImportClick.bind(_this);
             _this.onExportClick = _this.onExportClick.bind(_this);
             var emptyStateConfig = {
+                description: '',
                 pop_size: '',
                 num_generations: '',
                 mutn_rate: '',
@@ -709,6 +711,7 @@
             var _this = this;
             e.preventDefault();
             var data = {
+                description: this.state.fieldValues.description,
                 config: stateToConfig(this.state.fieldValues),
             };
             apiPost('/api/create-job/', data, this.props.dispatch).then(function (response) {
@@ -755,14 +758,22 @@
                 });
                 apiGet('/api/job-config/', { jobId: this.props.jobId }, this.props.dispatch).then(function (response) {
                     var config = toml.parse(response.config);
+                    var fieldVals = configToState(config);
+                    fieldVals['description'] = response.description;
                     _this.setState({
-                        fieldValues: configToState(config),
+                        fieldValues: fieldVals,
                     });
                 });
             }
         };
         Component.prototype.render = function () {
-            return React.createElement('div', { className: 'new-job-view' }, React.createElement('div', { className: 'new-job-view__loading' }), React.createElement('form', { className: 'new-job-view__form', onSubmit: this.onSubmit }, React.createElement('div', { className: 'new-job-view__form-section-title' }, 'Basic'), React.createElement('div', { className: 'new-job-view__field' }, React.createElement('label', {}, 'Population size (initial or fixed)'), React.createElement('input', {
+            return React.createElement('div', { className: 'new-job-view' }, React.createElement('div', { className: 'new-job-view__loading' }), React.createElement('form', { className: 'new-job-view__form', onSubmit: this.onSubmit }, React.createElement('div', { className: 'new-job-view__form-section-title' }, 'Basic'), React.createElement('div', { className: 'new-job-view__field' }, React.createElement('label', {}, 'Job description'), React.createElement('input', {
+                type: 'text',
+                value: this.state.fieldValues.description,
+                onChange: this.fieldChangeHandlers.description,
+            }), (this.state.fieldValues.description !== this.state.defaultValues.description ?
+                React.createElement('div', { className: 'new-job-view__not-default' }) :
+                null)), React.createElement('div', { className: 'new-job-view__field' }, React.createElement('label', {}, 'Population size (initial or fixed)'), React.createElement('input', {
                 type: 'number',
                 min: '2',
                 max: '1000000',
@@ -1429,6 +1440,7 @@
     function configToState(config) {
         var filesToOutput = filesToOutputBooleans(config.computation.files_to_output);
         return {
+            description: '',
             pop_size: config.basic.pop_size.toString(),
             num_generations: config.basic.num_generations.toString(),
             mutn_rate: config.mutations.mutn_rate.toString(),
@@ -1625,11 +1637,11 @@
                 className: 'job-listing-view__filter',
                 value: this.state.all ? 'all' : 'mine',
                 onChange: this.onFilterChanged,
-            }, React.createElement('option', { value: 'mine' }, 'My Jobs'), React.createElement('option', { value: 'all' }, 'All Jobs')), React.createElement('div', { className: 'job-listing-view__import button button--text', onClick: this.onImportClick }, 'Import'), React.createElement('div', { className: 'job-listing-view__jobs' }, React.createElement('div', { className: 'job-listing-view__labels' }, React.createElement('div', { className: 'job-listing-view__labels__id' }, 'Job ID'), React.createElement('div', { className: 'job-listing-view__labels__time' }, 'Time'), React.createElement('div', { className: 'job-listing-view__labels__username' }, 'User'), React.createElement('div', { className: 'job-listing-view__labels__status' }, 'Status')), this.state.jobs.map(function (job) { return (React.createElement('div', {
+            }, React.createElement('option', { value: 'mine' }, 'My Jobs'), React.createElement('option', { value: 'all' }, 'All Jobs')), React.createElement('div', { className: 'job-listing-view__import button button--text', onClick: this.onImportClick }, 'Import'), React.createElement('div', { className: 'job-listing-view__jobs' }, React.createElement('div', { className: 'job-listing-view__labels' }, React.createElement('div', { className: 'job-listing-view__labels__id' }, 'Job ID'), React.createElement('div', { className: 'job-listing-view__labels__time' }, 'Time'), React.createElement('div', { className: 'job-listing-view__labels__description' }, 'Description'), React.createElement('div', { className: 'job-listing-view__labels__username' }, 'User'), React.createElement('div', { className: 'job-listing-view__labels__status' }, 'Status')), this.state.jobs.map(function (job) { return (React.createElement('div', {
                 className: 'job-listing-view__job',
                 key: job.id,
                 onClick: function () { return _this.onJobClick(job.id); },
-            }, React.createElement('div', { className: 'job-listing-view__job__id' }, job.id), React.createElement('div', { className: 'job-listing-view__job__time' }, moment(job.time).fromNow()), React.createElement('div', { className: 'job-listing-view__job__username' }, job.username), React.createElement('div', { className: 'job-listing-view__job__status' }, capitalizeFirstLetter(job.status)))); })));
+            }, React.createElement('div', { className: 'job-listing-view__job__id' }, job.id), React.createElement('div', { className: 'job-listing-view__job__time' }, moment(job.time).fromNow()), React.createElement('div', { className: 'job-listing-view__job__description' }, job.description), React.createElement('div', { className: 'job-listing-view__job__username' }, job.username), React.createElement('div', { className: 'job-listing-view__job__status' }, capitalizeFirstLetter(job.status)))); })));
         };
         return Component;
     }(React.Component));

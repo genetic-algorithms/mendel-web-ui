@@ -2,10 +2,11 @@ package main
 
 import (
 	"net/http"
-	"strings"
 	"sort"
+	"strings"
 )
 
+// Called for /api/user-list/ route
 func apiUserListHandler(w http.ResponseWriter, r *http.Request) {
 	user := getAuthenticatedUser(r)
 	if user.Id == "" || !user.IsAdmin {

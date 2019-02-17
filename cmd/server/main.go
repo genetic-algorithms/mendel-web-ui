@@ -337,6 +337,7 @@ func generateJobId() (string, error) {
 		return "", err
 	}
 
+	//todo: check to see if this id is already in the db, and generate another one if it is
 	return hex.EncodeToString(bytes), nil
 }
 

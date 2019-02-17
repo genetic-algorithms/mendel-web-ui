@@ -2,18 +2,19 @@ package main
 
 import (
 	"encoding/json"
-	"net/http"
 	"io/ioutil"
+	"net/http"
 	"path/filepath"
 	"strings"
 )
 
+// Called for /api/plot-deleterious-mutations/ route
 func apiPlotDeleteriousMutationsHandler(w http.ResponseWriter, r *http.Request) {
 	type GenerationData struct {
-		Generation int `json:"generation"`
+		Generation         int       `json:"generation"`
 		BinMidpointFitness []float64 `json:"binmidpointfitness"`
-		Dominant []float64 `json:"dominant"`
-		Recessive []float64 `json:"recessive"`
+		Dominant           []float64 `json:"dominant"`
+		Recessive          []float64 `json:"recessive"`
 	}
 
 	user := getAuthenticatedUser(r)
@@ -41,7 +42,7 @@ func apiPlotDeleteriousMutationsHandler(w http.ResponseWriter, r *http.Request) 
 			bytes, err := ioutil.ReadFile(filepath.Join(globalJobsDir, jobId, "allele-distribution-del", fileName))
 			if err != nil {
 				globalRunningJobsLock.RUnlock()
-				http.Error(w, "500 Internal Server Error (could not read file: " + fileName + ")", http.StatusInternalServerError)
+				http.Error(w, "500 Internal Server Error (could not read file: "+fileName+")", http.StatusInternalServerError)
 				return
 			}
 
@@ -49,7 +50,7 @@ func apiPlotDeleteriousMutationsHandler(w http.ResponseWriter, r *http.Request) 
 			err = json.Unmarshal(bytes, &generationData)
 			if err != nil {
 				globalRunningJobsLock.RUnlock()
-				http.Error(w, "500 Internal Server Error (could not parse json file: " + fileName + ")", http.StatusInternalServerError)
+				http.Error(w, "500 Internal Server Error (could not parse json file: "+fileName+")", http.StatusInternalServerError)
 				return
 			}
 
