@@ -85,9 +85,9 @@ func main() {
 
 	/*
 		There are 3 routes this web ui server responds to:
-		  - /static/*: request from browser for css files and bundle.js (all of our typescript compiled to javascript)
-		  - /api/*: requests from browser for data (users, jobs, plot file data, etc.)
-		  - /*: request for the initial page (exact content sent depends on the rest of the url)
+			- /static/*: request from browser for css files and bundle.js (all of our typescript compiled to javascript)
+			- /api/*: requests from browser for data (users, jobs, plot file data, etc.)
+			- /*: request for the initial page (exact content sent depends on the rest of the url)
 	*/
 	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir(globalStaticPath))))
 
