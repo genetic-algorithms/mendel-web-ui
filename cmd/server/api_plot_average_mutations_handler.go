@@ -21,10 +21,10 @@ func apiPlotAverageMutationsHandler(w http.ResponseWriter, r *http.Request) {
 	bytes, err := ioutil.ReadFile(filepath.Join(globalJobsDir, jobId, "mendel.hst"))
 	globalRunningJobsLock.RUnlock()
 
-	if err != nil {
+    if err != nil {
 		http.Error(w, "500 Internal Server Error (could not open mendel.hst)", http.StatusInternalServerError)
 		return
-	}
+    }
 
 	rows := parseSpaceSeparatedPlotFile(bytes)
 

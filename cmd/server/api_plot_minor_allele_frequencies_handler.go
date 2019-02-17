@@ -30,11 +30,11 @@ func apiPlotMinorAlleleFrequenciesHandler(w http.ResponseWriter, r *http.Request
 	globalRunningJobsLock.RLock()
 	fileInfos, err := ioutil.ReadDir(filepath.Join(globalJobsDir, jobId, "normalized-allele-bins"))
 
-	if err != nil {
+    if err != nil {
 		globalRunningJobsLock.RUnlock()
 		http.Error(w, "500 Internal Server Error (could not list normalized-allele-bins directory)", http.StatusInternalServerError)
 		return
-	}
+    }
 
 	result := []GenerationData{}
 	for _, fileInfo := range fileInfos {

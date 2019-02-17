@@ -27,11 +27,11 @@ func apiPlotDeleteriousMutationsHandler(w http.ResponseWriter, r *http.Request) 
 	globalRunningJobsLock.RLock()
 	fileInfos, err := ioutil.ReadDir(filepath.Join(globalJobsDir, jobId, "allele-distribution-del"))
 
-	if err != nil {
+    if err != nil {
 		globalRunningJobsLock.RUnlock()
 		http.Error(w, "500 Internal Server Error (could not list allele-distribution-del directory)", http.StatusInternalServerError)
 		return
-	}
+    }
 
 	result := []GenerationData{}
 	for _, fileInfo := range fileInfos {
