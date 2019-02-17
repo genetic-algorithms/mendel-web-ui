@@ -249,6 +249,18 @@ export function apiPost(
 }>;
 
 export function apiPost(
+    url: '/api/create-job/',
+    body: {
+        username: string;
+        password: string;
+    },
+    dispatch: Redux.Dispatch<ReduxAction>
+): Promise<{
+    status: 'success' | 'wrong_credentials';
+    user: User;
+}>;
+
+export function apiPost(
     url: '/api/import-job/',
     body: {
         contents: string;
