@@ -32,10 +32,11 @@ type Database struct {
 }
 
 type DatabaseJob struct {
-	Id      string    `json:"id"`
-	Time    time.Time `json:"time"`
-	OwnerId string    `json:"owner_id"`
-	Status  string    `json:"status"` // running, cancelled, failed, succeeded
+	Id          string    `json:"id"`
+	Description string    `json:"description"`
+	Time        time.Time `json:"time"`
+	OwnerId     string    `json:"owner_id"`
+	Status      string    `json:"status"` // running, cancelled, failed, succeeded
 }
 
 type DatabaseUser struct {

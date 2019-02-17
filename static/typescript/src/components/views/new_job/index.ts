@@ -17,6 +17,7 @@ type Props = {
 };
 
 type StateConfig = {
+    description: string;
     pop_size: string;
     num_generations: string;
     mutn_rate: string;
@@ -145,6 +146,7 @@ const HELP_URL_PREFIX = 'http://ec2-52-43-51-28.us-west-2.compute.amazonaws.com:
 
 class Component extends React.Component<Props, State> {
     fieldChangeHandlers: {
+        description: (e: React.ChangeEvent<HTMLInputElement>) => void;
         pop_size: (e: React.ChangeEvent<HTMLInputElement>) => void;
         num_generations: (e: React.ChangeEvent<HTMLInputElement>) => void;
         mutn_rate: (e: React.ChangeEvent<HTMLInputElement>) => void;
@@ -204,6 +206,7 @@ class Component extends React.Component<Props, State> {
         super(props);
 
         this.fieldChangeHandlers = {
+            description: e => this.simpleFieldChanged('description', e),
             pop_size: e => this.simpleFieldChanged('pop_size', e),
             num_generations: e => this.simpleFieldChanged('num_generations', e),
             mutn_rate: e => this.simpleFieldChanged('mutn_rate', e),
@@ -348,6 +351,7 @@ class Component extends React.Component<Props, State> {
         e.preventDefault();
 
         const data = {
+            description: this.state.fieldValues.description,
             config: stateToConfig(this.state.fieldValues),
         };
 
@@ -1604,6 +1608,7 @@ function configToState(config: ServerConfig) {
     const filesToOutput = filesToOutputBooleans(config.computation.files_to_output);
 
     return {
+        description: '',
         pop_size: config.basic.pop_size.toString(),
         num_generations: config.basic.num_generations.toString(),
         mutn_rate: config.mutations.mutn_rate.toString(),

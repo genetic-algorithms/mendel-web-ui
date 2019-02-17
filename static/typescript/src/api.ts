@@ -62,6 +62,7 @@ export function apiGet(
 ): Promise<{
     jobs: {
         id: string;
+        description: string;
         time: string;
         status: string;
         username: string;
@@ -248,6 +249,7 @@ export function apiPost(
     user: User,
 }>;
 
+//todo: is this really correct???
 export function apiPost(
     url: '/api/import-job/',
     body: {
@@ -261,6 +263,7 @@ export function apiPost(
 export function apiPost(
     url: '/api/create-job/',
     body: {
+        description: string;
         config: string;
     },
     dispatch: Redux.Dispatch<ReduxAction>

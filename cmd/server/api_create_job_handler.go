@@ -1,16 +1,17 @@
 package main
 
 import (
+	"bufio"
 	"encoding/json"
+	"io/ioutil"
+	"log"
 	"net/http"
 	"os"
-	"path/filepath"
 	"os/exec"
-	"bufio"
+	"path/filepath"
 	"strings"
-	"log"
 	"time"
-	"io/ioutil"
+
 	"github.com/BurntSushi/toml"
 )
 
@@ -26,9 +27,11 @@ func apiCreateJobHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// From the request body get the job description and all the mendel-go job input params
 	decoder := json.NewDecoder(r.Body)
 	var data struct {
-		Config string `json:"config"`
+		Description string `json:"description"`
+		Config      string `json:"config"`
 	}
 	err := decoder.Decode(&data)
 	if err != nil {
@@ -81,10 +84,11 @@ func apiCreateJobHandler(w http.ResponseWriter, r *http.Request) {
 	globalRunningJobsLock.Unlock()
 
 	job := DatabaseJob{
-		Id: jobId,
-		Time: time.Now().UTC(),
-		OwnerId: user.Id,
-		Status: "running",
+		Id:          jobId,
+		Description: data.Description,
+		Time:        time.Now().UTC(),
+		OwnerId:     user.Id,
+		Status:      "running",
 	}
 
 	globalDbLock.Lock()

@@ -7,10 +7,11 @@ import (
 )
 
 type ApiJobListHandlerJob struct {
-	Id string `json:"id"`
-	Time time.Time `json:"time"`
-	Status string `json:"status"`
-	Username string `json:"username"`
+	Id          string    `json:"id"`
+	Description string    `json:"description"`
+	Time        time.Time `json:"time"`
+	Status      string    `json:"status"`
+	Username    string    `json:"username"`
 }
 
 func apiJobListHandler(w http.ResponseWriter, r *http.Request) {
@@ -27,10 +28,11 @@ func apiJobListHandler(w http.ResponseWriter, r *http.Request) {
 	for _, job := range globalDb.Jobs {
 		if all || user.Id == job.OwnerId {
 			jobs = append(jobs, ApiJobListHandlerJob{
-				Id: job.Id,
-				Time: job.Time,
-				Status: job.Status,
-				Username: globalDb.Users[job.OwnerId].Username,
+				Id:          job.Id,
+				Description: job.Description,
+				Time:        job.Time,
+				Status:      job.Status,
+				Username:    globalDb.Users[job.OwnerId].Username,
 			})
 		}
 	}
