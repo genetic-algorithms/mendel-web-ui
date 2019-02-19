@@ -5,6 +5,7 @@ import (
 	"net/http"
 )
 
+// Called for /api/default-config/ route
 func apiGetDefaultConfigHandler(w http.ResponseWriter, r *http.Request) {
 	user := getAuthenticatedUser(r)
 	if user.Id == "" {

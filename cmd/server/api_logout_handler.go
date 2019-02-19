@@ -4,6 +4,7 @@ import (
 	"net/http"
 )
 
+// Called for /api/logout/ route
 func apiLogoutHandler(w http.ResponseWriter, r *http.Request) {
 	user := getAuthenticatedUser(r)
 	if user.Id == "" {
@@ -25,9 +26,9 @@ func apiLogoutHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	http.SetCookie(w, &http.Cookie{
-		Name:  "session",
-		Value: encoded,
-		Path:  "/",
+		Name:     "session",
+		Value:    encoded,
+		Path:     "/",
 		HttpOnly: true,
 	})
 

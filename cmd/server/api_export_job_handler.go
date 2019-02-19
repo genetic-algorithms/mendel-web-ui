@@ -1,15 +1,16 @@
 package main
 
 import (
-	"io/ioutil"
-	"os"
-	"net/http"
 	"archive/zip"
 	"bytes"
 	"encoding/base64"
+	"io/ioutil"
+	"net/http"
+	"os"
 	"path/filepath"
 )
 
+// Called for /api/export-job/ route
 func apiExportJobHandler(w http.ResponseWriter, r *http.Request) {
 	user := getAuthenticatedUser(r)
 	if user.Id == "" {
@@ -29,7 +30,7 @@ func apiExportJobHandler(w http.ResponseWriter, r *http.Request) {
 		}
 
 		if !info.IsDir() {
-			relativePath := path[len(jobDir) + 1:]
+			relativePath := path[len(jobDir)+1:]
 			b, err := ioutil.ReadFile(path)
 			if err != nil {
 				return err

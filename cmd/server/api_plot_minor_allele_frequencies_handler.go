@@ -2,19 +2,20 @@ package main
 
 import (
 	"encoding/json"
-	"net/http"
 	"io/ioutil"
+	"net/http"
 	"path/filepath"
 	"strings"
 )
 
+// Called for /api/plot-minor-allele-frequencies/ route
 func apiPlotMinorAlleleFrequenciesHandler(w http.ResponseWriter, r *http.Request) {
 	type GenerationData struct {
-		Generation int `json:"generation"`
-		Bins []int `json:"bins"`
-		Deleterious []float64 `json:"deleterious"`
-		Neutral []float64 `json:"neutral"`
-		Favorable []float64 `json:"favorable"`
+		Generation        int       `json:"generation"`
+		Bins              []int     `json:"bins"`
+		Deleterious       []float64 `json:"deleterious"`
+		Neutral           []float64 `json:"neutral"`
+		Favorable         []float64 `json:"favorable"`
 		DelInitialAlleles []float64 `json:"delInitialAlleles"`
 		FavInitialAlleles []float64 `json:"favInitialAlleles"`
 	}
@@ -44,7 +45,7 @@ func apiPlotMinorAlleleFrequenciesHandler(w http.ResponseWriter, r *http.Request
 			bytes, err := ioutil.ReadFile(filepath.Join(globalJobsDir, jobId, "normalized-allele-bins", fileName))
 			if err != nil {
 				globalRunningJobsLock.RUnlock()
-				http.Error(w, "500 Internal Server Error (could not read file: " + fileName + ")", http.StatusInternalServerError)
+				http.Error(w, "500 Internal Server Error (could not read file: "+fileName+")", http.StatusInternalServerError)
 				return
 			}
 
@@ -52,7 +53,7 @@ func apiPlotMinorAlleleFrequenciesHandler(w http.ResponseWriter, r *http.Request
 			err = json.Unmarshal(bytes, &generationData)
 			if err != nil {
 				globalRunningJobsLock.RUnlock()
-				http.Error(w, "500 Internal Server Error (could not parse json file: " + fileName + ")", http.StatusInternalServerError)
+				http.Error(w, "500 Internal Server Error (could not parse json file: "+fileName+")", http.StatusInternalServerError)
 				return
 			}
 

@@ -5,6 +5,7 @@ import (
 	"net/http"
 )
 
+// Called for /api/delete-user/ route
 func apiDeleteUserHandler(w http.ResponseWriter, r *http.Request) {
 	type PostUser struct {
 		Id string `json:"id"`
