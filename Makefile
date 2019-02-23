@@ -1,8 +1,8 @@
 SHELL ?= /bin/bash -e
 #BINARY ?= cmd/server/mendel-web-ui
 BINARY ?= mendel-web-ui
-export VERSION ?= 1.0.0
-export RELEASE ?= 1
+export VERSION ?= 1.1.0
+export RELEASE ?= 2
 # rpmbuild does not give us a good way to set topdir, so use the default location
 RPMROOT ?= $(HOME)/rpmbuild
 RPMNAME ?= mendel-web-ui
