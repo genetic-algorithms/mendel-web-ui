@@ -23,13 +23,7 @@ func apiGetJobConfigHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Also get description from db and fill in below
-	globalDbLock.RLock()
-	jobDescription := globalDb.Jobs[jobId].Description
-	globalDbLock.RUnlock()
-
 	writeJsonResponse(w, map[string]string{
-		"description": jobDescription,
 		"config":      string(bytes),
 	})
 }

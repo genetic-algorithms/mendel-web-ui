@@ -1,39 +1,57 @@
-# Build
+# Mendel's Accountant Web UI
 
-Compile the go code:
+This is the user interface for the [Mendel's Accountant genetic mutation tracking program](https://github.com/genetic-algorithms/mendel-go).
+
+## Develop
+
+After modifying code, compile the go code (the server portion) and start it:
 ```
-./scripts/build_go
+make runserver
 ```
 
-Bundle to typescript code while you are developing:
+Then bundle the typescript code and start the front end:
 ```
-watch
+scripts/watch
 ```
 
-That last command creates `static/js/bundle.js`, which for now should be committed to git.
+That last command creates `static/js/bundle.js`, which for now should be committed to git. It will also watch the source files and automatically regenerate `static/js/bundle.js` when necessary.
 
-# Run
+## Build the Packages
+
+First, set the VERSION variable in `Makefile`.
+
+Build the RPM:
+```
+make rpmbuild
+```
+
+Note: so far the RPM has only been tested on Amazon Linux.
+
+Build the Mac install package:
+```
+make macpkg
+```
+
+## Run From the Package
+
+On Amazon Linux:
+
+The server is started automatically by `initctl` running `/etc/init/mendel-web-ui.conf`.
+
+Browse http://hostname-or-ip:8581/
+
+On Mac:
+
+Put `/usr/local/bin` in your path, if you haven't already.
 
 To start the web UI server:
 
 ```
-scripts start-mendel-ui.sh {dev|prod}
+start-mendel-ui.sh
 ```
 
 To stop the web UI server:
 
 ```
-scripts stop-mendel-ui.sh
-```
-
-Or if you want to start it manually:
-
-```
-./cmd/server/mendel-web-ui <port> <binary> <default_config>
-```
-
-Example:
-
-```
-./cmd/server/mendel-web-ui 8590 ../mendel-go/mendel-go ../mendel-go/mendel-defaults.ini
+stop-mendel-ui.sh
 ```

@@ -19,9 +19,9 @@ elif [[ "$runEnv" == "dev" ]]; then
 	# We assume they run this in the mendel-web-ui github dir
 	staticDir="${2:-}"  # to override using the local static dir
 	port=8581
-	logDir="$HOME/log/mendel-web-ui"
-	mkdir -p $logDir
-	cmd/server/mendel-web-ui $port ../mendel-go/mendel-go ../mendel-go/mendel-defaults.ini $staticDir > $logDir/stdout.log 2> $logDir/stderr.log &
+	#logDir="$HOME/log/mendel-web-ui"
+	#mkdir -p $logDir
+	cmd/server/mendel-web-ui $port ../mendel-go/mendel-go ../mendel-go/mendel-defaults.ini $staticDir &  # stdout and stderr will go to the terminal session
 	if [[ $? -eq 0 ]]; then
 		echo "cmd/server/mendel-web-ui started, browse http://0.0.0.0:$port/"
 	fi

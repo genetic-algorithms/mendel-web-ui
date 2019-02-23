@@ -18,9 +18,8 @@ type Props = {
 
 // Used to store the state of the NewJob component for both default values and current field values.
 // Also used for a set of empty values used to initialize state.
-// Note: StateConfig is distinguished from ServerConfig in that the latter doesnt include meta data like description.
 type StateConfig = {
-    description: string;    // this is meta data stored in our db, not passed to mendel-go in the config file
+    description: string;
     pop_size: string;
     num_generations: string;
     mutn_rate: string;
@@ -76,9 +75,11 @@ type StateConfig = {
     allele_count_gc_interval: string;
 };
 
-// The format that the server will pass to mendel-go. Does not include meta data like description.
+// The format that the server will pass to mendel-go.
 type ServerConfig = {
     basic: {
+        // case_id is not here because that is generated automatically on the server
+        description: string;
         pop_size: number;
         num_generations: number;
     },
@@ -344,7 +345,6 @@ class Component extends React.Component<Props, State> {
         chooseFileContents(contents => {
             const config = toml.parse(contents) as ServerConfig;
             const values = configToState(config);
-            //todo: also need to get description from the import file
 
             this.setState({
                 fieldValues: values,
@@ -355,7 +355,6 @@ class Component extends React.Component<Props, State> {
     // Export current field values to file export.toml
     onExportClick() {
         const output = stateToConfig(this.state.fieldValues);
-        //todo: also need to export description
         const a = document.createElement('a');
         a.setAttribute('download', 'export.toml');
         a.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(output));
@@ -366,7 +365,6 @@ class Component extends React.Component<Props, State> {
         e.preventDefault();
 
         const data = {
-            description: this.state.fieldValues.description,
             config: stateToConfig(this.state.fieldValues),
         };
 
@@ -436,7 +434,6 @@ class Component extends React.Component<Props, State> {
                 const config = toml.parse(response.config);
 
                 const fieldVals = configToState(config);
-                fieldVals['description'] = response.description
 
                 this.setState({
                     fieldValues: fieldVals,
@@ -1564,11 +1561,11 @@ class Component extends React.Component<Props, State> {
     }
 }
 
-// Convert our component state (current field values) to job config (exclude job meta data)
+// Convert our component state (current field values) to job config (exclude job meta data when we have some)
 function stateToConfig(state: StateConfig) {
     return [
-        // intentionally omitting description
         '[basic]',
+        'description = ' + tomlString(state.description),
         'pop_size = ' + tomlInt(state.pop_size),
         'num_generations = ' + tomlInt(state.num_generations),
 
@@ -1637,12 +1634,12 @@ function stateToConfig(state: StateConfig) {
     ].join('\n');
 }
 
-// Convert the job config to our component state (doesnt include job meta data)
+// Convert the job config to our component state (would not include job meta data, if we had some)
 function configToState(config: ServerConfig) {
     const filesToOutput = filesToOutputBooleans(config.computation.files_to_output);
 
     return {
-        description: '',    // because this is part of the StateConfig type. Will be filled in later
+        description: config.basic.description.toString(),
         pop_size: config.basic.pop_size.toString(),
         num_generations: config.basic.num_generations.toString(),
         mutn_rate: config.mutations.mutn_rate.toString(),

@@ -711,7 +711,6 @@
             var _this = this;
             e.preventDefault();
             var data = {
-                description: this.state.fieldValues.description,
                 config: stateToConfig(this.state.fieldValues),
             };
             apiPost('/api/create-job/', data, this.props.dispatch).then(function (response) {
@@ -759,7 +758,6 @@
                 apiGet('/api/job-config/', { jobId: this.props.jobId }, this.props.dispatch).then(function (response) {
                     var config = toml.parse(response.config);
                     var fieldVals = configToState(config);
-                    fieldVals['description'] = response.description;
                     _this.setState({
                         fieldValues: fieldVals,
                     });
@@ -1380,6 +1378,7 @@
     function stateToConfig(state) {
         return [
             '[basic]',
+            'description = ' + tomlString(state.description),
             'pop_size = ' + tomlInt(state.pop_size),
             'num_generations = ' + tomlInt(state.num_generations),
             '[mutations]',
@@ -1440,7 +1439,7 @@
     function configToState(config) {
         var filesToOutput = filesToOutputBooleans(config.computation.files_to_output);
         return {
-            description: '',
+            description: config.basic.description.toString(),
             pop_size: config.basic.pop_size.toString(),
             num_generations: config.basic.num_generations.toString(),
             mutn_rate: config.mutations.mutn_rate.toString(),

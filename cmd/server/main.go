@@ -33,7 +33,7 @@ type Database struct {
 
 type DatabaseJob struct {
 	Id          string    `json:"id"`
-	Description string    `json:"description"`
+	Description string    `json:"description"` // this is cached in the db from the job config
 	Time        time.Time `json:"time"`
 	OwnerId     string    `json:"owner_id"`
 	Status      string    `json:"status"` // running, cancelled, failed, succeeded

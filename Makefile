@@ -9,12 +9,12 @@ RPMNAME ?= mendel-web-ui
 MAC_PKG_IDENTIFIER ?= com.github.genetic-algorithms.pkg.mendel-web-ui
 MAC_PKG_INSTALL_DIR ?= /Users/Shared/mendel-web-ui
 
-default: run
+default: runserver
 
 cmd/server/$(BINARY): cmd/server/*.go
 	scripts/build_go
 
-run: cmd/server/$(BINARY)
+runserver: cmd/server/$(BINARY)
 	scripts/stop-mendel-ui.sh || true
 	scripts/start-mendel-ui.sh dev
 
@@ -53,4 +53,4 @@ release: rpmbuild macpkg upload-release
 clean:
 	go clean
 
-.PHONY: default run rpmbuild macpkg macinstall macpkginfo clean
+.PHONY: default runserver rpmbuild macpkg macinstall macpkginfo clean

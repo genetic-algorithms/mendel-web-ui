@@ -28,11 +28,10 @@ func apiCreateJobHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// From the request body get the job description and all the mendel-go job input params
+	// From the request body get the mendel-go job input params
 	decoder := json.NewDecoder(r.Body)
 	var data struct {
-		Description string `json:"description"`
-		Config      string `json:"config"`
+		Config string `json:"config"`
 	}
 	err := decoder.Decode(&data)
 	if err != nil {
@@ -86,7 +85,7 @@ func apiCreateJobHandler(w http.ResponseWriter, r *http.Request) {
 
 	job := DatabaseJob{
 		Id:          jobId,
-		Description: data.Description,
+		Description: config["basic"]["description"].(string),
 		Time:        time.Now().UTC(),
 		OwnerId:     user.Id,
 		Status:      "running",
