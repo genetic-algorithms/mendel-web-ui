@@ -84,7 +84,7 @@ class Component extends React.Component<Props> {
 
     render() {
         return React.createElement('div', { className: 'plots-view' },
-            React.createElement(Sidebar, { jobId: this.props.jobId, activeSlug: 'fitness-history' }),
+            React.createElement(Sidebar, { jobId: this.props.jobId, activeSlug: 'fitness-history', dispatch: this.props.dispatch }),
             React.createElement('div', { className: 'plots-view__non-sidebar' },
                 React.createElement('div', { className: 'plots-view__plot', ref: this.plotElement }),
             ),

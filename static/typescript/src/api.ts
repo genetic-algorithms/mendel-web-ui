@@ -70,6 +70,18 @@ export function apiGet(
 }>;
 
 export function apiGet(
+    url: '/api/job-plot-files/',
+    params: {
+        jobId: string;
+    },
+    dispatch: Redux.Dispatch<ReduxAction>,
+    signal?: AbortSignal,
+): Promise<{
+    files: string[];
+    tribes: number[];
+}>;
+
+export function apiGet(
     url: '/api/plot-average-mutations/',
     params: {
         jobId: string;

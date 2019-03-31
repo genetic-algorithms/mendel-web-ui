@@ -169,7 +169,7 @@ class Component extends React.Component<Props, State> {
 
     render() {
         return React.createElement('div', { className: 'plots-view' },
-            React.createElement(Sidebar, { jobId: this.props.jobId, activeSlug: 'minor-allele-frequencies' }),
+            React.createElement(Sidebar, { jobId: this.props.jobId, activeSlug: 'minor-allele-frequencies', dispatch: this.props.dispatch }),
             React.createElement('div', { className: 'plots-view__non-sidebar plots-view--has-slider' },
                 React.createElement('div', { className: 'plots-view__plot', ref: this.plotElement }),
                 React.createElement('div', { className: 'plots-view__slider' },

@@ -60,6 +60,7 @@ type StateConfig = {
     bottleneck_pop_size: string;
     num_bottleneck_generations: string;
     multiple_bottlenecks: string;
+    num_tribes: string;
     files_to_output_fit: boolean;
     files_to_output_hst: boolean;
     files_to_output_allele_bins: boolean;
@@ -126,6 +127,9 @@ type ServerConfig = {
         bottleneck_pop_size: number;
         num_bottleneck_generations: number;
         multiple_bottlenecks: string;
+    },
+    tribes: {
+        num_tribes: number;
     },
     computation: {
         files_to_output: string;
@@ -196,6 +200,7 @@ class Component extends React.Component<Props, State> {
         bottleneck_pop_size: (e: React.ChangeEvent<HTMLInputElement>) => void;
         num_bottleneck_generations: (e: React.ChangeEvent<HTMLInputElement>) => void;
         multiple_bottlenecks: (e: React.ChangeEvent<HTMLInputElement>) => void;
+        num_tribes: (e: React.ChangeEvent<HTMLInputElement>) => void;
         files_to_output_fit: (checked: boolean) => void;
         files_to_output_hst: (checked: boolean) => void;
         files_to_output_allele_bins: (checked: boolean) => void;
@@ -257,6 +262,7 @@ class Component extends React.Component<Props, State> {
             bottleneck_pop_size: e => this.simpleFieldChanged('bottleneck_pop_size', e),
             num_bottleneck_generations: e => this.simpleFieldChanged('num_bottleneck_generations', e),
             multiple_bottlenecks: e => this.simpleFieldChanged('multiple_bottlenecks', e),
+            num_tribes: e => this.simpleFieldChanged('num_tribes', e),
             files_to_output_fit: checked => this.checkboxFieldChanged('files_to_output_fit', checked),
             files_to_output_hst: checked => this.checkboxFieldChanged('files_to_output_hst', checked),
             files_to_output_allele_bins: checked => this.checkboxFieldChanged('files_to_output_allele_bins', checked),
@@ -319,6 +325,7 @@ class Component extends React.Component<Props, State> {
             bottleneck_pop_size: '',
             num_bottleneck_generations: '',
             multiple_bottlenecks: '',
+            num_tribes: '',
             files_to_output_fit: true,
             files_to_output_hst: true,
             files_to_output_allele_bins: true,
@@ -1294,6 +1301,28 @@ class Component extends React.Component<Props, State> {
                     }),
                 ),
 
+                React.createElement('div', { className: 'new-job-view__form-section-title' }, 'Tribes'),
+
+                React.createElement('div', { className: 'new-job-view__field' },
+                    React.createElement('label', {}, 'The number of tribes (separate populations)'),
+                    React.createElement('input', {
+                        type: 'number',
+                        min: '1',
+                        max: '100000',
+                        step: '1',
+                        value: this.state.fieldValues.num_tribes,
+                        onChange: this.fieldChangeHandlers.num_tribes,
+                    }),
+                    (parseInt(this.state.fieldValues.num_tribes) !== parseInt(this.state.defaultValues.num_tribes) ?
+                        React.createElement('div', { className: 'new-job-view__not-default' }) :
+                        null
+                    ),
+                    React.createElement(Help, {
+                        title: 'num_tribes',
+                        content: 'Tribes mate and evolve separately. Many tribes can exhaust system resources quickly.',
+                    }),
+                ),
+
                 React.createElement('div', { className: 'new-job-view__form-section-title' }, 'Output Files'),
 
                 React.createElement('div', { className: 'new-job-view__field' },
@@ -1613,6 +1642,9 @@ function stateToConfig(state: StateConfig) {
         'num_bottleneck_generations = ' + tomlInt(state.num_bottleneck_generations),
         'multiple_bottlenecks = ' + tomlString(state.multiple_bottlenecks),
 
+        '[tribes]',
+        'num_tribes = ' + tomlInt(state.num_tribes),
+
         '[computation]',
         'files_to_output = ' + tomlString(
             filesToOutputString(
@@ -1680,6 +1712,7 @@ function configToState(config: ServerConfig) {
         bottleneck_pop_size: config.population.bottleneck_pop_size.toString(),
         num_bottleneck_generations: config.population.num_bottleneck_generations.toString(),
         multiple_bottlenecks: config.population.multiple_bottlenecks,
+        num_tribes: config.tribes.num_tribes.toString(),
         files_to_output_fit: filesToOutput.fit,
         files_to_output_hst: filesToOutput.hst,
         files_to_output_allele_bins: filesToOutput.alleles,

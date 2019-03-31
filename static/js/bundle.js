@@ -611,6 +611,7 @@
                 bottleneck_pop_size: function (e) { return _this.simpleFieldChanged('bottleneck_pop_size', e); },
                 num_bottleneck_generations: function (e) { return _this.simpleFieldChanged('num_bottleneck_generations', e); },
                 multiple_bottlenecks: function (e) { return _this.simpleFieldChanged('multiple_bottlenecks', e); },
+                num_tribes: function (e) { return _this.simpleFieldChanged('num_tribes', e); },
                 files_to_output_fit: function (checked) { return _this.checkboxFieldChanged('files_to_output_fit', checked); },
                 files_to_output_hst: function (checked) { return _this.checkboxFieldChanged('files_to_output_hst', checked); },
                 files_to_output_allele_bins: function (checked) { return _this.checkboxFieldChanged('files_to_output_allele_bins', checked); },
@@ -670,6 +671,7 @@
                 bottleneck_pop_size: '',
                 num_bottleneck_generations: '',
                 multiple_bottlenecks: '',
+                num_tribes: '',
                 files_to_output_fit: true,
                 files_to_output_hst: true,
                 files_to_output_allele_bins: true,
@@ -1236,6 +1238,18 @@
                 null), React.createElement(Help, {
                 title: 'multiple_bottlenecks',
                 content: 'Used for Multiple Bottlenecks population growth model, instead of any of the other population growth and bottleneck parameters.',
+            })), React.createElement('div', { className: 'new-job-view__form-section-title' }, 'Tribes'), React.createElement('div', { className: 'new-job-view__field' }, React.createElement('label', {}, 'The number of tribes (separate populations)'), React.createElement('input', {
+                type: 'number',
+                min: '1',
+                max: '100000',
+                step: '1',
+                value: this.state.fieldValues.num_tribes,
+                onChange: this.fieldChangeHandlers.num_tribes,
+            }), (parseInt(this.state.fieldValues.num_tribes) !== parseInt(this.state.defaultValues.num_tribes) ?
+                React.createElement('div', { className: 'new-job-view__not-default' }) :
+                null), React.createElement(Help, {
+                title: 'num_tribes',
+                content: 'Tribes mate and evolve separately. Many tribes can exhaust system resources quickly.',
             })), React.createElement('div', { className: 'new-job-view__form-section-title' }, 'Output Files'), React.createElement('div', { className: 'new-job-view__field' }, React.createElement('label', {}, 'mendel.fit'), React.createElement('div', { className: 'new-job-view__checkbox-wrapper' }, React.createElement(Checkbox, {
                 checked: this.state.fieldValues.files_to_output_fit,
                 onChange: this.fieldChangeHandlers.files_to_output_fit,
@@ -1422,6 +1436,8 @@
             'bottleneck_pop_size = ' + tomlInt(state.bottleneck_pop_size),
             'num_bottleneck_generations = ' + tomlInt(state.num_bottleneck_generations),
             'multiple_bottlenecks = ' + tomlString(state.multiple_bottlenecks),
+            '[tribes]',
+            'num_tribes = ' + tomlInt(state.num_tribes),
             '[computation]',
             'files_to_output = ' + tomlString(filesToOutputString(state.files_to_output_fit, state.files_to_output_hst, state.files_to_output_allele_bins)),
             'tracking_threshold = ' + tomlFloat(state.tracking_threshold),
@@ -1480,6 +1496,7 @@
             bottleneck_pop_size: config.population.bottleneck_pop_size.toString(),
             num_bottleneck_generations: config.population.num_bottleneck_generations.toString(),
             multiple_bottlenecks: config.population.multiple_bottlenecks,
+            num_tribes: config.tribes.num_tribes.toString(),
             files_to_output_fit: filesToOutput.fit,
             files_to_output_hst: filesToOutput.hst,
             files_to_output_allele_bins: filesToOutput.alleles,
@@ -2337,26 +2354,32 @@
         {
             title: 'Average mutations/individual',
             slug: 'average-mutations',
+            filename: 'mendel.hst',
         },
         {
             title: 'Fitness history',
             slug: 'fitness-history',
+            filename: 'mendel.fit',
         },
         {
             title: 'Distribution of accumulated mutations (deleterious)',
             slug: 'deleterious-mutations',
+            filename: 'allele-distribution-del',
         },
         {
             title: 'Distribution of accumulated mutations (beneficial)',
             slug: 'beneficial-mutations',
+            filename: 'allele-distribution-fav',
         },
         {
             title: 'SNP Frequencies',
             slug: 'snp-frequencies',
+            filename: 'allele-bins',
         },
         {
             title: 'Minor Allele Frequencies',
             slug: 'minor-allele-frequencies',
+            filename: 'normalized-allele-bins',
         },
     ];
     function mapDispatchToProps$2(dispatch, ownProps) {
@@ -2371,12 +2394,35 @@
     }
     var Component$9 = (function (_super) {
         __extends$h(Component, _super);
-        function Component() {
-            return _super !== null && _super.apply(this, arguments) || this;
+        function Component(props) {
+            var _this = _super.call(this, props) || this;
+            _this.fetchController = new AbortController();
+            _this.state = {
+                files: [],
+                tribes: [],
+            };
+            return _this;
         }
+        Component.prototype.fetchFiles = function (jobId) {
+            var _this = this;
+            this.fetchController.abort();
+            this.fetchController = new AbortController();
+            apiGet('/api/job-plot-files/', { jobId: jobId }, this.props.dispatch, this.fetchController.signal).then(function (response) {
+                _this.setState({
+                    files: response.files,
+                    tribes: response.tribes,
+                });
+            });
+        };
+        Component.prototype.componentDidMount = function () {
+            this.fetchFiles(this.props.jobId);
+        };
+        Component.prototype.componentWillUnmount = function () {
+            this.fetchController.abort();
+        };
         Component.prototype.render = function () {
             var _this = this;
-            return React.createElement('div', { className: 'plots-view__sidebar' }, React.createElement('div', { className: 'plots-view__sidebar__back', onClick: this.props.onBackClick }, React.createElement(BackIcon, { width: 24, height: 24 })), React.createElement('div', { className: 'plots-view__sidebar__items' }, LINKS.map(function (link) { return (React.createElement('div', {
+            return React.createElement('div', { className: 'plots-view__sidebar' }, React.createElement('div', { className: 'plots-view__sidebar__back', onClick: this.props.onBackClick }, React.createElement(BackIcon, { width: 24, height: 24 })), React.createElement('div', { className: 'plots-view__sidebar__items' }, LINKS.filter(function (link) { return _this.state.files.indexOf(link.filename) > -1; }).map(function (link) { return (React.createElement('div', {
                 className: 'plots-view__sidebar__item ' + (_this.props.activeSlug === link.slug ? 'plots-view__sidebar--active' : ''),
                 onClick: function () { return _this.props.onLinkClick(link.slug); },
                 key: link.slug,
@@ -2463,7 +2509,7 @@
             this.fetchController.abort();
         };
         Component.prototype.render = function () {
-            return React.createElement('div', { className: 'plots-view' }, React.createElement(Sidebar, { jobId: this.props.jobId, activeSlug: 'average-mutations' }), React.createElement('div', { className: 'plots-view__non-sidebar' }, React.createElement('div', { className: 'plots-view__plot', ref: this.plotElement })));
+            return React.createElement('div', { className: 'plots-view' }, React.createElement(Sidebar, { jobId: this.props.jobId, activeSlug: 'average-mutations', dispatch: this.props.dispatch }), React.createElement('div', { className: 'plots-view__non-sidebar' }, React.createElement('div', { className: 'plots-view__plot', ref: this.plotElement })));
         };
         return Component;
     }(React.Component));
@@ -2543,7 +2589,7 @@
             this.fetchController.abort();
         };
         Component.prototype.render = function () {
-            return React.createElement('div', { className: 'plots-view' }, React.createElement(Sidebar, { jobId: this.props.jobId, activeSlug: 'fitness-history' }), React.createElement('div', { className: 'plots-view__non-sidebar' }, React.createElement('div', { className: 'plots-view__plot', ref: this.plotElement })));
+            return React.createElement('div', { className: 'plots-view' }, React.createElement(Sidebar, { jobId: this.props.jobId, activeSlug: 'fitness-history', dispatch: this.props.dispatch }), React.createElement('div', { className: 'plots-view__non-sidebar' }, React.createElement('div', { className: 'plots-view__plot', ref: this.plotElement })));
         };
         return Component;
     }(React.Component));
@@ -2664,7 +2710,7 @@
             this.fetchController.abort();
         };
         Component.prototype.render = function () {
-            return React.createElement('div', { className: 'plots-view' }, React.createElement(Sidebar, { jobId: this.props.jobId, activeSlug: 'deleterious-mutations' }), React.createElement('div', { className: 'plots-view__non-sidebar plots-view--has-slider' }, React.createElement('div', { className: 'plots-view__plot', ref: this.plotElement }), React.createElement('div', { className: 'plots-view__slider' }, React.createElement('div', { className: 'plots-view__slider-label' }, 'Generation:'), React.createElement('div', { className: 'plots-view__slider-number' }, this.state.data.length === 0 ? '' : this.state.data[this.state.currentIndex].generation), React.createElement('input', {
+            return React.createElement('div', { className: 'plots-view' }, React.createElement(Sidebar, { jobId: this.props.jobId, activeSlug: 'deleterious-mutations', dispatch: this.props.dispatch }), React.createElement('div', { className: 'plots-view__non-sidebar plots-view--has-slider' }, React.createElement('div', { className: 'plots-view__plot', ref: this.plotElement }), React.createElement('div', { className: 'plots-view__slider' }, React.createElement('div', { className: 'plots-view__slider-label' }, 'Generation:'), React.createElement('div', { className: 'plots-view__slider-number' }, this.state.data.length === 0 ? '' : this.state.data[this.state.currentIndex].generation), React.createElement('input', {
                 className: 'plots-view__slider-input',
                 type: 'range',
                 max: this.state.data.length - 1,
@@ -2790,7 +2836,7 @@
             this.fetchController.abort();
         };
         Component.prototype.render = function () {
-            return React.createElement('div', { className: 'plots-view' }, React.createElement(Sidebar, { jobId: this.props.jobId, activeSlug: 'beneficial-mutations' }), React.createElement('div', { className: 'plots-view__non-sidebar plots-view--has-slider' }, React.createElement('div', { className: 'plots-view__plot', ref: this.plotElement }), React.createElement('div', { className: 'plots-view__slider' }, React.createElement('div', { className: 'plots-view__slider-label' }, 'Generation:'), React.createElement('div', { className: 'plots-view__slider-number' }, this.state.data.length === 0 ? '' : this.state.data[this.state.currentIndex].generation), React.createElement('input', {
+            return React.createElement('div', { className: 'plots-view' }, React.createElement(Sidebar, { jobId: this.props.jobId, activeSlug: 'beneficial-mutations', dispatch: this.props.dispatch }), React.createElement('div', { className: 'plots-view__non-sidebar plots-view--has-slider' }, React.createElement('div', { className: 'plots-view__plot', ref: this.plotElement }), React.createElement('div', { className: 'plots-view__slider' }, React.createElement('div', { className: 'plots-view__slider-label' }, 'Generation:'), React.createElement('div', { className: 'plots-view__slider-number' }, this.state.data.length === 0 ? '' : this.state.data[this.state.currentIndex].generation), React.createElement('input', {
                 className: 'plots-view__slider-input',
                 type: 'range',
                 max: this.state.data.length - 1,
@@ -2974,7 +3020,7 @@
             this.fetchController.abort();
         };
         Component.prototype.render = function () {
-            return React.createElement('div', { className: 'plots-view' }, React.createElement(Sidebar, { jobId: this.props.jobId, activeSlug: 'snp-frequencies' }), React.createElement('div', { className: 'plots-view__non-sidebar plots-view--has-slider' }, React.createElement('div', { className: 'plots-view__plot', ref: this.plotElement }), React.createElement('div', { className: 'plots-view__slider' }, React.createElement('div', { className: 'plots-view__slider-label' }, 'Generation:'), React.createElement('div', { className: 'plots-view__slider-number' }, this.state.data.length === 0 ? '' : this.state.data[this.state.currentIndex].generation), React.createElement('input', {
+            return React.createElement('div', { className: 'plots-view' }, React.createElement(Sidebar, { jobId: this.props.jobId, activeSlug: 'snp-frequencies', dispatch: this.props.dispatch }), React.createElement('div', { className: 'plots-view__non-sidebar plots-view--has-slider' }, React.createElement('div', { className: 'plots-view__plot', ref: this.plotElement }), React.createElement('div', { className: 'plots-view__slider' }, React.createElement('div', { className: 'plots-view__slider-label' }, 'Generation:'), React.createElement('div', { className: 'plots-view__slider-number' }, this.state.data.length === 0 ? '' : this.state.data[this.state.currentIndex].generation), React.createElement('input', {
                 className: 'plots-view__slider-input',
                 type: 'range',
                 max: this.state.data.length - 1,
@@ -3124,7 +3170,7 @@
             this.fetchController.abort();
         };
         Component.prototype.render = function () {
-            return React.createElement('div', { className: 'plots-view' }, React.createElement(Sidebar, { jobId: this.props.jobId, activeSlug: 'minor-allele-frequencies' }), React.createElement('div', { className: 'plots-view__non-sidebar plots-view--has-slider' }, React.createElement('div', { className: 'plots-view__plot', ref: this.plotElement }), React.createElement('div', { className: 'plots-view__slider' }, React.createElement('div', { className: 'plots-view__slider-label' }, 'Generation:'), React.createElement('div', { className: 'plots-view__slider-number' }, this.state.data.length === 0 ? '' : this.state.data[this.state.currentIndex].generation), React.createElement('input', {
+            return React.createElement('div', { className: 'plots-view' }, React.createElement(Sidebar, { jobId: this.props.jobId, activeSlug: 'minor-allele-frequencies', dispatch: this.props.dispatch }), React.createElement('div', { className: 'plots-view__non-sidebar plots-view--has-slider' }, React.createElement('div', { className: 'plots-view__plot', ref: this.plotElement }), React.createElement('div', { className: 'plots-view__slider' }, React.createElement('div', { className: 'plots-view__slider-label' }, 'Generation:'), React.createElement('div', { className: 'plots-view__slider-number' }, this.state.data.length === 0 ? '' : this.state.data[this.state.currentIndex].generation), React.createElement('input', {
                 className: 'plots-view__slider-input',
                 type: 'range',
                 max: this.state.data.length - 1,

@@ -17,6 +17,7 @@ import (
 
 // Called for /api/create-job/ route
 func apiCreateJobHandler(w http.ResponseWriter, r *http.Request) {
+	log.Println("In /api/create-job/ ...")
 	user := getAuthenticatedUser(r)
 	if user.Id == "" {
 		http.Error(w, "401 Unauthorized", http.StatusUnauthorized)

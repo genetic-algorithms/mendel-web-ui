@@ -1,5 +1,7 @@
 package main
 
+// Called for /api/job-output/ route to get the stdout of the job
+
 import (
 	"io/ioutil"
 	"net/http"
@@ -7,7 +9,6 @@ import (
 	"strconv"
 )
 
-// Called for /api/job-output/ route
 func apiJobOutputHandler(w http.ResponseWriter, r *http.Request) {
 	user := getAuthenticatedUser(r)
 	if user.Id == "" {

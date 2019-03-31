@@ -1,12 +1,13 @@
 package main
 
+// Called for /api/job-list/ route
+
 import (
 	"net/http"
 	"sort"
 	"time"
 )
 
-// Called for /api/job-list/ route
 type ApiJobListHandlerJob struct {
 	Id          string    `json:"id"`
 	Description string    `json:"description"`

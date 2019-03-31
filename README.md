@@ -16,6 +16,13 @@ scripts/watch
 
 That last command creates `static/js/bundle.js`, which for now should be committed to git. It will also watch the source files and automatically regenerate `static/js/bundle.js` when necessary.
 
+## Test the Backend API
+
+The backend API can be tested via browser or curl URLs like this:
+```
+http://0.0.0.0:8581/api/job-plot-files/?jobId=b7f00ecc
+```
+
 ## Build the Packages
 
 First, set the VERSION variable in `Makefile`.

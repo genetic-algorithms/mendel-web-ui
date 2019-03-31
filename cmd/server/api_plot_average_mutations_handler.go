@@ -1,5 +1,7 @@
 package main
 
+// Called for /api/plot-average-mutations/ route
+
 import (
 	"io/ioutil"
 	"log"
@@ -8,7 +10,6 @@ import (
 	"strconv"
 )
 
-// Called for /api/plot-average-mutations/ route
 func apiPlotAverageMutationsHandler(w http.ResponseWriter, r *http.Request) {
 	user := getAuthenticatedUser(r)
 	if user.Id == "" {
