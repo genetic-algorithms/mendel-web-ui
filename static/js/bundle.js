@@ -2350,103 +2350,8 @@
             d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
         };
     })();
-    var LINKS = [
-        {
-            title: 'Average mutations/individual',
-            slug: 'average-mutations',
-            filename: 'mendel.hst',
-        },
-        {
-            title: 'Fitness history',
-            slug: 'fitness-history',
-            filename: 'mendel.fit',
-        },
-        {
-            title: 'Distribution of accumulated mutations (deleterious)',
-            slug: 'deleterious-mutations',
-            filename: 'allele-distribution-del',
-        },
-        {
-            title: 'Distribution of accumulated mutations (beneficial)',
-            slug: 'beneficial-mutations',
-            filename: 'allele-distribution-fav',
-        },
-        {
-            title: 'SNP Frequencies',
-            slug: 'snp-frequencies',
-            filename: 'allele-bins',
-        },
-        {
-            title: 'Minor Allele Frequencies',
-            slug: 'minor-allele-frequencies',
-            filename: 'normalized-allele-bins',
-        },
-    ];
-    function mapDispatchToProps$2(dispatch, ownProps) {
-        return {
-            onLinkClick: function (slug) {
-                setRoute(dispatch, '/plots/' + ownProps.jobId + '/' + slug + '/');
-            },
-            onBackClick: function () {
-                setRoute(dispatch, '/job-detail/' + ownProps.jobId + '/');
-            },
-        };
-    }
     var Component$9 = (function (_super) {
         __extends$h(Component, _super);
-        function Component(props) {
-            var _this = _super.call(this, props) || this;
-            _this.fetchController = new AbortController();
-            _this.state = {
-                files: [],
-                tribes: [],
-            };
-            return _this;
-        }
-        Component.prototype.fetchFiles = function (jobId) {
-            var _this = this;
-            this.fetchController.abort();
-            this.fetchController = new AbortController();
-            apiGet('/api/job-plot-files/', { jobId: jobId }, this.props.dispatch, this.fetchController.signal).then(function (response) {
-                _this.setState({
-                    files: response.files,
-                    tribes: response.tribes,
-                });
-            });
-        };
-        Component.prototype.componentDidMount = function () {
-            this.fetchFiles(this.props.jobId);
-        };
-        Component.prototype.componentWillUnmount = function () {
-            this.fetchController.abort();
-        };
-        Component.prototype.render = function () {
-            var _this = this;
-            return React.createElement('div', { className: 'plots-view__sidebar' }, React.createElement('div', { className: 'plots-view__sidebar__back', onClick: this.props.onBackClick }, React.createElement(BackIcon, { width: 24, height: 24 })), React.createElement('div', { className: 'plots-view__sidebar__items' }, LINKS.filter(function (link) { return _this.state.files.indexOf(link.filename) > -1; }).map(function (link) { return (React.createElement('div', {
-                className: 'plots-view__sidebar__item ' + (_this.props.activeSlug === link.slug ? 'plots-view__sidebar--active' : ''),
-                onClick: function () { return _this.props.onLinkClick(link.slug); },
-                key: link.slug,
-            }, link.title)); })));
-        };
-        return Component;
-    }(React.Component));
-    var Sidebar = ReactRedux.connect(null, mapDispatchToProps$2)(Component$9);
-
-    var __extends$i = (undefined && undefined.__extends) || (function () {
-        var extendStatics = function (d, b) {
-            extendStatics = Object.setPrototypeOf ||
-                ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-                function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
-            return extendStatics(d, b);
-        };
-        return function (d, b) {
-            extendStatics(d, b);
-            function __() { this.constructor = d; }
-            d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-        };
-    })();
-    var Component$a = (function (_super) {
-        __extends$i(Component, _super);
         function Component(props) {
             var _this = _super.call(this, props) || this;
             _this.resizePlot = _this.resizePlot.bind(_this);
@@ -2509,13 +2414,13 @@
             this.fetchController.abort();
         };
         Component.prototype.render = function () {
-            return React.createElement('div', { className: 'plots-view' }, React.createElement(Sidebar, { jobId: this.props.jobId, activeSlug: 'average-mutations', dispatch: this.props.dispatch }), React.createElement('div', { className: 'plots-view__non-sidebar' }, React.createElement('div', { className: 'plots-view__plot', ref: this.plotElement })));
+            return React.createElement('div', { className: 'plots-view__non-sidebar' }, React.createElement('div', { className: 'plots-view__plot', ref: this.plotElement }));
         };
         return Component;
     }(React.Component));
-    var AverageMutations = ReactRedux.connect()(Component$a);
+    var AverageMutations = ReactRedux.connect()(Component$9);
 
-    var __extends$j = (undefined && undefined.__extends) || (function () {
+    var __extends$i = (undefined && undefined.__extends) || (function () {
         var extendStatics = function (d, b) {
             extendStatics = Object.setPrototypeOf ||
                 ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
@@ -2528,8 +2433,8 @@
             d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
         };
     })();
-    var Component$b = (function (_super) {
-        __extends$j(Component, _super);
+    var Component$a = (function (_super) {
+        __extends$i(Component, _super);
         function Component(props) {
             var _this = _super.call(this, props) || this;
             _this.resizePlot = _this.resizePlot.bind(_this);
@@ -2589,13 +2494,13 @@
             this.fetchController.abort();
         };
         Component.prototype.render = function () {
-            return React.createElement('div', { className: 'plots-view' }, React.createElement(Sidebar, { jobId: this.props.jobId, activeSlug: 'fitness-history', dispatch: this.props.dispatch }), React.createElement('div', { className: 'plots-view__non-sidebar' }, React.createElement('div', { className: 'plots-view__plot', ref: this.plotElement })));
+            return React.createElement('div', { className: 'plots-view__non-sidebar' }, React.createElement('div', { className: 'plots-view__plot', ref: this.plotElement }));
         };
         return Component;
     }(React.Component));
-    var FitnessHistory = ReactRedux.connect()(Component$b);
+    var FitnessHistory = ReactRedux.connect()(Component$a);
 
-    var __extends$k = (undefined && undefined.__extends) || (function () {
+    var __extends$j = (undefined && undefined.__extends) || (function () {
         var extendStatics = function (d, b) {
             extendStatics = Object.setPrototypeOf ||
                 ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
@@ -2608,8 +2513,8 @@
             d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
         };
     })();
-    var Component$c = (function (_super) {
-        __extends$k(Component, _super);
+    var Component$b = (function (_super) {
+        __extends$j(Component, _super);
         function Component(props) {
             var _this = _super.call(this, props) || this;
             _this.resizePlot = _this.resizePlot.bind(_this);
@@ -2710,19 +2615,19 @@
             this.fetchController.abort();
         };
         Component.prototype.render = function () {
-            return React.createElement('div', { className: 'plots-view' }, React.createElement(Sidebar, { jobId: this.props.jobId, activeSlug: 'deleterious-mutations', dispatch: this.props.dispatch }), React.createElement('div', { className: 'plots-view__non-sidebar plots-view--has-slider' }, React.createElement('div', { className: 'plots-view__plot', ref: this.plotElement }), React.createElement('div', { className: 'plots-view__slider' }, React.createElement('div', { className: 'plots-view__slider-label' }, 'Generation:'), React.createElement('div', { className: 'plots-view__slider-number' }, this.state.data.length === 0 ? '' : this.state.data[this.state.currentIndex].generation), React.createElement('input', {
+            return React.createElement('div', { className: 'plots-view__non-sidebar plots-view--has-slider' }, React.createElement('div', { className: 'plots-view__plot', ref: this.plotElement }), React.createElement('div', { className: 'plots-view__slider' }, React.createElement('div', { className: 'plots-view__slider-label' }, 'Generation:'), React.createElement('div', { className: 'plots-view__slider-number' }, this.state.data.length === 0 ? '' : this.state.data[this.state.currentIndex].generation), React.createElement('input', {
                 className: 'plots-view__slider-input',
                 type: 'range',
                 max: this.state.data.length - 1,
                 value: this.state.currentIndex,
                 onChange: this.sliderInputChange,
-            }))));
+            })));
         };
         return Component;
     }(React.Component));
-    var DeleteriousMutations = ReactRedux.connect()(Component$c);
+    var DeleteriousMutations = ReactRedux.connect()(Component$b);
 
-    var __extends$l = (undefined && undefined.__extends) || (function () {
+    var __extends$k = (undefined && undefined.__extends) || (function () {
         var extendStatics = function (d, b) {
             extendStatics = Object.setPrototypeOf ||
                 ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
@@ -2735,8 +2640,8 @@
             d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
         };
     })();
-    var Component$d = (function (_super) {
-        __extends$l(Component, _super);
+    var Component$c = (function (_super) {
+        __extends$k(Component, _super);
         function Component(props) {
             var _this = _super.call(this, props) || this;
             _this.resizePlot = _this.resizePlot.bind(_this);
@@ -2836,19 +2741,19 @@
             this.fetchController.abort();
         };
         Component.prototype.render = function () {
-            return React.createElement('div', { className: 'plots-view' }, React.createElement(Sidebar, { jobId: this.props.jobId, activeSlug: 'beneficial-mutations', dispatch: this.props.dispatch }), React.createElement('div', { className: 'plots-view__non-sidebar plots-view--has-slider' }, React.createElement('div', { className: 'plots-view__plot', ref: this.plotElement }), React.createElement('div', { className: 'plots-view__slider' }, React.createElement('div', { className: 'plots-view__slider-label' }, 'Generation:'), React.createElement('div', { className: 'plots-view__slider-number' }, this.state.data.length === 0 ? '' : this.state.data[this.state.currentIndex].generation), React.createElement('input', {
+            return React.createElement('div', { className: 'plots-view__non-sidebar plots-view--has-slider' }, React.createElement('div', { className: 'plots-view__plot', ref: this.plotElement }), React.createElement('div', { className: 'plots-view__slider' }, React.createElement('div', { className: 'plots-view__slider-label' }, 'Generation:'), React.createElement('div', { className: 'plots-view__slider-number' }, this.state.data.length === 0 ? '' : this.state.data[this.state.currentIndex].generation), React.createElement('input', {
                 className: 'plots-view__slider-input',
                 type: 'range',
                 max: this.state.data.length - 1,
                 value: this.state.currentIndex,
                 onChange: this.sliderInputChange,
-            }))));
+            })));
         };
         return Component;
     }(React.Component));
-    var BeneficialMutations = ReactRedux.connect()(Component$d);
+    var BeneficialMutations = ReactRedux.connect()(Component$c);
 
-    var __extends$m = (undefined && undefined.__extends) || (function () {
+    var __extends$l = (undefined && undefined.__extends) || (function () {
         var extendStatics = function (d, b) {
             extendStatics = Object.setPrototypeOf ||
                 ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
@@ -2861,8 +2766,8 @@
             d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
         };
     })();
-    var Component$e = (function (_super) {
-        __extends$m(Component, _super);
+    var Component$d = (function (_super) {
+        __extends$l(Component, _super);
         function Component(props) {
             var _this = _super.call(this, props) || this;
             _this.resizePlot = _this.resizePlot.bind(_this);
@@ -3020,19 +2925,19 @@
             this.fetchController.abort();
         };
         Component.prototype.render = function () {
-            return React.createElement('div', { className: 'plots-view' }, React.createElement(Sidebar, { jobId: this.props.jobId, activeSlug: 'snp-frequencies', dispatch: this.props.dispatch }), React.createElement('div', { className: 'plots-view__non-sidebar plots-view--has-slider' }, React.createElement('div', { className: 'plots-view__plot', ref: this.plotElement }), React.createElement('div', { className: 'plots-view__slider' }, React.createElement('div', { className: 'plots-view__slider-label' }, 'Generation:'), React.createElement('div', { className: 'plots-view__slider-number' }, this.state.data.length === 0 ? '' : this.state.data[this.state.currentIndex].generation), React.createElement('input', {
+            return React.createElement('div', { className: 'plots-view__non-sidebar plots-view--has-slider' }, React.createElement('div', { className: 'plots-view__plot', ref: this.plotElement }), React.createElement('div', { className: 'plots-view__slider' }, React.createElement('div', { className: 'plots-view__slider-label' }, 'Generation:'), React.createElement('div', { className: 'plots-view__slider-number' }, this.state.data.length === 0 ? '' : this.state.data[this.state.currentIndex].generation), React.createElement('input', {
                 className: 'plots-view__slider-input',
                 type: 'range',
                 max: this.state.data.length - 1,
                 value: this.state.currentIndex,
                 onChange: this.sliderInputChange,
-            }))));
+            })));
         };
         return Component;
     }(React.Component));
-    var SnpFrequencies = ReactRedux.connect()(Component$e);
+    var SnpFrequencies = ReactRedux.connect()(Component$d);
 
-    var __extends$n = (undefined && undefined.__extends) || (function () {
+    var __extends$m = (undefined && undefined.__extends) || (function () {
         var extendStatics = function (d, b) {
             extendStatics = Object.setPrototypeOf ||
                 ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
@@ -3045,8 +2950,8 @@
             d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
         };
     })();
-    var Component$f = (function (_super) {
-        __extends$n(Component, _super);
+    var Component$e = (function (_super) {
+        __extends$m(Component, _super);
         function Component(props) {
             var _this = _super.call(this, props) || this;
             _this.resizePlot = _this.resizePlot.bind(_this);
@@ -3170,17 +3075,136 @@
             this.fetchController.abort();
         };
         Component.prototype.render = function () {
-            return React.createElement('div', { className: 'plots-view' }, React.createElement(Sidebar, { jobId: this.props.jobId, activeSlug: 'minor-allele-frequencies', dispatch: this.props.dispatch }), React.createElement('div', { className: 'plots-view__non-sidebar plots-view--has-slider' }, React.createElement('div', { className: 'plots-view__plot', ref: this.plotElement }), React.createElement('div', { className: 'plots-view__slider' }, React.createElement('div', { className: 'plots-view__slider-label' }, 'Generation:'), React.createElement('div', { className: 'plots-view__slider-number' }, this.state.data.length === 0 ? '' : this.state.data[this.state.currentIndex].generation), React.createElement('input', {
+            return React.createElement('div', { className: 'plots-view__non-sidebar plots-view--has-slider' }, React.createElement('div', { className: 'plots-view__plot', ref: this.plotElement }), React.createElement('div', { className: 'plots-view__slider' }, React.createElement('div', { className: 'plots-view__slider-label' }, 'Generation:'), React.createElement('div', { className: 'plots-view__slider-number' }, this.state.data.length === 0 ? '' : this.state.data[this.state.currentIndex].generation), React.createElement('input', {
                 className: 'plots-view__slider-input',
                 type: 'range',
                 max: this.state.data.length - 1,
                 value: this.state.currentIndex,
                 onChange: this.sliderInputChange,
-            }))));
+            })));
         };
         return Component;
     }(React.Component));
-    var MinorAlleleFrequencies = ReactRedux.connect()(Component$f);
+    var MinorAlleleFrequencies = ReactRedux.connect()(Component$e);
+
+    var __extends$n = (undefined && undefined.__extends) || (function () {
+        var extendStatics = function (d, b) {
+            extendStatics = Object.setPrototypeOf ||
+                ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+                function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+            return extendStatics(d, b);
+        };
+        return function (d, b) {
+            extendStatics(d, b);
+            function __() { this.constructor = d; }
+            d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+        };
+    })();
+    var LINKS = [
+        {
+            title: 'Average mutations/individual',
+            slug: 'average-mutations',
+            filename: 'mendel.hst',
+        },
+        {
+            title: 'Fitness history',
+            slug: 'fitness-history',
+            filename: 'mendel.fit',
+        },
+        {
+            title: 'Distribution of accumulated mutations (deleterious)',
+            slug: 'deleterious-mutations',
+            filename: 'allele-distribution-del',
+        },
+        {
+            title: 'Distribution of accumulated mutations (beneficial)',
+            slug: 'beneficial-mutations',
+            filename: 'allele-distribution-fav',
+        },
+        {
+            title: 'SNP Frequencies',
+            slug: 'snp-frequencies',
+            filename: 'allele-bins',
+        },
+        {
+            title: 'Minor Allele Frequencies',
+            slug: 'minor-allele-frequencies',
+            filename: 'normalized-allele-bins',
+        },
+    ];
+    function mapDispatchToProps$2(dispatch, ownProps) {
+        return {
+            dispatch: dispatch,
+            onLinkClick: function (slug) {
+                setRoute(dispatch, '/plots/' + ownProps.jobId + '/' + slug + '/');
+            },
+            onBackClick: function () {
+                setRoute(dispatch, '/job-detail/' + ownProps.jobId + '/');
+            },
+        };
+    }
+    var Component$f = (function (_super) {
+        __extends$n(Component, _super);
+        function Component(props) {
+            var _this = _super.call(this, props) || this;
+            _this.fetchController = new AbortController();
+            _this.state = {
+                files: [],
+                tribes: [],
+            };
+            return _this;
+        }
+        Component.prototype.fetchFiles = function (jobId) {
+            var _this = this;
+            this.fetchController.abort();
+            this.fetchController = new AbortController();
+            apiGet('/api/job-plot-files/', { jobId: jobId }, this.props.dispatch, this.fetchController.signal).then(function (response) {
+                _this.setState({
+                    files: response.files,
+                    tribes: response.tribes,
+                });
+            });
+        };
+        Component.prototype.getPlot = function () {
+            if (this.props.activeSlug === 'average-mutations') {
+                return React.createElement(AverageMutations, { jobId: this.props.jobId });
+            }
+            else if (this.props.activeSlug === 'fitness-history') {
+                return React.createElement(FitnessHistory, { jobId: this.props.jobId });
+            }
+            else if (this.props.activeSlug === 'deleterious-mutations') {
+                return React.createElement(DeleteriousMutations, { jobId: this.props.jobId });
+            }
+            else if (this.props.activeSlug === 'beneficial-mutations') {
+                return React.createElement(BeneficialMutations, { jobId: this.props.jobId });
+            }
+            else if (this.props.activeSlug === 'snp-frequencies') {
+                return React.createElement(SnpFrequencies, { jobId: this.props.jobId });
+            }
+            else if (this.props.activeSlug === 'minor-allele-frequencies') {
+                return React.createElement(MinorAlleleFrequencies, { jobId: this.props.jobId });
+            }
+            else {
+                return null;
+            }
+        };
+        Component.prototype.componentDidMount = function () {
+            this.fetchFiles(this.props.jobId);
+        };
+        Component.prototype.componentWillUnmount = function () {
+            this.fetchController.abort();
+        };
+        Component.prototype.render = function () {
+            var _this = this;
+            return React.createElement('div', { className: 'plots-view' }, React.createElement('div', { className: 'plots-view__sidebar' }, React.createElement('div', { className: 'plots-view__sidebar__back', onClick: this.props.onBackClick }, React.createElement(BackIcon, { width: 24, height: 24 })), React.createElement('div', { className: 'plots-view__sidebar__items' }, LINKS.filter(function (link) { return _this.state.files.indexOf(link.filename) > -1; }).map(function (link) { return (React.createElement('div', {
+                className: 'plots-view__sidebar__item ' + (_this.props.activeSlug === link.slug ? 'plots-view__sidebar--active' : ''),
+                onClick: function () { return _this.props.onLinkClick(link.slug); },
+                key: link.slug,
+            }, link.title)); }))), this.getPlot());
+        };
+        return Component;
+    }(React.Component));
+    var Plots = ReactRedux.connect(null, mapDispatchToProps$2)(Component$f);
 
     function mapStateToProps$4(state) {
         return {
@@ -3231,24 +3255,7 @@
         }
         else if (plotMatch) {
             var jobId = plotMatch[1];
-            if (plotMatch[2] === 'average-mutations') {
-                return React.createElement(AverageMutations, { jobId: jobId });
-            }
-            else if (plotMatch[2] === 'fitness-history') {
-                return React.createElement(FitnessHistory, { jobId: jobId });
-            }
-            else if (plotMatch[2] === 'deleterious-mutations') {
-                return React.createElement(DeleteriousMutations, { jobId: jobId });
-            }
-            else if (plotMatch[2] === 'beneficial-mutations') {
-                return React.createElement(BeneficialMutations, { jobId: jobId });
-            }
-            else if (plotMatch[2] === 'snp-frequencies') {
-                return React.createElement(SnpFrequencies, { jobId: jobId });
-            }
-            else if (plotMatch[2] === 'minor-allele-frequencies') {
-                return React.createElement(MinorAlleleFrequencies, { jobId: jobId });
-            }
+            return React.createElement(Plots, { jobId: jobId, activeSlug: plotMatch[2] });
         }
         return null;
     }

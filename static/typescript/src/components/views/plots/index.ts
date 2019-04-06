@@ -5,6 +5,12 @@ import { ReduxAction } from '../../../redux_action_types';
 import { BackIcon } from '../../icons/back';
 import { apiGet } from '../../../api';
 import { setRoute } from '../../../util';
+import { AverageMutations } from './average_mutations';
+import { FitnessHistory } from './fitness_history';
+import { DeleteriousMutations } from './deleterious_mutations';
+import { BeneficialMutations } from './beneficial_mutations';
+import { SnpFrequencies } from './snp_frequencies';
+import { MinorAlleleFrequencies } from './minor_allele_frequencies';
 
 const LINKS = [
     {
@@ -57,6 +63,7 @@ type State = {
 
 function mapDispatchToProps(dispatch: Redux.Dispatch<ReduxAction>, ownProps: OwnProps) {
     return {
+        dispatch: dispatch,
         onLinkClick: (slug: string) => {
             setRoute(dispatch, '/plots/' + ownProps.jobId + '/' + slug + '/');
         },
@@ -83,7 +90,7 @@ class Component extends React.Component<Props, State> {
     fetchFiles(jobId: string) {
         this.fetchController.abort();
         this.fetchController = new AbortController();
-    
+
         apiGet(
             '/api/job-plot-files/',
             { jobId: jobId },
@@ -96,31 +103,52 @@ class Component extends React.Component<Props, State> {
             });
         });
     }
-    
+
+    getPlot() {
+        if (this.props.activeSlug === 'average-mutations') {
+            return React.createElement(AverageMutations, { jobId: this.props.jobId });
+        } else if (this.props.activeSlug === 'fitness-history') {
+            return React.createElement(FitnessHistory, { jobId: this.props.jobId });
+        } else if (this.props.activeSlug === 'deleterious-mutations') {
+            return React.createElement(DeleteriousMutations, { jobId: this.props.jobId });
+        } else if (this.props.activeSlug === 'beneficial-mutations') {
+            return React.createElement(BeneficialMutations, { jobId: this.props.jobId });
+        } else if (this.props.activeSlug === 'snp-frequencies') {
+            return React.createElement(SnpFrequencies, { jobId: this.props.jobId });
+        } else if (this.props.activeSlug === 'minor-allele-frequencies') {
+            return React.createElement(MinorAlleleFrequencies, { jobId: this.props.jobId });
+        } else {
+            return null;
+        }
+    }
+
     componentDidMount() {
         this.fetchFiles(this.props.jobId);
     }
-    
+
     componentWillUnmount() {
         this.fetchController.abort();
     }
-    
+
     render() {
-        return React.createElement('div', { className: 'plots-view__sidebar' },
-            React.createElement('div', { className: 'plots-view__sidebar__back', onClick: this.props.onBackClick },
-                React.createElement(BackIcon, { width: 24, height: 24 }),
+        return React.createElement('div', { className: 'plots-view' },
+            React.createElement('div', { className: 'plots-view__sidebar' },
+                React.createElement('div', { className: 'plots-view__sidebar__back', onClick: this.props.onBackClick },
+                    React.createElement(BackIcon, { width: 24, height: 24 }),
+                ),
+                React.createElement('div', { className: 'plots-view__sidebar__items' },
+                    LINKS.filter(link => this.state.files.indexOf(link.filename) > -1 ).map(link => (
+                        React.createElement('div', {
+                            className: 'plots-view__sidebar__item ' + (this.props.activeSlug === link.slug ? 'plots-view__sidebar--active' : ''),
+                            onClick: () => this.props.onLinkClick(link.slug),
+                            key: link.slug,
+                        }, link.title)
+                    )),
+                ),
             ),
-            React.createElement('div', { className: 'plots-view__sidebar__items' },
-                LINKS.filter(link => this.state.files.indexOf(link.filename) > -1 ).map(link => (
-                    React.createElement('div', {
-                        className: 'plots-view__sidebar__item ' + (this.props.activeSlug === link.slug ? 'plots-view__sidebar--active' : ''),
-                        onClick: () => this.props.onLinkClick(link.slug),
-                        key: link.slug,
-                    }, link.title)
-                )),
-            ),
+            this.getPlot(),
         );
     }
 }
 
-export const Sidebar = ReactRedux.connect(null, mapDispatchToProps)(Component);
+export const Plots = ReactRedux.connect(null, mapDispatchToProps)(Component);

@@ -1,7 +1,6 @@
 import * as ReactRedux from 'react-redux';
 import * as Redux from 'redux';
 import { assertNotNull } from '../../../util';
-import { Sidebar } from './sidebar';
 import * as Plotly from 'plotly.js';
 import * as React from 'react';
 import { apiGet } from '../../../api';
@@ -141,23 +140,20 @@ class Component extends React.Component<Props, State> {
     }
 
     render() {
-        return React.createElement('div', { className: 'plots-view' },
-            React.createElement(Sidebar, { jobId: this.props.jobId, activeSlug: 'deleterious-mutations', dispatch: this.props.dispatch }),
-            React.createElement('div', { className: 'plots-view__non-sidebar plots-view--has-slider' },
-                React.createElement('div', { className: 'plots-view__plot', ref: this.plotElement }),
-                React.createElement('div', { className: 'plots-view__slider' },
-                    React.createElement('div', { className: 'plots-view__slider-label' }, 'Generation:'),
-                    React.createElement('div', { className: 'plots-view__slider-number' },
-                        this.state.data.length === 0 ? '' : this.state.data[this.state.currentIndex].generation
-                    ),
-                    React.createElement('input', {
-                        className: 'plots-view__slider-input',
-                        type: 'range',
-                        max: this.state.data.length - 1,
-                        value: this.state.currentIndex,
-                        onChange: this.sliderInputChange,
-                    }),
+        return React.createElement('div', { className: 'plots-view__non-sidebar plots-view--has-slider' },
+            React.createElement('div', { className: 'plots-view__plot', ref: this.plotElement }),
+            React.createElement('div', { className: 'plots-view__slider' },
+                React.createElement('div', { className: 'plots-view__slider-label' }, 'Generation:'),
+                React.createElement('div', { className: 'plots-view__slider-number' },
+                    this.state.data.length === 0 ? '' : this.state.data[this.state.currentIndex].generation
                 ),
+                React.createElement('input', {
+                    className: 'plots-view__slider-input',
+                    type: 'range',
+                    max: this.state.data.length - 1,
+                    value: this.state.currentIndex,
+                    onChange: this.sliderInputChange,
+                }),
             ),
         );
     }

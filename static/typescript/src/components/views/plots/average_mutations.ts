@@ -1,7 +1,6 @@
 import * as ReactRedux from 'react-redux';
 import * as Redux from 'redux';
 import { assertNotNull } from '../../../util';
-import { Sidebar } from './sidebar';
 import * as Plotly from 'plotly.js';
 import * as React from 'react';
 import { apiGet } from '../../../api';
@@ -86,11 +85,8 @@ class Component extends React.Component<Props> {
     }
 
     render() {
-        return React.createElement('div', { className: 'plots-view' },
-            React.createElement(Sidebar, { jobId: this.props.jobId, activeSlug: 'average-mutations', dispatch: this.props.dispatch }),
-            React.createElement('div', { className: 'plots-view__non-sidebar' },
-                React.createElement('div', { className: 'plots-view__plot', ref: this.plotElement }),
-            ),
+        return React.createElement('div', { className: 'plots-view__non-sidebar' },
+            React.createElement('div', { className: 'plots-view__plot', ref: this.plotElement }),
         );
     }
 }
