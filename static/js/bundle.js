@@ -3196,7 +3196,9 @@
         };
         Component.prototype.render = function () {
             var _this = this;
-            return React.createElement('div', { className: 'plots-view' }, React.createElement('div', { className: 'plots-view__sidebar' }, React.createElement('div', { className: 'plots-view__sidebar__back', onClick: this.props.onBackClick }, React.createElement(BackIcon, { width: 24, height: 24 })), React.createElement('div', { className: 'plots-view__sidebar__items' }, LINKS.filter(function (link) { return _this.state.files.indexOf(link.filename) > -1; }).map(function (link) { return (React.createElement('div', {
+            return React.createElement('div', { className: 'plots-view' }, React.createElement('div', { className: 'plots-view__sidebar' }, React.createElement('div', { className: 'plots-view__sidebar__back', onClick: this.props.onBackClick }, React.createElement(BackIcon, { width: 24, height: 24 })), (this.state.tribes.length > 0 ?
+                React.createElement('select', { className: 'plots-view__sidebar__select', value: 1, }, React.createElement('option', { value: 1 }, 1))
+                : null), React.createElement('div', { className: 'plots-view__sidebar__items' }, LINKS.filter(function (link) { return _this.state.files.indexOf(link.filename) > -1; }).map(function (link) { return (React.createElement('div', {
                 className: 'plots-view__sidebar__item ' + (_this.props.activeSlug === link.slug ? 'plots-view__sidebar--active' : ''),
                 onClick: function () { return _this.props.onLinkClick(link.slug); },
                 key: link.slug,

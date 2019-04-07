@@ -12,6 +12,12 @@ import { BeneficialMutations } from './beneficial_mutations';
 import { SnpFrequencies } from './snp_frequencies';
 import { MinorAlleleFrequencies } from './minor_allele_frequencies';
 
+/* Creates the plot links in the navigation panel of the plot page. With the introduction
+  of tribes, this panel also displays a drop-down menu, when a job has tribes, to enable
+  switching between the tribes.
+ */
+
+// All the possible plots. Will be filtered later for the plots files that actually exist for a job.
 const LINKS = [
     {
         title: 'Average mutations/individual',
@@ -51,6 +57,7 @@ type OwnProps = {
 };
 
 type Props = OwnProps & {
+    // These are the props added by mapDispatchToProps()
     onLinkClick: (slug: string) => void;
     onBackClick: () => void;
     dispatch: Redux.Dispatch<ReduxAction>;
@@ -59,8 +66,11 @@ type Props = OwnProps & {
 type State = {
     files: string[],
     tribes: number[],
+    //currentTribe: number,
 };
 
+// Called by redux when the component re-renders. Returns additional properties that get merged into
+// the components props. Use this method when you need the dispatch object for other functions.
 function mapDispatchToProps(dispatch: Redux.Dispatch<ReduxAction>, ownProps: OwnProps) {
     return {
         dispatch: dispatch,
@@ -79,15 +89,27 @@ class Component extends React.Component<Props, State> {
     constructor(props: Props) {
         super(props);
 
+        //this.onSelectChanged = this.onSelectChanged.bind(this);
         this.fetchController = new AbortController();
 
         this.state = {
             files: [],
             tribes: [],
+            //currentTribe: 0,  // initialize to 0 to indicate no tribe has been selected yet
         };
     }
 
-    fetchFiles(jobId: string) {
+    /* When the tribe drop-down menu is changed, get the plot files list for this job and tribe
+    onSelectChanged(e: React.ChangeEvent<HTMLSelectElement>) {
+        this.fetchFiles(this.props.jobId);   //todo: call this after the state change
+
+        this.setState({
+            currentTribe: parseInt(e.currentTarget.value),
+        });
+    } */
+
+    // Get which plot files and tribe dirs are available for this job
+    fetchFiles(jobId: string) {  //todo: add tribe arg
         this.fetchController.abort();
         this.fetchController = new AbortController();
 
@@ -130,20 +152,26 @@ class Component extends React.Component<Props, State> {
         this.fetchController.abort();
     }
 
+    /* The filter below filters the list to only the plots that exist for this job, then we map them to link elements */
     render() {
         return React.createElement('div', { className: 'plots-view' },
             React.createElement('div', { className: 'plots-view__sidebar' },
                 React.createElement('div', { className: 'plots-view__sidebar__back', onClick: this.props.onBackClick },
                     React.createElement(BackIcon, { width: 24, height: 24 }),
                 ),
+                (this.state.tribes.length>0 ?
+                    React.createElement('select', { className: 'plots-view__sidebar__select', value: 1, },
+                        React.createElement('option', { value: 1 }, 1),
+                    )
+                : null ),
                 React.createElement('div', { className: 'plots-view__sidebar__items' },
                     LINKS.filter(link => this.state.files.indexOf(link.filename) > -1 ).map(link => (
-                        React.createElement('div', {
-                            className: 'plots-view__sidebar__item ' + (this.props.activeSlug === link.slug ? 'plots-view__sidebar--active' : ''),
-                            onClick: () => this.props.onLinkClick(link.slug),
-                            key: link.slug,
-                        }, link.title)
-                    )),
+                            React.createElement('div', {
+                                className: 'plots-view__sidebar__item ' + (this.props.activeSlug === link.slug ? 'plots-view__sidebar--active' : ''),
+                                onClick: () => this.props.onLinkClick(link.slug),
+                                key: link.slug,
+                            }, link.title)
+                        )),
                 ),
             ),
             this.getPlot(),

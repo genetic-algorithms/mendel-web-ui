@@ -34,6 +34,32 @@
     fill: #333;
 }
 
+.plots-view__sidebar__select {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    /* display: block;
+    padding: 12px 20px; */
+    margin-left: 40px;
+    border: 1px solid transparent;
+    width: 100px;
+    font-size: 14px;
+    font-family: "Roboto", sans-serif;
+    color: #333;
+    box-sizing: border-box;
+    padding: 8px 10px;
+    background-color: #FFF;
+    border-radius: 0;
+    background-image: url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0Ij4KICAgIDxwYXRoIGQ9Ik03IDEwbDUgNSA1LTV6IiBmaWxsPSIjMzMzIiAvPgo8L3N2Zz4K);
+    background-repeat: no-repeat;
+    background-position: right center;
+}
+
+.plots-view__sidebar__select:focus {
+    outline: none;
+    border-color: #CCC;
+}
+
 .plots-view__sidebar__item {
     padding: 12px 20px;
     border-right: 4px solid transparent;

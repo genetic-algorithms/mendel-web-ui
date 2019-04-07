@@ -1,6 +1,6 @@
 package main
 
-// Called for /api/job-plot-files/ route
+// Called for /api/job-plot-files/?jobId=<jobid> route
 
 import (
 	"io/ioutil"
