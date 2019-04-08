@@ -51,6 +51,10 @@ func apiJobPlotFilesHandler(w http.ResponseWriter, r *http.Request) {
 
 // Read the given dir and return the non-fully-qualified files and the tribe numbers
 func readJobDir(dir string) (files []string, tribes []int, err error) {
+	// If nothing found, return emtpy arrays instead of null
+	files = []string{}
+	tribes = []int{}
+
 	dirEntries, err := ioutil.ReadDir(dir)
 	if err != nil {
 		return nil, nil, err
