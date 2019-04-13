@@ -73,6 +73,7 @@ export function apiGet(
     url: '/api/job-plot-files/',
     params: {
         jobId: string;
+        tribe: string;
     },
     dispatch: Redux.Dispatch<ReduxAction>,
     signal?: AbortSignal,

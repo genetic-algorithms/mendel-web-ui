@@ -3147,18 +3147,25 @@
         __extends$n(Component, _super);
         function Component(props) {
             var _this = _super.call(this, props) || this;
+            _this.onSelectChanged = _this.onSelectChanged.bind(_this);
             _this.fetchController = new AbortController();
             _this.state = {
                 files: [],
                 tribes: [],
+                currentTribe: 0,
             };
             return _this;
         }
-        Component.prototype.fetchFiles = function (jobId) {
+        Component.prototype.onSelectChanged = function (e) {
+            var value = parseInt(e.currentTarget.value);
+            this.fetchFiles(this.props.jobId, value);
+            this.setState({ currentTribe: value, });
+        };
+        Component.prototype.fetchFiles = function (jobId, tribe) {
             var _this = this;
             this.fetchController.abort();
             this.fetchController = new AbortController();
-            apiGet('/api/job-plot-files/', { jobId: jobId }, this.props.dispatch, this.fetchController.signal).then(function (response) {
+            apiGet('/api/job-plot-files/', { jobId: jobId, tribe: tribe.toString() }, this.props.dispatch, this.fetchController.signal).then(function (response) {
                 _this.setState({
                     files: response.files,
                     tribes: response.tribes,
@@ -3189,7 +3196,7 @@
             }
         };
         Component.prototype.componentDidMount = function () {
-            this.fetchFiles(this.props.jobId);
+            this.fetchFiles(this.props.jobId, this.state.currentTribe);
         };
         Component.prototype.componentWillUnmount = function () {
             this.fetchController.abort();
@@ -3197,7 +3204,9 @@
         Component.prototype.render = function () {
             var _this = this;
             return React.createElement('div', { className: 'plots-view' }, React.createElement('div', { className: 'plots-view__sidebar' }, React.createElement('div', { className: 'plots-view__sidebar__back', onClick: this.props.onBackClick }, React.createElement(BackIcon, { width: 24, height: 24 })), (this.state.tribes.length > 0 ?
-                React.createElement('select', { className: 'plots-view__sidebar__select', value: 1, }, React.createElement('option', { value: 1 }, 1))
+                React.createElement('select', { className: 'plots-view__sidebar__select', value: this.state.currentTribe, onChange: this.onSelectChanged, }, React.createElement('option', { value: 0 }, 'Summary'), this.state.tribes.map(function (tribe) {
+                    return React.createElement('option', { value: tribe }, tribe);
+                }))
                 : null), React.createElement('div', { className: 'plots-view__sidebar__items' }, LINKS.filter(function (link) { return _this.state.files.indexOf(link.filename) > -1; }).map(function (link) { return (React.createElement('div', {
                 className: 'plots-view__sidebar__item ' + (_this.props.activeSlug === link.slug ? 'plots-view__sidebar--active' : ''),
                 onClick: function () { return _this.props.onLinkClick(link.slug); },

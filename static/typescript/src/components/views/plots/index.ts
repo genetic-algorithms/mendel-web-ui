@@ -12,7 +12,7 @@ import { BeneficialMutations } from './beneficial_mutations';
 import { SnpFrequencies } from './snp_frequencies';
 import { MinorAlleleFrequencies } from './minor_allele_frequencies';
 
-/* Creates the plot links in the navigation panel of the plot page. With the introduction
+/* Creates the plot links in the sidebar navigation panel and the current plot. With the introduction
   of tribes, this panel also displays a drop-down menu, when a job has tribes, to enable
   switching between the tribes.
  */
@@ -58,7 +58,7 @@ type OwnProps = {
 
 type Props = OwnProps & {
     // These are the props added by mapDispatchToProps()
-    onLinkClick: (slug: string) => void;
+    onLinkClick: (slug: string) => void;    // changes to a different plot within this page
     onBackClick: () => void;
     dispatch: Redux.Dispatch<ReduxAction>;
 };
@@ -66,7 +66,7 @@ type Props = OwnProps & {
 type State = {
     files: string[],
     tribes: number[],
-    //currentTribe: number,
+    currentTribe: number,
 };
 
 // Called by redux when the component re-renders. Returns additional properties that get merged into
@@ -89,33 +89,33 @@ class Component extends React.Component<Props, State> {
     constructor(props: Props) {
         super(props);
 
-        //this.onSelectChanged = this.onSelectChanged.bind(this);
+        this.onSelectChanged = this.onSelectChanged.bind(this);
         this.fetchController = new AbortController();
 
         this.state = {
             files: [],
             tribes: [],
-            //currentTribe: 0,  // initialize to 0 to indicate no tribe has been selected yet
+            currentTribe: 0,  // initialize to 0 to indicate no tribe has been selected yet
         };
     }
 
-    /* When the tribe drop-down menu is changed, get the plot files list for this job and tribe
+    // When the tribe drop-down menu is changed, get the plot files list for this job and tribe
     onSelectChanged(e: React.ChangeEvent<HTMLSelectElement>) {
-        this.fetchFiles(this.props.jobId);   //todo: call this after the state change
+        const value = parseInt(e.currentTarget.value);
 
-        this.setState({
-            currentTribe: parseInt(e.currentTarget.value),
-        });
-    } */
+        this.fetchFiles(this.props.jobId, value);
+
+        this.setState({ currentTribe: value, });
+    }
 
     // Get which plot files and tribe dirs are available for this job
-    fetchFiles(jobId: string) {  //todo: add tribe arg
+    fetchFiles(jobId: string, tribe: number) {
         this.fetchController.abort();
         this.fetchController = new AbortController();
 
         apiGet(
             '/api/job-plot-files/',
-            { jobId: jobId },
+            { jobId: jobId, tribe: tribe.toString() },
             this.props.dispatch,
             this.fetchController.signal,
         ).then(response => {
@@ -126,6 +126,7 @@ class Component extends React.Component<Props, State> {
         });
     }
 
+    // Returns the currently active plot component for this page
     getPlot() {
         if (this.props.activeSlug === 'average-mutations') {
             return React.createElement(AverageMutations, { jobId: this.props.jobId });
@@ -145,14 +146,16 @@ class Component extends React.Component<Props, State> {
     }
 
     componentDidMount() {
-        this.fetchFiles(this.props.jobId);
+        this.fetchFiles(this.props.jobId, this.state.currentTribe);
     }
 
     componentWillUnmount() {
         this.fetchController.abort();
     }
 
-    /* The filter below filters the list to only the plots that exist for this job, then we map them to link elements */
+    /* The filter below filters the list to only the plots that exist for this job, then we map them to link elements.
+        The select widget changes what tribe we fetch plot files for and display.
+    */
     render() {
         return React.createElement('div', { className: 'plots-view' },
             React.createElement('div', { className: 'plots-view__sidebar' },
@@ -160,8 +163,11 @@ class Component extends React.Component<Props, State> {
                     React.createElement(BackIcon, { width: 24, height: 24 }),
                 ),
                 (this.state.tribes.length>0 ?
-                    React.createElement('select', { className: 'plots-view__sidebar__select', value: 1, },
-                        React.createElement('option', { value: 1 }, 1),
+                    React.createElement('select', { className: 'plots-view__sidebar__select', value: this.state.currentTribe, onChange: this.onSelectChanged, },
+                        React.createElement('option', { value: 0 }, 'Summary'),
+                        this.state.tribes.map(tribe => 
+                            React.createElement('option', { value: tribe }, tribe),
+                        )
                     )
                 : null ),
                 React.createElement('div', { className: 'plots-view__sidebar__items' },
