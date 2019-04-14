@@ -8,6 +8,7 @@ import { ReduxAction } from '../../../redux_action_types';
 
 type Props = {
     jobId: string;
+    tribe: number;
     dispatch: Redux.Dispatch<ReduxAction>;
 };
 
@@ -31,7 +32,7 @@ class Component extends React.Component<Props> {
     componentDidMount() {
         this.fetchController = new AbortController();
 
-        apiGet('/api/plot-average-mutations/', { jobId: this.props.jobId }, this.props.dispatch).then(response => {
+        apiGet('/api/plot-average-mutations/', { jobId: this.props.jobId, tribe: this.props.tribe.toString() }, this.props.dispatch).then(response => {
             const data: Plotly.Data[] = [
                 {
                     x: response.generations,

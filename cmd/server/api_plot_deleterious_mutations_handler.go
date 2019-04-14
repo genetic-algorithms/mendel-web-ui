@@ -1,15 +1,19 @@
 package main
 
+// Called for /api/plot-deleterious-mutations/ route
+// To test, browse: http://0.0.0.0:8581/api/plot-deleterious-mutations/?jobId=1281c1aa&tribe=1
+
 import (
 	"encoding/json"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"path/filepath"
 	"strings"
 )
 
-// Called for /api/plot-deleterious-mutations/ route
 func apiPlotDeleteriousMutationsHandler(w http.ResponseWriter, r *http.Request) {
+	log.Printf("In /api/plot-deleterious-mutations/ %s ...", r.URL.Query())
 	type GenerationData struct {
 		Generation         int       `json:"generation"`
 		BinMidpointFitness []float64 `json:"binmidpointfitness"`
@@ -24,13 +28,21 @@ func apiPlotDeleteriousMutationsHandler(w http.ResponseWriter, r *http.Request) 
 	}
 
 	jobId := r.URL.Query().Get("jobId")
+	tribeNum := r.URL.Query().Get("tribe") // do not convert to int, because we need it as a string anyway
+	var dir string
+	if tribeNum == "" || tribeNum == "0" {
+		dir = jobId // we get the plot files from the main dir
+	} else {
+		dir = jobId + "/tribe-" + tribeNum
+	}
+	dirPath := filepath.Join(globalJobsDir, dir, "allele-distribution-del")
 
 	globalRunningJobsLock.RLock()
-	fileInfos, err := ioutil.ReadDir(filepath.Join(globalJobsDir, jobId, "allele-distribution-del"))
+	fileInfos, err := ioutil.ReadDir(dirPath)
 
 	if err != nil {
 		globalRunningJobsLock.RUnlock()
-		http.Error(w, "500 Internal Server Error (could not list allele-distribution-del directory)", http.StatusInternalServerError)
+		http.Error(w, "500 Internal Server Error: could not list "+dirPath, http.StatusInternalServerError)
 		return
 	}
 
@@ -39,10 +51,10 @@ func apiPlotDeleteriousMutationsHandler(w http.ResponseWriter, r *http.Request) 
 		fileName := fileInfo.Name()
 
 		if strings.HasSuffix(fileName, ".json") {
-			bytes, err := ioutil.ReadFile(filepath.Join(globalJobsDir, jobId, "allele-distribution-del", fileName))
+			bytes, err := ioutil.ReadFile(filepath.Join(dirPath, fileName))
 			if err != nil {
 				globalRunningJobsLock.RUnlock()
-				http.Error(w, "500 Internal Server Error (could not read file: "+fileName+")", http.StatusInternalServerError)
+				http.Error(w, "500 Internal Server Error: could not read file: "+filepath.Join(dirPath, fileName), http.StatusInternalServerError)
 				return
 			}
 
@@ -50,7 +62,7 @@ func apiPlotDeleteriousMutationsHandler(w http.ResponseWriter, r *http.Request) 
 			err = json.Unmarshal(bytes, &generationData)
 			if err != nil {
 				globalRunningJobsLock.RUnlock()
-				http.Error(w, "500 Internal Server Error (could not parse json file: "+fileName+")", http.StatusInternalServerError)
+				http.Error(w, "500 Internal Server Error: could not parse json file: "+filepath.Join(dirPath, fileName), http.StatusInternalServerError)
 				return
 			}
 

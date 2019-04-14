@@ -1,5 +1,8 @@
 package main
 
+// Called for /api/plot-fitness-history/ route
+// To test, browse: http://0.0.0.0:8581/api/plot-fitness-history/?jobId=1281c1aa&tribe=1
+
 import (
 	"io/ioutil"
 	"log"
@@ -8,8 +11,8 @@ import (
 	"strconv"
 )
 
-// Called for /api/plot-fitness-history/ route
 func apiPlotFitnessHistoryHandler(w http.ResponseWriter, r *http.Request) {
+	log.Printf("In /api/plot-fitness-history/ %s ...", r.URL.Query())
 	user := getAuthenticatedUser(r)
 	if user.Id == "" {
 		http.Error(w, "401 Unauthorized", http.StatusUnauthorized)
@@ -17,13 +20,21 @@ func apiPlotFitnessHistoryHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	jobId := r.URL.Query().Get("jobId")
+	tribeNum := r.URL.Query().Get("tribe") // do not convert to int, because we need it as a string anyway
+	var dir string
+	if tribeNum == "" || tribeNum == "0" {
+		dir = jobId // we get the plot files from the main dir
+	} else {
+		dir = jobId + "/tribe-" + tribeNum
+	}
+	filePath := filepath.Join(globalJobsDir, dir, "mendel.fit")
 
 	globalRunningJobsLock.RLock()
-	bytes, err := ioutil.ReadFile(filepath.Join(globalJobsDir, jobId, "mendel.fit"))
+	bytes, err := ioutil.ReadFile(filePath)
 	globalRunningJobsLock.RUnlock()
 
 	if err != nil {
-		http.Error(w, "500 Internal Server Error (could not open mendel.hst)", http.StatusInternalServerError)
+		http.Error(w, "500 Internal Server Error: could not open "+filePath, http.StatusInternalServerError)
 		return
 	}
 

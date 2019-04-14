@@ -129,17 +129,17 @@ class Component extends React.Component<Props, State> {
     // Returns the currently active plot component for this page
     getPlot() {
         if (this.props.activeSlug === 'average-mutations') {
-            return React.createElement(AverageMutations, { jobId: this.props.jobId });
+            return React.createElement(AverageMutations, { jobId: this.props.jobId, tribe: this.state.currentTribe });
         } else if (this.props.activeSlug === 'fitness-history') {
-            return React.createElement(FitnessHistory, { jobId: this.props.jobId });
+            return React.createElement(FitnessHistory, { jobId: this.props.jobId, tribe: this.state.currentTribe });
         } else if (this.props.activeSlug === 'deleterious-mutations') {
-            return React.createElement(DeleteriousMutations, { jobId: this.props.jobId });
+            return React.createElement(DeleteriousMutations, { jobId: this.props.jobId, tribe: this.state.currentTribe });
         } else if (this.props.activeSlug === 'beneficial-mutations') {
-            return React.createElement(BeneficialMutations, { jobId: this.props.jobId });
+            return React.createElement(BeneficialMutations, { jobId: this.props.jobId, tribe: this.state.currentTribe });
         } else if (this.props.activeSlug === 'snp-frequencies') {
-            return React.createElement(SnpFrequencies, { jobId: this.props.jobId });
+            return React.createElement(SnpFrequencies, { jobId: this.props.jobId, tribe: this.state.currentTribe });
         } else if (this.props.activeSlug === 'minor-allele-frequencies') {
-            return React.createElement(MinorAlleleFrequencies, { jobId: this.props.jobId });
+            return React.createElement(MinorAlleleFrequencies, { jobId: this.props.jobId, tribe: this.state.currentTribe });
         } else {
             return null;
         }

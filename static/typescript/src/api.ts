@@ -86,6 +86,7 @@ export function apiGet(
     url: '/api/plot-average-mutations/',
     params: {
         jobId: string;
+        tribe: string;
     },
     dispatch: Redux.Dispatch<ReduxAction>,
     signal?: AbortSignal,
@@ -100,6 +101,7 @@ export function apiGet(
     url: '/api/plot-beneficial-mutations/',
     params: {
         jobId: string;
+        tribe: string;
     },
     dispatch: Redux.Dispatch<ReduxAction>,
     signal?: AbortSignal,
@@ -114,6 +116,7 @@ export function apiGet(
     url: '/api/plot-deleterious-mutations/',
     params: {
         jobId: string;
+        tribe: string;
     },
     dispatch: Redux.Dispatch<ReduxAction>,
     signal?: AbortSignal,
@@ -128,6 +131,7 @@ export function apiGet(
     url: '/api/plot-fitness-history/',
     params: {
         jobId: string;
+        tribe: string;
     },
     dispatch: Redux.Dispatch<ReduxAction>,
     signal?: AbortSignal,
@@ -141,6 +145,7 @@ export function apiGet(
     url: '/api/plot-minor-allele-frequencies/',
     params: {
         jobId: string;
+        tribe: string;
     },
     dispatch: Redux.Dispatch<ReduxAction>,
     signal?: AbortSignal,
@@ -158,6 +163,7 @@ export function apiGet(
     url: '/api/plot-snp-frequencies/',
     params: {
         jobId: string;
+        tribe: string;
     },
     dispatch: Redux.Dispatch<ReduxAction>,
     signal?: AbortSignal,

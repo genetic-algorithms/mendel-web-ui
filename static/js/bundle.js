@@ -2365,7 +2365,7 @@
         Component.prototype.componentDidMount = function () {
             var _this = this;
             this.fetchController = new AbortController();
-            apiGet('/api/plot-average-mutations/', { jobId: this.props.jobId }, this.props.dispatch).then(function (response) {
+            apiGet('/api/plot-average-mutations/', { jobId: this.props.jobId, tribe: this.props.tribe.toString() }, this.props.dispatch).then(function (response) {
                 var data = [
                     {
                         x: response.generations,
@@ -2448,7 +2448,7 @@
         Component.prototype.componentDidMount = function () {
             var _this = this;
             this.fetchController = new AbortController();
-            apiGet('/api/plot-fitness-history/', { jobId: this.props.jobId }, this.props.dispatch).then(function (response) {
+            apiGet('/api/plot-fitness-history/', { jobId: this.props.jobId, tribe: this.props.tribe.toString() }, this.props.dispatch).then(function (response) {
                 var data = [
                     {
                         x: response.generations,
@@ -2544,7 +2544,7 @@
         Component.prototype.componentDidMount = function () {
             var _this = this;
             this.fetchController = new AbortController();
-            apiGet('/api/plot-beneficial-mutations/', { jobId: this.props.jobId }, this.props.dispatch).then(function (response) {
+            apiGet('/api/plot-beneficial-mutations/', { jobId: this.props.jobId, tribe: this.props.tribe.toString() }, this.props.dispatch).then(function (response) {
                 var maxY = 0;
                 for (var _i = 0, response_1 = response; _i < response_1.length; _i++) {
                     var generation = response_1[_i];
@@ -2671,7 +2671,7 @@
         Component.prototype.componentDidMount = function () {
             var _this = this;
             this.fetchController = new AbortController();
-            apiGet('/api/plot-beneficial-mutations/', { jobId: this.props.jobId }, this.props.dispatch).then(function (response) {
+            apiGet('/api/plot-beneficial-mutations/', { jobId: this.props.jobId, tribe: this.props.tribe.toString() }, this.props.dispatch).then(function (response) {
                 var maxY = 0;
                 for (var _i = 0, response_1 = response; _i < response_1.length; _i++) {
                     var generation = response_1[_i];
@@ -2803,7 +2803,7 @@
         Component.prototype.componentDidMount = function () {
             var _this = this;
             this.fetchController = new AbortController();
-            apiGet('/api/plot-snp-frequencies/', { jobId: this.props.jobId }, this.props.dispatch).then(function (response) {
+            apiGet('/api/plot-snp-frequencies/', { jobId: this.props.jobId, tribe: this.props.tribe.toString() }, this.props.dispatch).then(function (response) {
                 var maxY = 0;
                 for (var _i = 0, response_1 = response; _i < response_1.length; _i++) {
                     var generation = response_1[_i];
@@ -2987,7 +2987,7 @@
         Component.prototype.componentDidMount = function () {
             var _this = this;
             this.fetchController = new AbortController();
-            apiGet('/api/plot-minor-allele-frequencies/', { jobId: this.props.jobId }, this.props.dispatch).then(function (response) {
+            apiGet('/api/plot-minor-allele-frequencies/', { jobId: this.props.jobId, tribe: this.props.tribe.toString() }, this.props.dispatch).then(function (response) {
                 var generationData = response[response.length - 1];
                 var data = [
                     {
@@ -3174,22 +3174,22 @@
         };
         Component.prototype.getPlot = function () {
             if (this.props.activeSlug === 'average-mutations') {
-                return React.createElement(AverageMutations, { jobId: this.props.jobId });
+                return React.createElement(AverageMutations, { jobId: this.props.jobId, tribe: this.state.currentTribe });
             }
             else if (this.props.activeSlug === 'fitness-history') {
-                return React.createElement(FitnessHistory, { jobId: this.props.jobId });
+                return React.createElement(FitnessHistory, { jobId: this.props.jobId, tribe: this.state.currentTribe });
             }
             else if (this.props.activeSlug === 'deleterious-mutations') {
-                return React.createElement(DeleteriousMutations, { jobId: this.props.jobId });
+                return React.createElement(DeleteriousMutations, { jobId: this.props.jobId, tribe: this.state.currentTribe });
             }
             else if (this.props.activeSlug === 'beneficial-mutations') {
-                return React.createElement(BeneficialMutations, { jobId: this.props.jobId });
+                return React.createElement(BeneficialMutations, { jobId: this.props.jobId, tribe: this.state.currentTribe });
             }
             else if (this.props.activeSlug === 'snp-frequencies') {
-                return React.createElement(SnpFrequencies, { jobId: this.props.jobId });
+                return React.createElement(SnpFrequencies, { jobId: this.props.jobId, tribe: this.state.currentTribe });
             }
             else if (this.props.activeSlug === 'minor-allele-frequencies') {
-                return React.createElement(MinorAlleleFrequencies, { jobId: this.props.jobId });
+                return React.createElement(MinorAlleleFrequencies, { jobId: this.props.jobId, tribe: this.state.currentTribe });
             }
             else {
                 return null;

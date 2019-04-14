@@ -1,15 +1,19 @@
 package main
 
+// Called for /api/plot-minor-allele-frequencies/ route
+// To test, browse: http://0.0.0.0:8581/api/plot-minor-allele-frequencies/?jobId=1281c1aa&tribe=1
+
 import (
 	"encoding/json"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"path/filepath"
 	"strings"
 )
 
-// Called for /api/plot-minor-allele-frequencies/ route
 func apiPlotMinorAlleleFrequenciesHandler(w http.ResponseWriter, r *http.Request) {
+	log.Printf("In /api/plot-minor-allele-frequencies/ %s ...", r.URL.Query())
 	type GenerationData struct {
 		Generation        int       `json:"generation"`
 		Bins              []int     `json:"bins"`
@@ -27,13 +31,21 @@ func apiPlotMinorAlleleFrequenciesHandler(w http.ResponseWriter, r *http.Request
 	}
 
 	jobId := r.URL.Query().Get("jobId")
+	tribeNum := r.URL.Query().Get("tribe") // do not convert to int, because we need it as a string anyway
+	var dir string
+	if tribeNum == "" || tribeNum == "0" {
+		dir = jobId // we get the plot files from the main dir
+	} else {
+		dir = jobId + "/tribe-" + tribeNum
+	}
+	dirPath := filepath.Join(globalJobsDir, dir, "normalized-allele-bins")
 
 	globalRunningJobsLock.RLock()
-	fileInfos, err := ioutil.ReadDir(filepath.Join(globalJobsDir, jobId, "normalized-allele-bins"))
+	fileInfos, err := ioutil.ReadDir(dirPath)
 
 	if err != nil {
 		globalRunningJobsLock.RUnlock()
-		http.Error(w, "500 Internal Server Error (could not list normalized-allele-bins directory)", http.StatusInternalServerError)
+		http.Error(w, "500 Internal Server Error: could not list "+dirPath, http.StatusInternalServerError)
 		return
 	}
 
@@ -42,10 +54,10 @@ func apiPlotMinorAlleleFrequenciesHandler(w http.ResponseWriter, r *http.Request
 		fileName := fileInfo.Name()
 
 		if strings.HasSuffix(fileName, ".json") {
-			bytes, err := ioutil.ReadFile(filepath.Join(globalJobsDir, jobId, "normalized-allele-bins", fileName))
+			bytes, err := ioutil.ReadFile(filepath.Join(dirPath, fileName))
 			if err != nil {
 				globalRunningJobsLock.RUnlock()
-				http.Error(w, "500 Internal Server Error (could not read file: "+fileName+")", http.StatusInternalServerError)
+				http.Error(w, "500 Internal Server Error: could not read file: "+filepath.Join(dirPath, fileName), http.StatusInternalServerError)
 				return
 			}
 
@@ -53,7 +65,7 @@ func apiPlotMinorAlleleFrequenciesHandler(w http.ResponseWriter, r *http.Request
 			err = json.Unmarshal(bytes, &generationData)
 			if err != nil {
 				globalRunningJobsLock.RUnlock()
-				http.Error(w, "500 Internal Server Error (could not parse json file: "+fileName+")", http.StatusInternalServerError)
+				http.Error(w, "500 Internal Server Error: could not parse json file: "+filepath.Join(dirPath, fileName), http.StatusInternalServerError)
 				return
 			}
 

@@ -1,6 +1,7 @@
 package main
 
 // Called for /api/plot-average-mutations/ route
+// To test, browse: http://0.0.0.0:8581/api/plot-average-mutations/?jobId=1281c1aa&tribe=1
 
 import (
 	"io/ioutil"
@@ -11,6 +12,7 @@ import (
 )
 
 func apiPlotAverageMutationsHandler(w http.ResponseWriter, r *http.Request) {
+	log.Printf("In /api/plot-average-mutations/ %s ...", r.URL.Query())
 	user := getAuthenticatedUser(r)
 	if user.Id == "" {
 		http.Error(w, "401 Unauthorized", http.StatusUnauthorized)
@@ -18,13 +20,21 @@ func apiPlotAverageMutationsHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	jobId := r.URL.Query().Get("jobId")
+	tribeNum := r.URL.Query().Get("tribe") // do not convert to int, because we need it as a string anyway
+	var dir string
+	if tribeNum == "" || tribeNum == "0" {
+		dir = jobId // we get the plot files from the main dir
+	} else {
+		dir = jobId + "/tribe-" + tribeNum
+	}
+	filePath := filepath.Join(globalJobsDir, dir, "mendel.hst")
 
 	globalRunningJobsLock.RLock()
-	bytes, err := ioutil.ReadFile(filepath.Join(globalJobsDir, jobId, "mendel.hst"))
+	bytes, err := ioutil.ReadFile(filePath)
 	globalRunningJobsLock.RUnlock()
 
 	if err != nil {
-		http.Error(w, "500 Internal Server Error (could not open mendel.hst)", http.StatusInternalServerError)
+		http.Error(w, "500 Internal Server Error: could not open "+filePath, http.StatusInternalServerError)
 		return
 	}
 

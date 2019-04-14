@@ -18,6 +18,7 @@ type ApiData = {
 
 type Props = {
     jobId: string;
+    tribe: number;
     dispatch: Redux.Dispatch<ReduxAction>;
 };
 
@@ -72,7 +73,7 @@ class Component extends React.Component<Props, State> {
     componentDidMount() {
         this.fetchController = new AbortController();
 
-        apiGet('/api/plot-minor-allele-frequencies/', { jobId: this.props.jobId }, this.props.dispatch).then(response => {
+        apiGet('/api/plot-minor-allele-frequencies/', { jobId: this.props.jobId, tribe: this.props.tribe.toString() }, this.props.dispatch).then(response => {
             const generationData = response[response.length - 1];
 
             const data: Plotly.Data[] = [
