@@ -2256,7 +2256,7 @@
             return _this;
         }
         Component.prototype.onPlotsClick = function () {
-            setRoute(this.props.dispatch, '/plots/' + this.props.jobId + '/average-mutations/');
+            setRoute(this.props.dispatch, '/plots/' + this.props.jobId + '/0/average-mutations/');
         };
         Component.prototype.onConfigClick = function () {
             setRoute(this.props.dispatch, '/job-config/' + this.props.jobId + '/');
@@ -2365,7 +2365,7 @@
         Component.prototype.componentDidMount = function () {
             var _this = this;
             this.fetchController = new AbortController();
-            apiGet('/api/plot-average-mutations/', { jobId: this.props.jobId, tribe: this.props.tribe.toString() }, this.props.dispatch).then(function (response) {
+            apiGet('/api/plot-average-mutations/', { jobId: this.props.jobId, tribe: this.props.tribe }, this.props.dispatch).then(function (response) {
                 var data = [
                     {
                         x: response.generations,
@@ -2448,7 +2448,7 @@
         Component.prototype.componentDidMount = function () {
             var _this = this;
             this.fetchController = new AbortController();
-            apiGet('/api/plot-fitness-history/', { jobId: this.props.jobId, tribe: this.props.tribe.toString() }, this.props.dispatch).then(function (response) {
+            apiGet('/api/plot-fitness-history/', { jobId: this.props.jobId, tribe: this.props.tribe }, this.props.dispatch).then(function (response) {
                 var data = [
                     {
                         x: response.generations,
@@ -2544,7 +2544,7 @@
         Component.prototype.componentDidMount = function () {
             var _this = this;
             this.fetchController = new AbortController();
-            apiGet('/api/plot-beneficial-mutations/', { jobId: this.props.jobId, tribe: this.props.tribe.toString() }, this.props.dispatch).then(function (response) {
+            apiGet('/api/plot-beneficial-mutations/', { jobId: this.props.jobId, tribe: this.props.tribe }, this.props.dispatch).then(function (response) {
                 var maxY = 0;
                 for (var _i = 0, response_1 = response; _i < response_1.length; _i++) {
                     var generation = response_1[_i];
@@ -2671,7 +2671,7 @@
         Component.prototype.componentDidMount = function () {
             var _this = this;
             this.fetchController = new AbortController();
-            apiGet('/api/plot-beneficial-mutations/', { jobId: this.props.jobId, tribe: this.props.tribe.toString() }, this.props.dispatch).then(function (response) {
+            apiGet('/api/plot-beneficial-mutations/', { jobId: this.props.jobId, tribe: this.props.tribe }, this.props.dispatch).then(function (response) {
                 var maxY = 0;
                 for (var _i = 0, response_1 = response; _i < response_1.length; _i++) {
                     var generation = response_1[_i];
@@ -2803,7 +2803,7 @@
         Component.prototype.componentDidMount = function () {
             var _this = this;
             this.fetchController = new AbortController();
-            apiGet('/api/plot-snp-frequencies/', { jobId: this.props.jobId, tribe: this.props.tribe.toString() }, this.props.dispatch).then(function (response) {
+            apiGet('/api/plot-snp-frequencies/', { jobId: this.props.jobId, tribe: this.props.tribe }, this.props.dispatch).then(function (response) {
                 var maxY = 0;
                 for (var _i = 0, response_1 = response; _i < response_1.length; _i++) {
                     var generation = response_1[_i];
@@ -2987,7 +2987,7 @@
         Component.prototype.componentDidMount = function () {
             var _this = this;
             this.fetchController = new AbortController();
-            apiGet('/api/plot-minor-allele-frequencies/', { jobId: this.props.jobId, tribe: this.props.tribe.toString() }, this.props.dispatch).then(function (response) {
+            apiGet('/api/plot-minor-allele-frequencies/', { jobId: this.props.jobId, tribe: this.props.tribe }, this.props.dispatch).then(function (response) {
                 var generationData = response[response.length - 1];
                 var data = [
                     {
@@ -3136,7 +3136,7 @@
         return {
             dispatch: dispatch,
             onLinkClick: function (slug) {
-                setRoute(dispatch, '/plots/' + ownProps.jobId + '/' + slug + '/');
+                setRoute(dispatch, '/plots/' + ownProps.jobId + '/' + ownProps.tribe + '/' + slug + '/');
             },
             onBackClick: function () {
                 setRoute(dispatch, '/job-detail/' + ownProps.jobId + '/');
@@ -3152,20 +3152,19 @@
             _this.state = {
                 files: [],
                 tribes: [],
-                currentTribe: 0,
             };
             return _this;
         }
         Component.prototype.onSelectChanged = function (e) {
-            var value = parseInt(e.currentTarget.value);
-            this.fetchFiles(this.props.jobId, value);
-            this.setState({ currentTribe: value, });
+            var tribe = e.currentTarget.value;
+            this.fetchFiles(this.props.jobId, tribe);
+            setRoute(this.props.dispatch, '/plots/' + this.props.jobId + '/' + tribe + '/' + this.props.activeSlug + '/');
         };
         Component.prototype.fetchFiles = function (jobId, tribe) {
             var _this = this;
             this.fetchController.abort();
             this.fetchController = new AbortController();
-            apiGet('/api/job-plot-files/', { jobId: jobId, tribe: tribe.toString() }, this.props.dispatch, this.fetchController.signal).then(function (response) {
+            apiGet('/api/job-plot-files/', { jobId: jobId, tribe: tribe }, this.props.dispatch, this.fetchController.signal).then(function (response) {
                 _this.setState({
                     files: response.files,
                     tribes: response.tribes,
@@ -3174,29 +3173,29 @@
         };
         Component.prototype.getPlot = function () {
             if (this.props.activeSlug === 'average-mutations') {
-                return React.createElement(AverageMutations, { jobId: this.props.jobId, tribe: this.state.currentTribe });
+                return React.createElement(AverageMutations, { jobId: this.props.jobId, tribe: this.props.tribe });
             }
             else if (this.props.activeSlug === 'fitness-history') {
-                return React.createElement(FitnessHistory, { jobId: this.props.jobId, tribe: this.state.currentTribe });
+                return React.createElement(FitnessHistory, { jobId: this.props.jobId, tribe: this.props.tribe });
             }
             else if (this.props.activeSlug === 'deleterious-mutations') {
-                return React.createElement(DeleteriousMutations, { jobId: this.props.jobId, tribe: this.state.currentTribe });
+                return React.createElement(DeleteriousMutations, { jobId: this.props.jobId, tribe: this.props.tribe });
             }
             else if (this.props.activeSlug === 'beneficial-mutations') {
-                return React.createElement(BeneficialMutations, { jobId: this.props.jobId, tribe: this.state.currentTribe });
+                return React.createElement(BeneficialMutations, { jobId: this.props.jobId, tribe: this.props.tribe });
             }
             else if (this.props.activeSlug === 'snp-frequencies') {
-                return React.createElement(SnpFrequencies, { jobId: this.props.jobId, tribe: this.state.currentTribe });
+                return React.createElement(SnpFrequencies, { jobId: this.props.jobId, tribe: this.props.tribe });
             }
             else if (this.props.activeSlug === 'minor-allele-frequencies') {
-                return React.createElement(MinorAlleleFrequencies, { jobId: this.props.jobId, tribe: this.state.currentTribe });
+                return React.createElement(MinorAlleleFrequencies, { jobId: this.props.jobId, tribe: this.props.tribe });
             }
             else {
                 return null;
             }
         };
         Component.prototype.componentDidMount = function () {
-            this.fetchFiles(this.props.jobId, this.state.currentTribe);
+            this.fetchFiles(this.props.jobId, this.props.tribe);
         };
         Component.prototype.componentWillUnmount = function () {
             this.fetchController.abort();
@@ -3204,7 +3203,7 @@
         Component.prototype.render = function () {
             var _this = this;
             return React.createElement('div', { className: 'plots-view' }, React.createElement('div', { className: 'plots-view__sidebar' }, React.createElement('div', { className: 'plots-view__sidebar__back', onClick: this.props.onBackClick }, React.createElement(BackIcon, { width: 24, height: 24 })), (this.state.tribes.length > 0 ?
-                React.createElement('select', { className: 'plots-view__sidebar__select', value: this.state.currentTribe, onChange: this.onSelectChanged, }, React.createElement('option', { value: 0 }, 'Summary'), this.state.tribes.map(function (tribe) {
+                React.createElement('select', { className: 'plots-view__sidebar__select', value: this.props.tribe, onChange: this.onSelectChanged, }, React.createElement('option', { value: 0 }, 'Summary'), this.state.tribes.map(function (tribe) {
                     return React.createElement('option', { value: tribe }, tribe);
                 }))
                 : null), React.createElement('div', { className: 'plots-view__sidebar__items' }, LINKS.filter(function (link) { return _this.state.files.indexOf(link.filename) > -1; }).map(function (link) { return (React.createElement('div', {
@@ -3226,7 +3225,7 @@
         var jobDetailMatch = route.match(new RegExp('^/job-detail/(\\w+)/$'));
         var jobConfigMatch = route.match(new RegExp('^/job-config/(\\w+)/$'));
         var editUserMatch = route.match(new RegExp('^/edit-user/(\\w+)/$'));
-        var plotMatch = route.match(new RegExp('^/plots/(\\w+)/([\\w-]+)/$'));
+        var plotMatch = route.match(new RegExp('^/plots/(\\w+)/(\\w+)/([\\w-]+)/$'));
         if (route === '/') {
             return React.createElement(NewJob, {
                 jobId: null,
@@ -3266,7 +3265,8 @@
         }
         else if (plotMatch) {
             var jobId = plotMatch[1];
-            return React.createElement(Plots, { jobId: jobId, activeSlug: plotMatch[2] });
+            var tribe = plotMatch[2];
+            return React.createElement(Plots, { jobId: jobId, tribe: tribe, activeSlug: plotMatch[3] });
         }
         return null;
     }

@@ -30,7 +30,7 @@ function getView(route: string) {
     const jobDetailMatch = route.match(new RegExp('^/job-detail/(\\w+)/$'));
     const jobConfigMatch = route.match(new RegExp('^/job-config/(\\w+)/$'));
     const editUserMatch = route.match(new RegExp('^/edit-user/(\\w+)/$'));
-    const plotMatch = route.match(new RegExp('^/plots/(\\w+)/([\\w-]+)/$'));
+    const plotMatch = route.match(new RegExp('^/plots/(\\w+)/(\\w+)/([\\w-]+)/$'));
 
     if (route === '/') {
         return React.createElement(NewJob, {
@@ -62,7 +62,8 @@ function getView(route: string) {
         });
     } else if (plotMatch) {
         const jobId = plotMatch[1];
-        return React.createElement(Plots, { jobId: jobId, activeSlug: plotMatch[2] });
+        const tribe = plotMatch[2];
+        return React.createElement(Plots, { jobId: jobId, tribe: tribe, activeSlug: plotMatch[3] });
     }
 
     return null;

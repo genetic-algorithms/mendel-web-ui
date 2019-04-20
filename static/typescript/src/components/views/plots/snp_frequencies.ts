@@ -18,7 +18,7 @@ type ApiData = {
 
 type Props = {
     jobId: string;
-    tribe: number;
+    tribe: string;
     dispatch: Redux.Dispatch<ReduxAction>;
 };
 
@@ -73,7 +73,7 @@ class Component extends React.Component<Props, State> {
     componentDidMount() {
         this.fetchController = new AbortController();
 
-        apiGet('/api/plot-snp-frequencies/', { jobId: this.props.jobId, tribe: this.props.tribe.toString() }, this.props.dispatch).then(response => {
+        apiGet('/api/plot-snp-frequencies/', { jobId: this.props.jobId, tribe: this.props.tribe }, this.props.dispatch).then(response => {
             let maxY = 0;
             for (let generation of response) {
                 for (let n of generation.deleterious) {

@@ -42,7 +42,7 @@ class Component extends React.Component<Props, State> {
     }
 
     onPlotsClick() {
-        setRoute(this.props.dispatch, '/plots/' + this.props.jobId + '/average-mutations/');
+        setRoute(this.props.dispatch, '/plots/' + this.props.jobId + '/0/average-mutations/');
     }
 
     onConfigClick() {
