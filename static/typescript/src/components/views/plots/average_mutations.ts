@@ -29,10 +29,10 @@ class Component extends React.Component<Props> {
         Plotly.Plots.resize(assertNotNull(this.plotElement.current));
     }
 
-    componentDidMount() {
+    fetchPlot(jobId: string, tribe: string) {
         this.fetchController = new AbortController();
 
-        apiGet('/api/plot-average-mutations/', { jobId: this.props.jobId, tribe: this.props.tribe }, this.props.dispatch).then(response => {
+        apiGet('/api/plot-average-mutations/', { jobId: jobId, tribe: tribe }, this.props.dispatch).then(response => {
             const data: Plotly.Data[] = [
                 {
                     x: response.generations,
@@ -75,8 +75,17 @@ class Component extends React.Component<Props> {
 
             Plotly.newPlot(assertNotNull(this.plotElement.current), data, layout);
         });
+    }
 
+    componentDidMount() {
+        this.fetchPlot(this.props.jobId, this.props.tribe);
         window.addEventListener('resize', this.resizePlot);
+    }
+
+    componentDidUpdate(prevProps: Props) {
+        if (prevProps.tribe !== this.props.tribe) {
+            this.fetchPlot(this.props.jobId, this.props.tribe);
+        }
     }
 
     componentWillUnmount() {

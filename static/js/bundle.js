@@ -2362,10 +2362,10 @@
         Component.prototype.resizePlot = function () {
             Plotly.Plots.resize(assertNotNull(this.plotElement.current));
         };
-        Component.prototype.componentDidMount = function () {
+        Component.prototype.fetchPlot = function (jobId, tribe) {
             var _this = this;
             this.fetchController = new AbortController();
-            apiGet('/api/plot-average-mutations/', { jobId: this.props.jobId, tribe: this.props.tribe }, this.props.dispatch).then(function (response) {
+            apiGet('/api/plot-average-mutations/', { jobId: jobId, tribe: tribe }, this.props.dispatch).then(function (response) {
                 var data = [
                     {
                         x: response.generations,
@@ -2406,7 +2406,15 @@
                 };
                 Plotly.newPlot(assertNotNull(_this.plotElement.current), data, layout);
             });
+        };
+        Component.prototype.componentDidMount = function () {
+            this.fetchPlot(this.props.jobId, this.props.tribe);
             window.addEventListener('resize', this.resizePlot);
+        };
+        Component.prototype.componentDidUpdate = function (prevProps) {
+            if (prevProps.tribe !== this.props.tribe) {
+                this.fetchPlot(this.props.jobId, this.props.tribe);
+            }
         };
         Component.prototype.componentWillUnmount = function () {
             Plotly.purge(assertNotNull(this.plotElement.current));
@@ -2445,10 +2453,10 @@
         Component.prototype.resizePlot = function () {
             Plotly.Plots.resize(assertNotNull(this.plotElement.current));
         };
-        Component.prototype.componentDidMount = function () {
+        Component.prototype.fetchPlot = function (jobId, tribe) {
             var _this = this;
             this.fetchController = new AbortController();
-            apiGet('/api/plot-fitness-history/', { jobId: this.props.jobId, tribe: this.props.tribe }, this.props.dispatch).then(function (response) {
+            apiGet('/api/plot-fitness-history/', { jobId: jobId, tribe: tribe }, this.props.dispatch).then(function (response) {
                 var data = [
                     {
                         x: response.generations,
@@ -2486,7 +2494,15 @@
                 };
                 Plotly.newPlot(assertNotNull(_this.plotElement.current), data, layout);
             });
+        };
+        Component.prototype.componentDidMount = function () {
+            this.fetchPlot(this.props.jobId, this.props.tribe);
             window.addEventListener('resize', this.resizePlot);
+        };
+        Component.prototype.componentDidUpdate = function (prevProps) {
+            if (prevProps.tribe !== this.props.tribe) {
+                this.fetchPlot(this.props.jobId, this.props.tribe);
+            }
         };
         Component.prototype.componentWillUnmount = function () {
             Plotly.purge(assertNotNull(this.plotElement.current));
@@ -2541,10 +2557,10 @@
                 currentIndex: newIndex,
             });
         };
-        Component.prototype.componentDidMount = function () {
+        Component.prototype.fetchPlot = function (jobId, tribe) {
             var _this = this;
             this.fetchController = new AbortController();
-            apiGet('/api/plot-beneficial-mutations/', { jobId: this.props.jobId, tribe: this.props.tribe }, this.props.dispatch).then(function (response) {
+            apiGet('/api/plot-beneficial-mutations/', { jobId: jobId, tribe: tribe }, this.props.dispatch).then(function (response) {
                 var maxY = 0;
                 for (var _i = 0, response_1 = response; _i < response_1.length; _i++) {
                     var generation = response_1[_i];
@@ -2607,7 +2623,15 @@
                     currentIndex: response.length - 1,
                 });
             });
+        };
+        Component.prototype.componentDidMount = function () {
+            this.fetchPlot(this.props.jobId, this.props.tribe);
             window.addEventListener('resize', this.resizePlot);
+        };
+        Component.prototype.componentDidUpdate = function (prevProps) {
+            if (prevProps.tribe !== this.props.tribe) {
+                this.fetchPlot(this.props.jobId, this.props.tribe);
+            }
         };
         Component.prototype.componentWillUnmount = function () {
             Plotly.purge(assertNotNull(this.plotElement.current));
@@ -2668,10 +2692,10 @@
                 currentIndex: newIndex,
             });
         };
-        Component.prototype.componentDidMount = function () {
+        Component.prototype.fetchPlot = function (jobId, tribe) {
             var _this = this;
             this.fetchController = new AbortController();
-            apiGet('/api/plot-beneficial-mutations/', { jobId: this.props.jobId, tribe: this.props.tribe }, this.props.dispatch).then(function (response) {
+            apiGet('/api/plot-beneficial-mutations/', { jobId: jobId, tribe: tribe }, this.props.dispatch).then(function (response) {
                 var maxY = 0;
                 for (var _i = 0, response_1 = response; _i < response_1.length; _i++) {
                     var generation = response_1[_i];
@@ -2733,7 +2757,15 @@
                     currentIndex: response.length - 1,
                 });
             });
+        };
+        Component.prototype.componentDidMount = function () {
+            this.fetchPlot(this.props.jobId, this.props.tribe);
             window.addEventListener('resize', this.resizePlot);
+        };
+        Component.prototype.componentDidUpdate = function (prevProps) {
+            if (prevProps.tribe !== this.props.tribe) {
+                this.fetchPlot(this.props.jobId, this.props.tribe);
+            }
         };
         Component.prototype.componentWillUnmount = function () {
             Plotly.purge(assertNotNull(this.plotElement.current));
@@ -2800,10 +2832,10 @@
                 currentIndex: newIndex,
             });
         };
-        Component.prototype.componentDidMount = function () {
+        Component.prototype.fetchPlot = function (jobId, tribe) {
             var _this = this;
             this.fetchController = new AbortController();
-            apiGet('/api/plot-snp-frequencies/', { jobId: this.props.jobId, tribe: this.props.tribe }, this.props.dispatch).then(function (response) {
+            apiGet('/api/plot-snp-frequencies/', { jobId: jobId, tribe: tribe }, this.props.dispatch).then(function (response) {
                 var maxY = 0;
                 for (var _i = 0, response_1 = response; _i < response_1.length; _i++) {
                     var generation = response_1[_i];
@@ -2917,7 +2949,15 @@
                     currentIndex: response.length - 1,
                 });
             });
+        };
+        Component.prototype.componentDidMount = function () {
+            this.fetchPlot(this.props.jobId, this.props.tribe);
             window.addEventListener('resize', this.resizePlot);
+        };
+        Component.prototype.componentDidUpdate = function (prevProps) {
+            if (prevProps.tribe !== this.props.tribe) {
+                this.fetchPlot(this.props.jobId, this.props.tribe);
+            }
         };
         Component.prototype.componentWillUnmount = function () {
             Plotly.purge(assertNotNull(this.plotElement.current));
@@ -2984,10 +3024,10 @@
                 currentIndex: newIndex,
             });
         };
-        Component.prototype.componentDidMount = function () {
+        Component.prototype.fetchPlot = function (jobId, tribe) {
             var _this = this;
             this.fetchController = new AbortController();
-            apiGet('/api/plot-minor-allele-frequencies/', { jobId: this.props.jobId, tribe: this.props.tribe }, this.props.dispatch).then(function (response) {
+            apiGet('/api/plot-minor-allele-frequencies/', { jobId: jobId, tribe: tribe }, this.props.dispatch).then(function (response) {
                 var generationData = response[response.length - 1];
                 var data = [
                     {
@@ -3067,7 +3107,15 @@
                     currentIndex: response.length - 1,
                 });
             });
+        };
+        Component.prototype.componentDidMount = function () {
+            this.fetchPlot(this.props.jobId, this.props.tribe);
             window.addEventListener('resize', this.resizePlot);
+        };
+        Component.prototype.componentDidUpdate = function (prevProps) {
+            if (prevProps.tribe !== this.props.tribe) {
+                this.fetchPlot(this.props.jobId, this.props.tribe);
+            }
         };
         Component.prototype.componentWillUnmount = function () {
             Plotly.purge(assertNotNull(this.plotElement.current));

@@ -61,10 +61,10 @@ class Component extends React.Component<Props, State> {
         });
     }
 
-    componentDidMount() {
+    fetchPlot(jobId: string, tribe: string) {
         this.fetchController = new AbortController();
 
-        apiGet('/api/plot-beneficial-mutations/', { jobId: this.props.jobId, tribe: this.props.tribe }, this.props.dispatch).then(response => {
+        apiGet('/api/plot-beneficial-mutations/', { jobId: jobId, tribe: tribe }, this.props.dispatch).then(response => {
             let maxY = 0;
             for (let generation of response) {
                 for (let n of generation.dominant) {
@@ -130,8 +130,17 @@ class Component extends React.Component<Props, State> {
                 currentIndex: response.length - 1,
             });
         });
+    }
 
+    componentDidMount() {
+        this.fetchPlot(this.props.jobId, this.props.tribe);
         window.addEventListener('resize', this.resizePlot);
+    }
+
+    componentDidUpdate(prevProps: Props) {
+        if (prevProps.tribe !== this.props.tribe) {
+            this.fetchPlot(this.props.jobId, this.props.tribe);
+        }
     }
 
     componentWillUnmount() {
