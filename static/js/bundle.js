@@ -76,6 +76,14 @@
             return obj;
         }
     }
+    function assertNotUndefined(obj) {
+        if (obj === undefined) {
+            throw new Error('Non-undefined assertion failed');
+        }
+        else {
+            return obj;
+        }
+    }
     function loadingIndicatorIncrement(dispatch) {
         dispatch({
             type: 'LOADING_INDICATOR_INCREMENT',
@@ -3148,6 +3156,30 @@
             d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
         };
     })();
+    var NoPlot = (function (_super) {
+        __extends$n(NoPlot, _super);
+        function NoPlot(props) {
+            return _super.call(this, props) || this;
+        }
+        NoPlot.prototype.render = function () {
+            return React.createElement('div', { className: 'plots-view__non-sidebar' }, React.createElement('div', { className: 'plots-view__no-plot' }, 'The ' + this.props.plotName + ' plot does not exist for this tribe'));
+        };
+        return NoPlot;
+    }(React.PureComponent));
+
+    var __extends$o = (undefined && undefined.__extends) || (function () {
+        var extendStatics = function (d, b) {
+            extendStatics = Object.setPrototypeOf ||
+                ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+                function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+            return extendStatics(d, b);
+        };
+        return function (d, b) {
+            extendStatics(d, b);
+            function __() { this.constructor = d; }
+            d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+        };
+    })();
     var LINKS = [
         {
             title: 'Average mutations/individual',
@@ -3192,7 +3224,7 @@
         };
     }
     var Component$f = (function (_super) {
-        __extends$n(Component, _super);
+        __extends$o(Component, _super);
         function Component(props) {
             var _this = _super.call(this, props) || this;
             _this.onSelectChanged = _this.onSelectChanged.bind(_this);
@@ -3219,24 +3251,45 @@
                 });
             });
         };
+        Component.prototype.fileExists = function (slug) {
+            var theLink = LINKS.find(function (link) { return link.slug === slug; });
+            if (theLink === undefined)
+                return false;
+            return this.state.files.indexOf(theLink.filename) > -1;
+        };
+        Component.prototype.getPlotTitle = function (slug) {
+            return assertNotUndefined(LINKS.find(function (link) { return link.slug === slug; })).title;
+        };
         Component.prototype.getPlot = function () {
             if (this.props.activeSlug === 'average-mutations') {
-                return React.createElement(AverageMutations, { jobId: this.props.jobId, tribe: this.props.tribe });
+                return (this.fileExists(this.props.activeSlug) ?
+                    React.createElement(AverageMutations, { jobId: this.props.jobId, tribe: this.props.tribe })
+                    : React.createElement(NoPlot, { plotName: this.getPlotTitle(this.props.activeSlug) }));
             }
             else if (this.props.activeSlug === 'fitness-history') {
-                return React.createElement(FitnessHistory, { jobId: this.props.jobId, tribe: this.props.tribe });
+                return (this.fileExists(this.props.activeSlug) ?
+                    React.createElement(FitnessHistory, { jobId: this.props.jobId, tribe: this.props.tribe })
+                    : React.createElement(NoPlot, { plotName: this.getPlotTitle(this.props.activeSlug) }));
             }
             else if (this.props.activeSlug === 'deleterious-mutations') {
-                return React.createElement(DeleteriousMutations, { jobId: this.props.jobId, tribe: this.props.tribe });
+                return (this.fileExists(this.props.activeSlug) ?
+                    React.createElement(DeleteriousMutations, { jobId: this.props.jobId, tribe: this.props.tribe })
+                    : React.createElement(NoPlot, { plotName: this.getPlotTitle(this.props.activeSlug) }));
             }
             else if (this.props.activeSlug === 'beneficial-mutations') {
-                return React.createElement(BeneficialMutations, { jobId: this.props.jobId, tribe: this.props.tribe });
+                return (this.fileExists(this.props.activeSlug) ?
+                    React.createElement(BeneficialMutations, { jobId: this.props.jobId, tribe: this.props.tribe })
+                    : React.createElement(NoPlot, { plotName: this.getPlotTitle(this.props.activeSlug) }));
             }
             else if (this.props.activeSlug === 'snp-frequencies') {
-                return React.createElement(SnpFrequencies, { jobId: this.props.jobId, tribe: this.props.tribe });
+                return (this.fileExists(this.props.activeSlug) ?
+                    React.createElement(SnpFrequencies, { jobId: this.props.jobId, tribe: this.props.tribe })
+                    : React.createElement(NoPlot, { plotName: this.getPlotTitle(this.props.activeSlug) }));
             }
             else if (this.props.activeSlug === 'minor-allele-frequencies') {
-                return React.createElement(MinorAlleleFrequencies, { jobId: this.props.jobId, tribe: this.props.tribe });
+                return (this.fileExists(this.props.activeSlug) ?
+                    React.createElement(MinorAlleleFrequencies, { jobId: this.props.jobId, tribe: this.props.tribe })
+                    : React.createElement(NoPlot, { plotName: this.getPlotTitle(this.props.activeSlug) }));
             }
             else {
                 return null;
@@ -3323,7 +3376,7 @@
     }
     var Content = ReactRedux.connect(mapStateToProps$4)(Component$g);
 
-    var __extends$o = (undefined && undefined.__extends) || (function () {
+    var __extends$p = (undefined && undefined.__extends) || (function () {
         var extendStatics = function (d, b) {
             extendStatics = Object.setPrototypeOf ||
                 ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
@@ -3342,7 +3395,7 @@
         };
     }
     var Component$h = (function (_super) {
-        __extends$o(Component, _super);
+        __extends$p(Component, _super);
         function Component(props) {
             var _this = _super.call(this, props) || this;
             _this.state = {
@@ -3370,7 +3423,7 @@
     }(React.Component));
     var NonLogin = ReactRedux.connect(mapStateToProps$5)(Component$h);
 
-    var __extends$p = (undefined && undefined.__extends) || (function () {
+    var __extends$q = (undefined && undefined.__extends) || (function () {
         var extendStatics = function (d, b) {
             extendStatics = Object.setPrototypeOf ||
                 ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
@@ -3389,7 +3442,7 @@
         };
     }
     var Component$i = (function (_super) {
-        __extends$p(Component, _super);
+        __extends$q(Component, _super);
         function Component() {
             return _super !== null && _super.apply(this, arguments) || this;
         }

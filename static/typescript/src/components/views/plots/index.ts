@@ -4,13 +4,14 @@ import * as ReactRedux from 'react-redux';
 import { ReduxAction } from '../../../redux_action_types';
 import { BackIcon } from '../../icons/back';
 import { apiGet } from '../../../api';
-import { setRoute } from '../../../util';
+import { setRoute, assertNotUndefined } from '../../../util';
 import { AverageMutations } from './average_mutations';
 import { FitnessHistory } from './fitness_history';
 import { DeleteriousMutations } from './deleterious_mutations';
 import { BeneficialMutations } from './beneficial_mutations';
 import { SnpFrequencies } from './snp_frequencies';
 import { MinorAlleleFrequencies } from './minor_allele_frequencies';
+import { NoPlot } from './no_plot';
 
 /* Creates the plot links in the sidebar navigation panel and the current plot. With the introduction
   of tribes, this panel also displays a drop-down menu, when a job has tribes, to enable
@@ -131,20 +132,50 @@ class Component extends React.Component<Props, State> {
         });
     }
 
+    // Returns true if the file associated with this active slug exists for the current tribe
+    fileExists(slug: string): boolean {
+        const theLink = LINKS.find(link => link.slug === slug);
+        if (theLink === undefined) return false;
+        return this.state.files.indexOf(theLink.filename) > -1;
+    }
+
+    // Returns the plot title associated with for the specified slug
+    getPlotTitle(slug: string): string {
+        return assertNotUndefined(LINKS.find(link => link.slug === slug)).title;
+    }
+
     // Returns the currently active plot component for this page
     getPlot() {
         if (this.props.activeSlug === 'average-mutations') {
-            return React.createElement(AverageMutations, { jobId: this.props.jobId, tribe: this.props.tribe });
+            return (this.fileExists(this.props.activeSlug) ?
+                React.createElement(AverageMutations, { jobId: this.props.jobId, tribe: this.props.tribe })
+                : React.createElement(NoPlot, { plotName: this.getPlotTitle(this.props.activeSlug) })
+            );
         } else if (this.props.activeSlug === 'fitness-history') {
-            return React.createElement(FitnessHistory, { jobId: this.props.jobId, tribe: this.props.tribe });
+            return (this.fileExists(this.props.activeSlug) ?
+                React.createElement(FitnessHistory, { jobId: this.props.jobId, tribe: this.props.tribe })
+                : React.createElement(NoPlot, { plotName: this.getPlotTitle(this.props.activeSlug) })
+            );
         } else if (this.props.activeSlug === 'deleterious-mutations') {
-            return React.createElement(DeleteriousMutations, { jobId: this.props.jobId, tribe: this.props.tribe });
+            return (this.fileExists(this.props.activeSlug) ?
+                React.createElement(DeleteriousMutations, { jobId: this.props.jobId, tribe: this.props.tribe })
+                : React.createElement(NoPlot, { plotName: this.getPlotTitle(this.props.activeSlug) })
+            );
         } else if (this.props.activeSlug === 'beneficial-mutations') {
-            return React.createElement(BeneficialMutations, { jobId: this.props.jobId, tribe: this.props.tribe });
+            return (this.fileExists(this.props.activeSlug) ?
+                React.createElement(BeneficialMutations, { jobId: this.props.jobId, tribe: this.props.tribe })
+                : React.createElement(NoPlot, { plotName: this.getPlotTitle(this.props.activeSlug) })
+            );
         } else if (this.props.activeSlug === 'snp-frequencies') {
-            return React.createElement(SnpFrequencies, { jobId: this.props.jobId, tribe: this.props.tribe });
+            return (this.fileExists(this.props.activeSlug) ?
+                React.createElement(SnpFrequencies, { jobId: this.props.jobId, tribe: this.props.tribe })
+                : React.createElement(NoPlot, { plotName: this.getPlotTitle(this.props.activeSlug) })
+            );
         } else if (this.props.activeSlug === 'minor-allele-frequencies') {
-            return React.createElement(MinorAlleleFrequencies, { jobId: this.props.jobId, tribe: this.props.tribe });
+            return (this.fileExists(this.props.activeSlug) ?
+                React.createElement(MinorAlleleFrequencies, { jobId: this.props.jobId, tribe: this.props.tribe })
+                : React.createElement(NoPlot, { plotName: this.getPlotTitle(this.props.activeSlug) })
+            );
         } else {
             return null;
         }

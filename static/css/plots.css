@@ -84,6 +84,13 @@
     background-color: #FFF;
 }
 
+.plots-view__no-plot {
+    position: absolute;
+    top: 50%;
+    left: 20%;
+    padding: 10px 10px;
+}
+
 .plots-view__plot {
     position: absolute;
     top: 0;

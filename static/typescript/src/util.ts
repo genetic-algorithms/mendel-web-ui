@@ -28,6 +28,14 @@ export function assertNotNull<T>(obj: T | null) {
     }
 }
 
+export function assertNotUndefined<T>(obj: T | undefined) {
+    if (obj === undefined) {
+        throw new Error('Non-undefined assertion failed');
+    } else {
+        return obj;
+    }
+}
+
 export function loadingIndicatorIncrement(dispatch: Redux.Dispatch<ReduxAction>) {
     dispatch({
         type: 'LOADING_INDICATOR_INCREMENT',
