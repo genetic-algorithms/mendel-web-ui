@@ -2959,15 +2959,18 @@
             });
         };
         Component.prototype.componentDidMount = function () {
+            console.log('snp componentDidMount');
             this.fetchPlot(this.props.jobId, this.props.tribe);
             window.addEventListener('resize', this.resizePlot);
         };
         Component.prototype.componentDidUpdate = function (prevProps) {
+            console.log('snp componentDidUpdate');
             if (prevProps.tribe !== this.props.tribe) {
                 this.fetchPlot(this.props.jobId, this.props.tribe);
             }
         };
         Component.prototype.componentWillUnmount = function () {
+            console.log('snp componentWillUnmount');
             Plotly.purge(assertNotNull(this.plotElement.current));
             window.removeEventListener('resize', this.resizePlot);
             this.fetchController.abort();

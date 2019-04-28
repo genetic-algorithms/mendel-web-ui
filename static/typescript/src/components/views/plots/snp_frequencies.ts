@@ -193,17 +193,20 @@ class Component extends React.Component<Props, State> {
     }
 
     componentDidMount() {
+        console.log('snp componentDidMount');
         this.fetchPlot(this.props.jobId, this.props.tribe);
         window.addEventListener('resize', this.resizePlot);
     }
 
     componentDidUpdate(prevProps: Props) {
+        console.log('snp componentDidUpdate');
         if (prevProps.tribe !== this.props.tribe) {
             this.fetchPlot(this.props.jobId, this.props.tribe);
         }
     }
 
     componentWillUnmount() {
+        console.log('snp componentWillUnmount');
         Plotly.purge(assertNotNull(this.plotElement.current));
         window.removeEventListener('resize', this.resizePlot);
         this.fetchController.abort();

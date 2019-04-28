@@ -85,9 +85,10 @@
 }
 
 .plots-view__no-plot {
-    position: absolute;
-    top: 50%;
-    left: 20%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
     padding: 10px 10px;
 }
 
