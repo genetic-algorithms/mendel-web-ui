@@ -11,6 +11,10 @@ export function reducer(state: ReduxState | undefined, action: ReduxAction) {
             user_listing: {
                 users: [],
             },
+            plots: {
+                files: [],
+                tribes: [],
+            },
         };
     }
 
@@ -44,6 +48,10 @@ export function reducer(state: ReduxState | undefined, action: ReduxAction) {
         case 'user_listing.USERS':
             return immer.default(state, draft => {
                 draft.user_listing.users = action.value;
+            });
+        case 'plots.INFO':
+            return immer.default(state, draft => {
+                draft.plots = action.value;
             });
         default:
             return state;

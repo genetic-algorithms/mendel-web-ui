@@ -12,6 +12,8 @@ import { BeneficialMutations } from './beneficial_mutations';
 import { SnpFrequencies } from './snp_frequencies';
 import { MinorAlleleFrequencies } from './minor_allele_frequencies';
 import { NoPlot } from './no_plot';
+import { PlotInfo } from '../../../plot_info';
+import { ReduxState } from '../../../redux_state_types';
 
 /* Creates the plot links in the sidebar navigation panel and the current plot. With the introduction
   of tribes, this panel also displays a drop-down menu, when a job has tribes, to enable
@@ -53,23 +55,31 @@ const LINKS = [
 ];
 
 type OwnProps = {
+    // Props that come from the route
     jobId: string;
     tribe: string;
     activeSlug: string;
 };
 
-type Props = OwnProps & {
+type PropsFromState = {
+    // Props that come from reduc via mapStateToProps()
+    plots: PlotInfo;
+}
+
+type PropsFromDispatch = {
     // These are the props added by mapDispatchToProps()
     onLinkClick: (slug: string) => void;    // changes to a different plot within this page
-    //switchTribe: (tribe: string) => void;    // changes to a different tribe within this page
     onBackClick: () => void;
     dispatch: Redux.Dispatch<ReduxAction>;
 };
 
-type State = {
-    files: string[],
-    tribes: number[],
-};
+type Props = OwnProps & PropsFromState & PropsFromDispatch;
+
+function mapStateToProps(state: ReduxState) {
+    return {
+        plots: state.plots,
+    };
+}
 
 // Called by redux when the component re-renders. Returns additional properties that get merged into
 // the components props. Use this method when you need the dispatch object for other functions.
@@ -79,16 +89,13 @@ function mapDispatchToProps(dispatch: Redux.Dispatch<ReduxAction>, ownProps: Own
         onLinkClick: (slug: string) => {
             setRoute(dispatch, '/plots/' + ownProps.jobId + '/' + ownProps.tribe + '/' + slug + '/');
         },
-        //switchTribe: (tribe: string) => {
-        //    setRoute(dispatch, '/plots/' + ownProps.jobId + '/' + tribe + '/' + ownProps.activeSlug + '/');
-        //},
         onBackClick: () => {
             setRoute(dispatch, '/job-detail/' + ownProps.jobId + '/');
         },
     };
 }
 
-class Component extends React.Component<Props, State> {
+class Component extends React.Component<Props> {
     fetchController: AbortController;
 
     constructor(props: Props) {
@@ -108,10 +115,21 @@ class Component extends React.Component<Props, State> {
         const tribe = e.currentTarget.value;
         //const tribeNum = parseInt(tribe);
 
-        this.fetchFiles(this.props.jobId, tribe);
+        this.fetchFiles(this.props.jobId, tribe).then(response => {
+            setRoute(this.props.dispatch, '/plots/' + this.props.jobId + '/' + tribe + '/' + this.props.activeSlug + '/');
+        });
 
-        //this.props.switchTribe(tribe)
-        setRoute(this.props.dispatch, '/plots/' + this.props.jobId + '/' + tribe + '/' + this.props.activeSlug + '/');
+        /* this.fetchFiles(this.props.jobId, tribe).then(response => {
+            this.setState(
+                {
+                    files: response.files,
+                },
+                // Use the callback to make sure setRoute runs after setState completes
+                () => {
+                    setRoute(this.props.dispatch, '/plots/' + this.props.jobId + '/' + tribe + '/' + this.props.activeSlug + '/');
+                }
+            );
+        }); */
     }
 
     // Get which plot files and tribe dirs are available for this job
@@ -119,15 +137,15 @@ class Component extends React.Component<Props, State> {
         this.fetchController.abort();
         this.fetchController = new AbortController();
 
-        apiGet(
+        return apiGet(
             '/api/job-plot-files/',
             { jobId: jobId, tribe: tribe },
             this.props.dispatch,
             this.fetchController.signal,
         ).then(response => {
-            this.setState({
-                files: response.files,
-                tribes: response.tribes,
+            this.props.dispatch({
+                type: 'plots.INFO',
+                value: { files: response.files, tribes: response.tribes },
             });
         });
     }
@@ -136,7 +154,7 @@ class Component extends React.Component<Props, State> {
     fileExists(slug: string): boolean {
         const theLink = LINKS.find(link => link.slug === slug);
         if (theLink === undefined) return false;
-        return this.state.files.indexOf(theLink.filename) > -1;
+        return this.props.plots.files.indexOf(theLink.filename) > -1;
     }
 
     // Returns the plot title associated with for the specified slug
@@ -149,32 +167,32 @@ class Component extends React.Component<Props, State> {
         if (this.props.activeSlug === 'average-mutations') {
             return (this.fileExists(this.props.activeSlug) ?
                 React.createElement(AverageMutations, { jobId: this.props.jobId, tribe: this.props.tribe })
-                : React.createElement(NoPlot, { plotName: this.getPlotTitle(this.props.activeSlug) })
+                : React.createElement(NoPlot, { plotName: this.getPlotTitle(this.props.activeSlug), tribe: this.props.tribe })
             );
         } else if (this.props.activeSlug === 'fitness-history') {
             return (this.fileExists(this.props.activeSlug) ?
                 React.createElement(FitnessHistory, { jobId: this.props.jobId, tribe: this.props.tribe })
-                : React.createElement(NoPlot, { plotName: this.getPlotTitle(this.props.activeSlug) })
+                : React.createElement(NoPlot, { plotName: this.getPlotTitle(this.props.activeSlug), tribe: this.props.tribe })
             );
         } else if (this.props.activeSlug === 'deleterious-mutations') {
             return (this.fileExists(this.props.activeSlug) ?
                 React.createElement(DeleteriousMutations, { jobId: this.props.jobId, tribe: this.props.tribe })
-                : React.createElement(NoPlot, { plotName: this.getPlotTitle(this.props.activeSlug) })
+                : React.createElement(NoPlot, { plotName: this.getPlotTitle(this.props.activeSlug), tribe: this.props.tribe })
             );
         } else if (this.props.activeSlug === 'beneficial-mutations') {
             return (this.fileExists(this.props.activeSlug) ?
                 React.createElement(BeneficialMutations, { jobId: this.props.jobId, tribe: this.props.tribe })
-                : React.createElement(NoPlot, { plotName: this.getPlotTitle(this.props.activeSlug) })
+                : React.createElement(NoPlot, { plotName: this.getPlotTitle(this.props.activeSlug), tribe: this.props.tribe })
             );
         } else if (this.props.activeSlug === 'snp-frequencies') {
             return (this.fileExists(this.props.activeSlug) ?
                 React.createElement(SnpFrequencies, { jobId: this.props.jobId, tribe: this.props.tribe })
-                : React.createElement(NoPlot, { plotName: this.getPlotTitle(this.props.activeSlug) })
+                : React.createElement(NoPlot, { plotName: this.getPlotTitle(this.props.activeSlug), tribe: this.props.tribe })
             );
         } else if (this.props.activeSlug === 'minor-allele-frequencies') {
             return (this.fileExists(this.props.activeSlug) ?
                 React.createElement(MinorAlleleFrequencies, { jobId: this.props.jobId, tribe: this.props.tribe })
-                : React.createElement(NoPlot, { plotName: this.getPlotTitle(this.props.activeSlug) })
+                : React.createElement(NoPlot, { plotName: this.getPlotTitle(this.props.activeSlug), tribe: this.props.tribe })
             );
         } else {
             return null;
@@ -198,16 +216,16 @@ class Component extends React.Component<Props, State> {
                 React.createElement('div', { className: 'plots-view__sidebar__back', onClick: this.props.onBackClick },
                     React.createElement(BackIcon, { width: 24, height: 24 }),
                 ),
-                (this.state.tribes.length>0 ?
+                (this.props.plots.tribes.length>0 ?
                     React.createElement('select', { className: 'plots-view__sidebar__select', value: this.props.tribe, onChange: this.onSelectChanged, },
                         React.createElement('option', { value: 0 }, 'Summary'),
-                        this.state.tribes.map(tribe => 
+                        this.props.plots.tribes.map(tribe => 
                             React.createElement('option', { value: tribe }, tribe),
                         )
                     )
                 : null ),
                 React.createElement('div', { className: 'plots-view__sidebar__items' },
-                    LINKS.filter(link => this.state.files.indexOf(link.filename) > -1 ).map(link => (
+                    LINKS.filter(link => this.props.plots.files.indexOf(link.filename) > -1 ).map(link => (
                             React.createElement('div', {
                                 className: 'plots-view__sidebar__item ' + (this.props.activeSlug === link.slug ? 'plots-view__sidebar--active' : ''),
                                 onClick: () => this.props.onLinkClick(link.slug),
@@ -221,4 +239,4 @@ class Component extends React.Component<Props, State> {
     }
 }
 
-export const Plots = ReactRedux.connect(null, mapDispatchToProps)(Component);
+export const Plots = ReactRedux.connect(mapStateToProps, mapDispatchToProps)(Component);

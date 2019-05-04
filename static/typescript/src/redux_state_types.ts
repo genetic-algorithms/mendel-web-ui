@@ -1,10 +1,12 @@
 import { User } from './user_types';
+import { PlotInfo } from './plot_info';
 
 export type ReduxState = {
     user: User | null;
     route: string;
     loading_indicator_count: number;
     user_listing: {
-        users: User[],
+        users: User[];
     },
+    plots: PlotInfo;
 };

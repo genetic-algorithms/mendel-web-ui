@@ -1,4 +1,5 @@
 import { User } from './user_types';
+import { PlotInfo } from './plot_info';
 
 export type ReduxAction = {
     type: 'USER';
@@ -18,4 +19,7 @@ export type ReduxAction = {
 } | {
     type: 'user_listing.USERS';
     value: User[];
+} | {
+    type: 'plots.INFO';
+    value: PlotInfo;
 };

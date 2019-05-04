@@ -13,6 +13,10 @@
                 user_listing: {
                     users: [],
                 },
+                plots: {
+                    files: [],
+                    tribes: [],
+                },
             };
         }
         switch (action.type) {
@@ -45,6 +49,10 @@
             case 'user_listing.USERS':
                 return immer__default(state, function (draft) {
                     draft.user_listing.users = action.value;
+                });
+            case 'plots.INFO':
+                return immer__default(state, function (draft) {
+                    draft.plots = action.value;
                 });
             default:
                 return state;
@@ -3165,7 +3173,8 @@
             return _super.call(this, props) || this;
         }
         NoPlot.prototype.render = function () {
-            return React.createElement('div', { className: 'plots-view__non-sidebar' }, React.createElement('div', { className: 'plots-view__no-plot' }, 'The ' + this.props.plotName + ' plot does not exist for this tribe'));
+            var tribeStr = this.props.tribe == '0' ? 'the summary' : 'tribe ' + this.props.tribe;
+            return React.createElement('div', { className: 'plots-view__non-sidebar' }, React.createElement('div', { className: 'plots-view__no-plot' }, 'The ' + this.props.plotName + ' plot does not exist for ' + tribeStr));
         };
         return NoPlot;
     }(React.PureComponent));
@@ -3215,6 +3224,11 @@
             filename: 'normalized-allele-bins',
         },
     ];
+    function mapStateToProps$4(state) {
+        return {
+            plots: state.plots,
+        };
+    }
     function mapDispatchToProps$2(dispatch, ownProps) {
         return {
             dispatch: dispatch,
@@ -3239,18 +3253,20 @@
             return _this;
         }
         Component.prototype.onSelectChanged = function (e) {
+            var _this = this;
             var tribe = e.currentTarget.value;
-            this.fetchFiles(this.props.jobId, tribe);
-            setRoute(this.props.dispatch, '/plots/' + this.props.jobId + '/' + tribe + '/' + this.props.activeSlug + '/');
+            this.fetchFiles(this.props.jobId, tribe).then(function (response) {
+                setRoute(_this.props.dispatch, '/plots/' + _this.props.jobId + '/' + tribe + '/' + _this.props.activeSlug + '/');
+            });
         };
         Component.prototype.fetchFiles = function (jobId, tribe) {
             var _this = this;
             this.fetchController.abort();
             this.fetchController = new AbortController();
-            apiGet('/api/job-plot-files/', { jobId: jobId, tribe: tribe }, this.props.dispatch, this.fetchController.signal).then(function (response) {
-                _this.setState({
-                    files: response.files,
-                    tribes: response.tribes,
+            return apiGet('/api/job-plot-files/', { jobId: jobId, tribe: tribe }, this.props.dispatch, this.fetchController.signal).then(function (response) {
+                _this.props.dispatch({
+                    type: 'plots.INFO',
+                    value: { files: response.files, tribes: response.tribes },
                 });
             });
         };
@@ -3258,7 +3274,7 @@
             var theLink = LINKS.find(function (link) { return link.slug === slug; });
             if (theLink === undefined)
                 return false;
-            return this.state.files.indexOf(theLink.filename) > -1;
+            return this.props.plots.files.indexOf(theLink.filename) > -1;
         };
         Component.prototype.getPlotTitle = function (slug) {
             return assertNotUndefined(LINKS.find(function (link) { return link.slug === slug; })).title;
@@ -3267,32 +3283,32 @@
             if (this.props.activeSlug === 'average-mutations') {
                 return (this.fileExists(this.props.activeSlug) ?
                     React.createElement(AverageMutations, { jobId: this.props.jobId, tribe: this.props.tribe })
-                    : React.createElement(NoPlot, { plotName: this.getPlotTitle(this.props.activeSlug) }));
+                    : React.createElement(NoPlot, { plotName: this.getPlotTitle(this.props.activeSlug), tribe: this.props.tribe }));
             }
             else if (this.props.activeSlug === 'fitness-history') {
                 return (this.fileExists(this.props.activeSlug) ?
                     React.createElement(FitnessHistory, { jobId: this.props.jobId, tribe: this.props.tribe })
-                    : React.createElement(NoPlot, { plotName: this.getPlotTitle(this.props.activeSlug) }));
+                    : React.createElement(NoPlot, { plotName: this.getPlotTitle(this.props.activeSlug), tribe: this.props.tribe }));
             }
             else if (this.props.activeSlug === 'deleterious-mutations') {
                 return (this.fileExists(this.props.activeSlug) ?
                     React.createElement(DeleteriousMutations, { jobId: this.props.jobId, tribe: this.props.tribe })
-                    : React.createElement(NoPlot, { plotName: this.getPlotTitle(this.props.activeSlug) }));
+                    : React.createElement(NoPlot, { plotName: this.getPlotTitle(this.props.activeSlug), tribe: this.props.tribe }));
             }
             else if (this.props.activeSlug === 'beneficial-mutations') {
                 return (this.fileExists(this.props.activeSlug) ?
                     React.createElement(BeneficialMutations, { jobId: this.props.jobId, tribe: this.props.tribe })
-                    : React.createElement(NoPlot, { plotName: this.getPlotTitle(this.props.activeSlug) }));
+                    : React.createElement(NoPlot, { plotName: this.getPlotTitle(this.props.activeSlug), tribe: this.props.tribe }));
             }
             else if (this.props.activeSlug === 'snp-frequencies') {
                 return (this.fileExists(this.props.activeSlug) ?
                     React.createElement(SnpFrequencies, { jobId: this.props.jobId, tribe: this.props.tribe })
-                    : React.createElement(NoPlot, { plotName: this.getPlotTitle(this.props.activeSlug) }));
+                    : React.createElement(NoPlot, { plotName: this.getPlotTitle(this.props.activeSlug), tribe: this.props.tribe }));
             }
             else if (this.props.activeSlug === 'minor-allele-frequencies') {
                 return (this.fileExists(this.props.activeSlug) ?
                     React.createElement(MinorAlleleFrequencies, { jobId: this.props.jobId, tribe: this.props.tribe })
-                    : React.createElement(NoPlot, { plotName: this.getPlotTitle(this.props.activeSlug) }));
+                    : React.createElement(NoPlot, { plotName: this.getPlotTitle(this.props.activeSlug), tribe: this.props.tribe }));
             }
             else {
                 return null;
@@ -3306,11 +3322,11 @@
         };
         Component.prototype.render = function () {
             var _this = this;
-            return React.createElement('div', { className: 'plots-view' }, React.createElement('div', { className: 'plots-view__sidebar' }, React.createElement('div', { className: 'plots-view__sidebar__back', onClick: this.props.onBackClick }, React.createElement(BackIcon, { width: 24, height: 24 })), (this.state.tribes.length > 0 ?
-                React.createElement('select', { className: 'plots-view__sidebar__select', value: this.props.tribe, onChange: this.onSelectChanged, }, React.createElement('option', { value: 0 }, 'Summary'), this.state.tribes.map(function (tribe) {
+            return React.createElement('div', { className: 'plots-view' }, React.createElement('div', { className: 'plots-view__sidebar' }, React.createElement('div', { className: 'plots-view__sidebar__back', onClick: this.props.onBackClick }, React.createElement(BackIcon, { width: 24, height: 24 })), (this.props.plots.tribes.length > 0 ?
+                React.createElement('select', { className: 'plots-view__sidebar__select', value: this.props.tribe, onChange: this.onSelectChanged, }, React.createElement('option', { value: 0 }, 'Summary'), this.props.plots.tribes.map(function (tribe) {
                     return React.createElement('option', { value: tribe }, tribe);
                 }))
-                : null), React.createElement('div', { className: 'plots-view__sidebar__items' }, LINKS.filter(function (link) { return _this.state.files.indexOf(link.filename) > -1; }).map(function (link) { return (React.createElement('div', {
+                : null), React.createElement('div', { className: 'plots-view__sidebar__items' }, LINKS.filter(function (link) { return _this.props.plots.files.indexOf(link.filename) > -1; }).map(function (link) { return (React.createElement('div', {
                 className: 'plots-view__sidebar__item ' + (_this.props.activeSlug === link.slug ? 'plots-view__sidebar--active' : ''),
                 onClick: function () { return _this.props.onLinkClick(link.slug); },
                 key: link.slug,
@@ -3318,9 +3334,9 @@
         };
         return Component;
     }(React.Component));
-    var Plots = ReactRedux.connect(null, mapDispatchToProps$2)(Component$f);
+    var Plots = ReactRedux.connect(mapStateToProps$4, mapDispatchToProps$2)(Component$f);
 
-    function mapStateToProps$4(state) {
+    function mapStateToProps$5(state) {
         return {
             route: state.route,
         };
@@ -3377,7 +3393,7 @@
     function Component$g(props) {
         return React.createElement('div', { className: 'page-content' }, getView(props.route));
     }
-    var Content = ReactRedux.connect(mapStateToProps$4)(Component$g);
+    var Content = ReactRedux.connect(mapStateToProps$5)(Component$g);
 
     var __extends$p = (undefined && undefined.__extends) || (function () {
         var extendStatics = function (d, b) {
@@ -3392,7 +3408,7 @@
             d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
         };
     })();
-    function mapStateToProps$5(state) {
+    function mapStateToProps$6(state) {
         return {
             route: state.route,
         };
@@ -3424,7 +3440,7 @@
         };
         return Component;
     }(React.Component));
-    var NonLogin = ReactRedux.connect(mapStateToProps$5)(Component$h);
+    var NonLogin = ReactRedux.connect(mapStateToProps$6)(Component$h);
 
     var __extends$q = (undefined && undefined.__extends) || (function () {
         var extendStatics = function (d, b) {
@@ -3439,7 +3455,7 @@
             d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
         };
     })();
-    function mapStateToProps$6(state) {
+    function mapStateToProps$7(state) {
         return {
             route: state.route,
         };
@@ -3456,7 +3472,7 @@
         };
         return Component;
     }(React.Component));
-    var Root = ReactRedux.connect(mapStateToProps$6)(Component$i);
+    var Root = ReactRedux.connect(mapStateToProps$7)(Component$i);
 
     function init() {
         var store = Redux.createStore(reducer);
