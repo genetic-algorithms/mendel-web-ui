@@ -10,7 +10,7 @@ if [[ "$runEnv" == "prod" ]]; then
 	port=8581
 	logDir="/var/log/mendel-web-ui"
 	staticDir="/usr/local/mendel-web-ui/static"
-	cd /var/run/mendel-web-ui    # this gives it access to the dirs: database, output
+	cd /usr/local/var/run/mendel-web-ui    # this gives it access to the dirs: database, output
 	/usr/local/bin/mendel-web-ui $port /usr/local/bin/mendel-go /usr/local/share/mendel-go/mendel-defaults.ini $staticDir > $logDir/stdout.log 2> $logDir/stderr.log &
 	if [[ $? -eq 0 ]]; then
 		echo "/usr/local/bin/mendel-web-ui started, browse http://0.0.0.0:$port/"

@@ -23,42 +23,63 @@ The backend API can be tested via browser or curl URLs like this:
 http://0.0.0.0:8581/api/job-plot-files/?jobId=b7f00ecc
 ```
 
-## Build the Packages
+## Build, Install, and Run the Package
 
-First, set the VERSION variable in `Makefile`.
+First, set the `VERSION` and `RELEASE` variables in `Makefile`.
 
-Build the RPM:
-```
-make rpmbuild
-```
+### For Linux RPM:
 
 Note: so far the RPM has only been tested on Amazon Linux.
 
-Build the Mac install package:
+- Build (you build the linux rpm on mac if you 1st: `brew install rpm`):
+```
+make rpmbuild
+```
+- The rpm is created in `~/rpmbuild/RPMS/x86_64/`
+- Install:
+```
+yum install mendel-web-ui-*.x86_64.rpm
+```
+- The server is started automatically by `initctl` running `/etc/init/mendel-web-ui.conf`.
+- If you just installed the rpm for the 1st time, get the admin password:
+```
+cat /var/log/mendel-web-ui/stdout.log
+```
+- Browse http://hostname-or-ip:8581/
+- Change the admin pw, and then create additional users as necessary.
+
+### For the Mac install package:
+
+- Build:
 ```
 make macpkg
 ```
-
-## Run From the Package
-
-On Amazon Linux:
-
-The server is started automatically by `initctl` running `/etc/init/mendel-web-ui.conf`.
-
-Browse http://hostname-or-ip:8581/
-
-On Mac:
-
-Put `/usr/local/bin` in your path, if you haven't already.
-
-To start the web UI server:
-
+- The mac pkg is created in `pkg/mac/build/`
+- Install:
+```
+make macinstall
+```
+- Put `/usr/local/bin` in your path, if you haven't already.
+- Start the web UI server:
 ```
 start-mendel-ui.sh
 ```
+- If you just installed the rpm for the 1st time, get the admin password:
+```
+cat /var/log/mendel-web-ui/stdout.log
+```
+- Browse http://hostname-or-ip:8581/
+- Change the admin pw, and then create additional users as necessary.
 
 To stop the web UI server:
-
 ```
 stop-mendel-ui.sh
 ```
+
+## Create a Github Release for This New Version
+
+- Go to https://github.com/genetic-algorithms/mendel-web-ui/releases and click `Draft a new release`
+- Set the `tag` to this version number, enter a `title` and `description`
+- Upload the zipped rpm for this version that was created in `~/rpmbuild/RPMS/x86_64/`
+- Upload the zipped mac pkg for this version that was created in `pkg/mac/build/`
+- Click `Publish release`

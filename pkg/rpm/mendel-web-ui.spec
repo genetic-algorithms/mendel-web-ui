@@ -11,7 +11,7 @@ Packager: Bruce Potter
 Prefix: /usr/local
 #BuildRoot: ?
 BuildArch: x86_64
-Requires: mendel-go >= 1.2.0
+Requires: mendel-go >= 1.2.1
 
 %description
 The UI for Mendel's Accountant, which performs biologically realistic genetic evolution simulation.

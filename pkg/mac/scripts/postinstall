@@ -5,7 +5,8 @@
 SRCDIR=/Users/Shared
 DESTDIR=/usr/local
 
-mkdir -p $DESTDIR/bin $DESTDIR/share
+# Note: our runtime dirs can't be in /var/run, because they are removed on reboot and requires root to recreate them
+mkdir -p $DESTDIR/bin $DESTDIR/share $DESTDIR/var/run/mendel-web-ui/output/jobs  # main.go will create the database dir
 ln -sf $SRCDIR/mendel-web-ui/bin/mendel-web-ui $DESTDIR/bin
 ln -sf $SRCDIR/mendel-web-ui/bin/start-mendel-ui.sh $DESTDIR/bin
 ln -sf $SRCDIR/mendel-web-ui/bin/stop-mendel-ui.sh $DESTDIR/bin
@@ -13,8 +14,8 @@ ln -sf $SRCDIR/mendel-web-ui/share/mendel-web-ui $DESTDIR/share
 # this takes care of the static subdir
 ln -sf $SRCDIR/mendel-web-ui/mendel-web-ui $DESTDIR/mendel-web-ui
 
-mkdir -p /var/log/mendel-web-ui /var/run/mendel-web-ui/output/jobs  # main.go will create the database dir
+mkdir -p /var/log/mendel-web-ui
 # this is needed because these dirs are created by root during install, but will be written to by whatever user runs the web ui
-chmod 777 /var/log/mendel-web-ui /var/run/mendel-web-ui /var/run/mendel-web-ui/output /var/run/mendel-web-ui/output/jobs
+chmod -R 777 /var/log/mendel-web-ui $DESTDIR/var/run/mendel-web-ui
 
 exit 0
