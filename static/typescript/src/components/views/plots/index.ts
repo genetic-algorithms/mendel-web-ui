@@ -103,11 +103,6 @@ class Component extends React.Component<Props> {
 
         this.onSelectChanged = this.onSelectChanged.bind(this);
         this.fetchController = new AbortController();
-
-        this.state = {
-            files: [],
-            tribes: [],
-        };
     }
 
     // When the tribe drop-down menu is changed, get the plot files list for this job and tribe
@@ -116,20 +111,15 @@ class Component extends React.Component<Props> {
         //const tribeNum = parseInt(tribe);
 
         this.fetchFiles(this.props.jobId, tribe).then(response => {
-            setRoute(this.props.dispatch, '/plots/' + this.props.jobId + '/' + tribe + '/' + this.props.activeSlug + '/');
+            const url = '/plots/' + this.props.jobId + '/' + tribe + '/' + this.props.activeSlug + '/'
+            this.props.dispatch({
+                type: 'plots.INFO_AND_ROUTE',
+                plots: { files: response.files, tribes: response.tribes },
+                route: url,
+            });
+            history.pushState(null, '', url);
         });
 
-        /* this.fetchFiles(this.props.jobId, tribe).then(response => {
-            this.setState(
-                {
-                    files: response.files,
-                },
-                // Use the callback to make sure setRoute runs after setState completes
-                () => {
-                    setRoute(this.props.dispatch, '/plots/' + this.props.jobId + '/' + tribe + '/' + this.props.activeSlug + '/');
-                }
-            );
-        }); */
     }
 
     // Get which plot files and tribe dirs are available for this job
@@ -142,12 +132,7 @@ class Component extends React.Component<Props> {
             { jobId: jobId, tribe: tribe },
             this.props.dispatch,
             this.fetchController.signal,
-        ).then(response => {
-            this.props.dispatch({
-                type: 'plots.INFO',
-                value: { files: response.files, tribes: response.tribes },
-            });
-        });
+        );
     }
 
     // Returns true if the file associated with this active slug exists for the current tribe
@@ -200,7 +185,12 @@ class Component extends React.Component<Props> {
     }
 
     componentDidMount() {
-        this.fetchFiles(this.props.jobId, this.props.tribe);
+        this.fetchFiles(this.props.jobId, this.props.tribe).then(response => {
+            this.props.dispatch({
+                type: 'plots.INFO',
+                plots: { files: response.files, tribes: response.tribes },
+            });
+        });
     }
 
     componentWillUnmount() {

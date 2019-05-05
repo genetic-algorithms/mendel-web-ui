@@ -1,6 +1,8 @@
 import { User } from './user_types';
 import { PlotInfo } from './plot_info';
 
+// The list of actions that can change redux state
+
 export type ReduxAction = {
     type: 'USER';
     value: User;
@@ -21,5 +23,9 @@ export type ReduxAction = {
     value: User[];
 } | {
     type: 'plots.INFO';
-    value: PlotInfo;
+    plots: PlotInfo;
+} | {
+    type: 'plots.INFO_AND_ROUTE';
+    plots: PlotInfo;
+    route: string;
 };

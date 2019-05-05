@@ -2,6 +2,8 @@ import * as immer from 'immer';
 import { ReduxState } from './redux_state_types';
 import { ReduxAction } from './redux_action_types';
 
+// For the given (partial) redux state and the redux action, make the appropriate change to the state
+
 export function reducer(state: ReduxState | undefined, action: ReduxAction) {
     if (state === undefined) {
         return {
@@ -51,7 +53,12 @@ export function reducer(state: ReduxState | undefined, action: ReduxAction) {
             });
         case 'plots.INFO':
             return immer.default(state, draft => {
-                draft.plots = action.value;
+                draft.plots = action.plots;
+            });
+        case 'plots.INFO_AND_ROUTE':
+            return immer.default(state, draft => {
+                draft.plots = action.plots;
+                draft.route = action.route;
             });
         default:
             return state;

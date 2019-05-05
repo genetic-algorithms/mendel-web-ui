@@ -52,7 +52,12 @@
                 });
             case 'plots.INFO':
                 return immer__default(state, function (draft) {
-                    draft.plots = action.value;
+                    draft.plots = action.plots;
+                });
+            case 'plots.INFO_AND_ROUTE':
+                return immer__default(state, function (draft) {
+                    draft.plots = action.plots;
+                    draft.route = action.route;
                 });
             default:
                 return state;
@@ -3173,7 +3178,7 @@
             return _super.call(this, props) || this;
         }
         NoPlot.prototype.render = function () {
-            var tribeStr = this.props.tribe == '0' ? 'the summary' : 'tribe ' + this.props.tribe;
+            var tribeStr = this.props.tribe === '0' ? 'the summary' : 'tribe ' + this.props.tribe;
             return React.createElement('div', { className: 'plots-view__non-sidebar' }, React.createElement('div', { className: 'plots-view__no-plot' }, 'The ' + this.props.plotName + ' plot does not exist for ' + tribeStr));
         };
         return NoPlot;
@@ -3246,29 +3251,25 @@
             var _this = _super.call(this, props) || this;
             _this.onSelectChanged = _this.onSelectChanged.bind(_this);
             _this.fetchController = new AbortController();
-            _this.state = {
-                files: [],
-                tribes: [],
-            };
             return _this;
         }
         Component.prototype.onSelectChanged = function (e) {
             var _this = this;
             var tribe = e.currentTarget.value;
             this.fetchFiles(this.props.jobId, tribe).then(function (response) {
-                setRoute(_this.props.dispatch, '/plots/' + _this.props.jobId + '/' + tribe + '/' + _this.props.activeSlug + '/');
+                var url = '/plots/' + _this.props.jobId + '/' + tribe + '/' + _this.props.activeSlug + '/';
+                _this.props.dispatch({
+                    type: 'plots.INFO_AND_ROUTE',
+                    plots: { files: response.files, tribes: response.tribes },
+                    route: url,
+                });
+                history.pushState(null, '', url);
             });
         };
         Component.prototype.fetchFiles = function (jobId, tribe) {
-            var _this = this;
             this.fetchController.abort();
             this.fetchController = new AbortController();
-            return apiGet('/api/job-plot-files/', { jobId: jobId, tribe: tribe }, this.props.dispatch, this.fetchController.signal).then(function (response) {
-                _this.props.dispatch({
-                    type: 'plots.INFO',
-                    value: { files: response.files, tribes: response.tribes },
-                });
-            });
+            return apiGet('/api/job-plot-files/', { jobId: jobId, tribe: tribe }, this.props.dispatch, this.fetchController.signal);
         };
         Component.prototype.fileExists = function (slug) {
             var theLink = LINKS.find(function (link) { return link.slug === slug; });
@@ -3315,7 +3316,13 @@
             }
         };
         Component.prototype.componentDidMount = function () {
-            this.fetchFiles(this.props.jobId, this.props.tribe);
+            var _this = this;
+            this.fetchFiles(this.props.jobId, this.props.tribe).then(function (response) {
+                _this.props.dispatch({
+                    type: 'plots.INFO',
+                    plots: { files: response.files, tribes: response.tribes },
+                });
+            });
         };
         Component.prototype.componentWillUnmount = function () {
             this.fetchController.abort();
