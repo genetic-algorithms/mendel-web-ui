@@ -14,6 +14,8 @@ function paramsToString(params: { [key: string]: string }) {
     return paramStrings.join('&');
 }
 
+// Defines an overloaded apiGet() function for each api method
+
 export function apiGet(
     url: '/api/user-list/',
     params: {},
@@ -38,6 +40,16 @@ export function apiGet(
     dispatch: Redux.Dispatch<ReduxAction>,
     signal?: AbortSignal,
 ): Promise<User>;
+
+export function apiGet(
+    url: '/api/get-versions/',
+    params: {},
+    dispatch: Redux.Dispatch<ReduxAction>,
+    signal?: AbortSignal,
+): Promise<{
+    mendelUiVersion: string;
+    mendelGoVersion: string;
+}>;
 
 export function apiGet(
     url: '/api/job-output/',

@@ -34,6 +34,8 @@
 }
 
 .confirmation-dialog__description {
+    /*todo: figure out how to get multiple descriptions to appear below the previous one */
+    /* display: block; */
     padding-top: 24px;
     padding-bottom: 24px;
     line-height: calc(100% + 6px);

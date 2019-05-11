@@ -285,6 +285,49 @@
         return AccountIcon;
     }(React.PureComponent));
 
+    var rootElement = null;
+    function open(title, descriptions, actionCallback) {
+        if (rootElement !== null) {
+            close();
+        }
+        var cancelButton = createElement('div', 'confirmation-dialog__button', [document.createTextNode('Cancel')]);
+        var actionButton = createElement('div', 'confirmation-dialog__button', [document.createTextNode('Ok')]);
+        var overlay = createElement('div', 'confirmation-dialog__overlay', []);
+        rootElement = createElement('div', 'confirmation-dialog', [
+            overlay,
+            createElement('div', 'confirmation-dialog__content', [
+                createElement('div', 'confirmation-dialog__title', [document.createTextNode(title)]),
+                createElement('div', 'confirmation-dialog__description', descriptions.map(function (desc) { return document.createTextNode(desc); })),
+                createElement('div', 'confirmation-dialog__buttons', (actionCallback !== undefined ? [cancelButton, actionButton] : [actionButton])),
+            ]),
+        ]);
+        if (actionCallback !== undefined) {
+            cancelButton.addEventListener('click', close);
+        }
+        overlay.addEventListener('click', close);
+        actionButton.addEventListener('click', function () {
+            close();
+            if (actionCallback !== undefined) {
+                actionCallback();
+            }
+        });
+        document.body.appendChild(assertNotNull(rootElement));
+    }
+    function close() {
+        if (rootElement === null)
+            return;
+        assertNotNull(rootElement.parentNode).removeChild(rootElement);
+        rootElement = null;
+    }
+    function createElement(tagName, className, children) {
+        var element = document.createElement(tagName);
+        element.className = className;
+        for (var i = 0; i < children.length; ++i) {
+            element.appendChild(children[i]);
+        }
+        return element;
+    }
+
     var __extends$2 = (undefined && undefined.__extends) || (function () {
         var extendStatics = function (d, b) {
             extendStatics = Object.setPrototypeOf ||
@@ -311,6 +354,14 @@
             onJobsTabClick: function () { return setRoute(dispatch, '/job-listing/'); },
             onUsersTabClick: function () { return setRoute(dispatch, '/user-listing/'); },
             onMyAccountClick: function () { return setRoute(dispatch, '/my-account/'); },
+            onAboutClick: function () {
+                apiGet('/api/get-versions/', {}, dispatch).then(function (resp) {
+                    open("About Mendel's Accountant", [
+                        'Mendel Web UI Version: ' + resp.mendelUiVersion,
+                        'Mendel Go Version: ' + resp.mendelGoVersion,
+                    ]);
+                });
+            },
             onLogoutClick: function () {
                 apiPost('/api/logout/', {}, dispatch).then(function () {
                     dispatch({
@@ -379,6 +430,9 @@
                     className: 'page-header__account-menu-item',
                     onClick: this.props.onMyAccountClick,
                 }, 'My Account'), React.createElement('div', {
+                    className: 'page-header__account-menu-item',
+                    onClick: this.props.onAboutClick,
+                }, 'About'), React.createElement('div', {
                     className: 'page-header__account-menu-item',
                     onClick: this.props.onLogoutClick,
                 }, 'Logout')) :
@@ -1731,48 +1785,6 @@
         return DeleteIcon;
     }(React.PureComponent));
 
-    var rootElement = null;
-    function open(title, description, actionCallback) {
-        if (rootElement !== null) {
-            close();
-        }
-        var cancelButton = createElement('div', 'confirmation-dialog__button', [document.createTextNode('Cancel')]);
-        var actionButton = createElement('div', 'confirmation-dialog__button', [document.createTextNode('Ok')]);
-        var overlay = createElement('div', 'confirmation-dialog__overlay', []);
-        rootElement = createElement('div', 'confirmation-dialog', [
-            overlay,
-            createElement('div', 'confirmation-dialog__content', [
-                createElement('div', 'confirmation-dialog__title', [document.createTextNode(title)]),
-                createElement('div', 'confirmation-dialog__description', [document.createTextNode(description)]),
-                createElement('div', 'confirmation-dialog__buttons', [
-                    cancelButton,
-                    actionButton,
-                ]),
-            ]),
-        ]);
-        cancelButton.addEventListener('click', close);
-        overlay.addEventListener('click', close);
-        actionButton.addEventListener('click', function () {
-            close();
-            actionCallback();
-        });
-        document.body.appendChild(assertNotNull(rootElement));
-    }
-    function close() {
-        if (rootElement === null)
-            return;
-        assertNotNull(rootElement.parentNode).removeChild(rootElement);
-        rootElement = null;
-    }
-    function createElement(tagName, className, children) {
-        var element = document.createElement(tagName);
-        element.className = className;
-        for (var i = 0; i < children.length; ++i) {
-            element.appendChild(children[i]);
-        }
-        return element;
-    }
-
     var __extends$b = (undefined && undefined.__extends) || (function () {
         var extendStatics = function (d, b) {
             extendStatics = Object.setPrototypeOf ||
@@ -1805,7 +1817,7 @@
             onCreateClick: function () { return setRoute(dispatch, '/create-user/'); },
             fetchUsers: fetchUsers,
             onDeleteClick: function (userId) {
-                open('Delete user?', 'The user will be deleted, but jobs run by the user will be kept.', function () {
+                open('Delete user?', ['The user will be deleted, but jobs run by the user will be kept.'], function () {
                     apiPost('/api/delete-user/', {
                         id: userId,
                     }, dispatch).then(fetchUsers);

@@ -40,7 +40,7 @@ function mapDispatchToProps(dispatch: Redux.Dispatch<ReduxAction>) {
         onDeleteClick: (userId: string) => {
             confirmationDialog.open(
                 'Delete user?',
-                'The user will be deleted, but jobs run by the user will be kept.',
+                ['The user will be deleted, but jobs run by the user will be kept.'],
                 () => {
                     apiPost(
                         '/api/delete-user/',

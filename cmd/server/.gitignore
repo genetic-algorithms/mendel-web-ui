@@ -1,0 +1,2 @@
+# Built on the fly compile the version into the server
+/version.go

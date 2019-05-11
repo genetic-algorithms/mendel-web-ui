@@ -5,8 +5,9 @@ import { setRoute } from '../util';
 import { AccountIcon } from './icons/account';
 import { ReduxState } from '../redux_state_types';
 import { ReduxAction } from '../redux_action_types';
+import * as confirmationDialog from '../confirmation_dialog';
 import { User } from '../user_types';
-import { apiPost } from '../api';
+import { apiPost, apiGet } from '../api';
 
 type Props = {
     user: User | null;
@@ -16,6 +17,7 @@ type Props = {
     onJobsTabClick: () => void;
     onUsersTabClick: () => void;
     onMyAccountClick: () => void;
+    onAboutClick: () => void;
     onLogoutClick: () => void;
 };
 
@@ -37,6 +39,17 @@ function mapDispatchToProps(dispatch: Redux.Dispatch<ReduxAction>) {
         onJobsTabClick: () => setRoute(dispatch, '/job-listing/'),
         onUsersTabClick: () => setRoute(dispatch, '/user-listing/'),
         onMyAccountClick: () => setRoute(dispatch, '/my-account/'),
+        onAboutClick: () => {
+            apiGet('/api/get-versions/', {}, dispatch).then(resp => {
+                confirmationDialog.open(
+                    "About Mendel's Accountant",
+                    [
+                        'Mendel Web UI Version: ' + resp.mendelUiVersion,
+                        'Mendel Go Version: ' + resp.mendelGoVersion,
+                    ],
+                );
+            });
+        },
         onLogoutClick: () => {
             apiPost(
                 '/api/logout/',
@@ -133,6 +146,10 @@ class Component extends React.Component<Props, State> {
                         className: 'page-header__account-menu-item',
                         onClick: this.props.onMyAccountClick,
                     }, 'My Account'),
+                    React.createElement('div', {
+                        className: 'page-header__account-menu-item',
+                        onClick: this.props.onAboutClick,
+                    }, 'About'),
                     React.createElement('div', {
                         className: 'page-header__account-menu-item',
                         onClick: this.props.onLogoutClick,

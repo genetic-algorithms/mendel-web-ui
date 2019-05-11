@@ -14,6 +14,7 @@ MAC_PKG_INSTALL_DIR ?= /Users/Shared/mendel-web-ui
 default: runserver
 
 cmd/server/$(BINARY): cmd/server/*.go
+	echo 'package main; const MENDEL_UI_VERSION = "$(VERSION)-$(RELEASE)"' > cmd/server/version.go
 	scripts/build_go
 
 runserver: cmd/server/$(BINARY)

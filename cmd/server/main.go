@@ -237,6 +237,8 @@ func apiHandler(w http.ResponseWriter, r *http.Request) {
 		apiDeleteUserHandler(w, r)
 	} else if r.URL.Path == "/api/get-user/" {
 		apiGetUserHandler(w, r)
+	} else if r.URL.Path == "/api/get-versions/" {
+		apiGetVersionsHandler(w, r)
 	} else if r.URL.Path == "/api/default-config/" {
 		apiGetDefaultConfigHandler(w, r)
 	} else if r.URL.Path == "/api/job-config/" {
