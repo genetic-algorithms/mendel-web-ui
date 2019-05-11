@@ -4,6 +4,7 @@ import * as ReactRedux from 'react-redux';
 import { ReduxAction } from '../../redux_action_types';
 import { apiGet } from '../../api';
 import { setRoute } from '../../util';
+import moment from 'moment';
 
 type OwnProps = {
     jobId: string;
@@ -16,6 +17,8 @@ type Props = OwnProps & {
 type State = {
     output: string,
     done: boolean,
+    description: string,
+    time: string,
 };
 
 class Component extends React.Component<Props, State> {
@@ -34,6 +37,8 @@ class Component extends React.Component<Props, State> {
         this.state = {
             output: '',
             done: false,
+            description: '',
+            time: '',
         };
 
         this.onPlotsClick = this.onPlotsClick.bind(this);
@@ -85,6 +90,8 @@ class Component extends React.Component<Props, State> {
             this.setState((prevState, props) => ({
                 output: prevState.output + response.output,
                 done: response.done,
+                description: response.description,
+                time: response.time,
             }));
 
             if (!response.done) {
@@ -98,6 +105,8 @@ class Component extends React.Component<Props, State> {
             React.createElement('div', { className: 'job-detail-view__title' },
                 'Job',
                 React.createElement('span', { className: 'job-detail-view__job-id' }, this.props.jobId),
+                React.createElement('span', { className: 'job-detail-view__job-id' }, this.state.description),
+                React.createElement('span', { className: 'job-detail-view__job-id' }, moment(this.state.time).fromNow()),
             ),
             React.createElement('pre', { className: 'job-detail-view__output' }, this.state.output),
             React.createElement('div', { className: 'job-detail-view__bottom' },

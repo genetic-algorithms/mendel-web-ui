@@ -26,6 +26,7 @@ func apiJobOutputHandler(w http.ResponseWriter, r *http.Request) {
 	jobDir := filepath.Join(globalJobsDir, jobId)
 
 	globalRunningJobsLock.RLock()
+	job := globalDb.Jobs[jobId]
 	output, inProgress := globalRunningJobsOutput[jobId]
 	offsetOutput := ""
 
@@ -45,5 +46,7 @@ func apiJobOutputHandler(w http.ResponseWriter, r *http.Request) {
 	writeJsonResponse(w, map[string]interface{}{
 		"output": offsetOutput,
 		"done":   !inProgress,
+		"description": job.Description,
+		"time": job.Time,
 	})
 }

@@ -62,6 +62,8 @@ export function apiGet(
 ): Promise<{
     output: string;
     done: boolean;
+    description: string;
+    time: string;
 }>;
 
 export function apiGet(

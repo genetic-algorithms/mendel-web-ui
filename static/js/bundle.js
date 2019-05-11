@@ -2282,6 +2282,8 @@
             _this.state = {
                 output: '',
                 done: false,
+                description: '',
+                time: '',
             };
             _this.onPlotsClick = _this.onPlotsClick.bind(_this);
             _this.onConfigClick = _this.onConfigClick.bind(_this);
@@ -2317,6 +2319,8 @@
                 _this.setState(function (prevState, props) { return ({
                     output: prevState.output + response.output,
                     done: response.done,
+                    description: response.description,
+                    time: response.time,
                 }); });
                 if (!response.done) {
                     _this.fetchTimeout = setTimeout(_this.fetchOutput, 1000);
@@ -2324,7 +2328,7 @@
             });
         };
         Component.prototype.render = function () {
-            return React.createElement('div', { className: 'job-detail-view' }, React.createElement('div', { className: 'job-detail-view__title' }, 'Job', React.createElement('span', { className: 'job-detail-view__job-id' }, this.props.jobId)), React.createElement('pre', { className: 'job-detail-view__output' }, this.state.output), React.createElement('div', { className: 'job-detail-view__bottom' }, React.createElement('div', { className: 'job-detail-view__status' }, 'Status: ' + (this.state.done ? 'Done' : 'Running')), (this.state.done ?
+            return React.createElement('div', { className: 'job-detail-view' }, React.createElement('div', { className: 'job-detail-view__title' }, 'Job', React.createElement('span', { className: 'job-detail-view__job-id' }, this.props.jobId), React.createElement('span', { className: 'job-detail-view__job-id' }, this.state.description), React.createElement('span', { className: 'job-detail-view__job-id' }, moment(this.state.time).fromNow())), React.createElement('pre', { className: 'job-detail-view__output' }, this.state.output), React.createElement('div', { className: 'job-detail-view__bottom' }, React.createElement('div', { className: 'job-detail-view__status' }, 'Status: ' + (this.state.done ? 'Done' : 'Running')), (this.state.done ?
                 React.createElement('div', {
                     className: 'job-detail-view__plots-button button',
                     onClick: this.onPlotsClick,
