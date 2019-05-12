@@ -23,27 +23,17 @@ import { ReduxState } from '../../../redux_state_types';
 // All the possible plots. Will be filtered later for the plots files that actually exist for a job.
 const LINKS = [
     {
-        title: 'Average mutations/individual',
-        slug: 'average-mutations',
-        filename: 'mendel.hst',
-    },
-    {
         title: 'Fitness history',
         slug: 'fitness-history',
         filename: 'mendel.fit',
     },
     {
-        title: 'Distribution of accumulated mutations (deleterious)',
-        slug: 'deleterious-mutations',
-        filename: 'allele-distribution-del',
+        title: 'Average mutations/individual',
+        slug: 'average-mutations',
+        filename: 'mendel.hst',
     },
     {
-        title: 'Distribution of accumulated mutations (beneficial)',
-        slug: 'beneficial-mutations',
-        filename: 'allele-distribution-fav',
-    },
-    {
-        title: 'SNP Frequencies',
+        title: 'SNP (Single Nucleotide Polymorphism) Frequencies',
         slug: 'snp-frequencies',
         filename: 'allele-bins',
     },
@@ -51,6 +41,16 @@ const LINKS = [
         title: 'Minor Allele Frequencies',
         slug: 'minor-allele-frequencies',
         filename: 'normalized-allele-bins',
+    },
+    {
+        title: 'Distribution of accumulated deleterious mutations (experimental)',
+        slug: 'deleterious-mutations',
+        filename: 'allele-distribution-del',
+    },
+    {
+        title: 'Distribution of accumulated beneficial mutations (experimental)',
+        slug: 'beneficial-mutations',
+        filename: 'allele-distribution-fav',
     },
 ];
 
@@ -203,17 +203,20 @@ class Component extends React.Component<Props> {
     render() {
         return React.createElement('div', { className: 'plots-view' },
             React.createElement('div', { className: 'plots-view__sidebar' },
-                React.createElement('div', { className: 'plots-view__sidebar__back', onClick: this.props.onBackClick },
-                    React.createElement(BackIcon, { width: 24, height: 24 }),
-                ),
-                (this.props.plots.tribes.length>0 ?
-                    React.createElement('select', { className: 'plots-view__sidebar__select', value: this.props.tribe, onChange: this.onSelectChanged, },
-                        React.createElement('option', { value: 0 }, 'Summary'),
-                        this.props.plots.tribes.map(tribe => 
-                            React.createElement('option', { value: tribe }, tribe),
+                React.createElement('div', { className: 'plots-view__sidebar__title-area' },
+                    React.createElement('div', { className: 'plots-view__sidebar__back', onClick: this.props.onBackClick },
+                        React.createElement(BackIcon, { width: 24, height: 24 }),
+                    ),
+                    React.createElement('div', { className: 'plots-view__sidebar__title' }, 'Plots'),
+                    (this.props.plots.tribes.length>0 ?
+                        React.createElement('select', { className: 'plots-view__sidebar__select', value: this.props.tribe, onChange: this.onSelectChanged, },
+                            React.createElement('option', { value: 0 }, 'Summary'),
+                            this.props.plots.tribes.map(tribe => 
+                                React.createElement('option', { value: tribe }, 'Tribe '+tribe),
+                            )
                         )
-                    )
-                : null ),
+                    : null ),
+                ),
                 React.createElement('div', { className: 'plots-view__sidebar__items' },
                     LINKS.filter(link => this.props.plots.files.indexOf(link.filename) > -1 ).map(link => (
                             React.createElement('div', {

@@ -6,11 +6,11 @@
     padding-right: 24px;
 }
 
-.job-detail-view__job-id {
+.job-detail-view__job-info {
     font-size: 16px;
     margin-top: 7px;
     color: #888;
-    margin-left: 20px;
+    margin-left: 30px;
 }
 
 .job-detail-view__output {

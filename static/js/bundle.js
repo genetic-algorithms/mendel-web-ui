@@ -2328,7 +2328,7 @@
             });
         };
         Component.prototype.render = function () {
-            return React.createElement('div', { className: 'job-detail-view' }, React.createElement('div', { className: 'job-detail-view__title' }, 'Job', React.createElement('span', { className: 'job-detail-view__job-id' }, this.props.jobId), React.createElement('span', { className: 'job-detail-view__job-id' }, this.state.description), React.createElement('span', { className: 'job-detail-view__job-id' }, moment(this.state.time).fromNow())), React.createElement('pre', { className: 'job-detail-view__output' }, this.state.output), React.createElement('div', { className: 'job-detail-view__bottom' }, React.createElement('div', { className: 'job-detail-view__status' }, 'Status: ' + (this.state.done ? 'Done' : 'Running')), (this.state.done ?
+            return React.createElement('div', { className: 'job-detail-view' }, React.createElement('div', { className: 'job-detail-view__title' }, 'Job', React.createElement('span', { className: 'job-detail-view__job-info' }, this.props.jobId), React.createElement('span', { className: 'job-detail-view__job-info' }, this.state.description), React.createElement('span', { className: 'job-detail-view__job-info' }, moment(this.state.time).fromNow())), React.createElement('pre', { className: 'job-detail-view__output' }, this.state.output), React.createElement('div', { className: 'job-detail-view__bottom' }, React.createElement('div', { className: 'job-detail-view__status' }, 'Status: ' + (this.state.done ? 'Done' : 'Running')), (this.state.done ?
                 React.createElement('div', {
                     className: 'job-detail-view__plots-button button',
                     onClick: this.onPlotsClick,
@@ -3215,27 +3215,17 @@
     })();
     var LINKS = [
         {
-            title: 'Average mutations/individual',
-            slug: 'average-mutations',
-            filename: 'mendel.hst',
-        },
-        {
             title: 'Fitness history',
             slug: 'fitness-history',
             filename: 'mendel.fit',
         },
         {
-            title: 'Distribution of accumulated mutations (deleterious)',
-            slug: 'deleterious-mutations',
-            filename: 'allele-distribution-del',
+            title: 'Average mutations/individual',
+            slug: 'average-mutations',
+            filename: 'mendel.hst',
         },
         {
-            title: 'Distribution of accumulated mutations (beneficial)',
-            slug: 'beneficial-mutations',
-            filename: 'allele-distribution-fav',
-        },
-        {
-            title: 'SNP Frequencies',
+            title: 'SNP (Single Nucleotide Polymorphism) Frequencies',
             slug: 'snp-frequencies',
             filename: 'allele-bins',
         },
@@ -3243,6 +3233,16 @@
             title: 'Minor Allele Frequencies',
             slug: 'minor-allele-frequencies',
             filename: 'normalized-allele-bins',
+        },
+        {
+            title: 'Distribution of accumulated deleterious mutations (experimental)',
+            slug: 'deleterious-mutations',
+            filename: 'allele-distribution-del',
+        },
+        {
+            title: 'Distribution of accumulated beneficial mutations (experimental)',
+            slug: 'beneficial-mutations',
+            filename: 'allele-distribution-fav',
         },
     ];
     function mapStateToProps$4(state) {
@@ -3345,11 +3345,11 @@
         };
         Component.prototype.render = function () {
             var _this = this;
-            return React.createElement('div', { className: 'plots-view' }, React.createElement('div', { className: 'plots-view__sidebar' }, React.createElement('div', { className: 'plots-view__sidebar__back', onClick: this.props.onBackClick }, React.createElement(BackIcon, { width: 24, height: 24 })), (this.props.plots.tribes.length > 0 ?
+            return React.createElement('div', { className: 'plots-view' }, React.createElement('div', { className: 'plots-view__sidebar' }, React.createElement('div', { className: 'plots-view__sidebar__title-area' }, React.createElement('div', { className: 'plots-view__sidebar__back', onClick: this.props.onBackClick }, React.createElement(BackIcon, { width: 24, height: 24 })), React.createElement('div', { className: 'plots-view__sidebar__title' }, 'Plots'), (this.props.plots.tribes.length > 0 ?
                 React.createElement('select', { className: 'plots-view__sidebar__select', value: this.props.tribe, onChange: this.onSelectChanged, }, React.createElement('option', { value: 0 }, 'Summary'), this.props.plots.tribes.map(function (tribe) {
-                    return React.createElement('option', { value: tribe }, tribe);
+                    return React.createElement('option', { value: tribe }, 'Tribe ' + tribe);
                 }))
-                : null), React.createElement('div', { className: 'plots-view__sidebar__items' }, LINKS.filter(function (link) { return _this.props.plots.files.indexOf(link.filename) > -1; }).map(function (link) { return (React.createElement('div', {
+                : null)), React.createElement('div', { className: 'plots-view__sidebar__items' }, LINKS.filter(function (link) { return _this.props.plots.files.indexOf(link.filename) > -1; }).map(function (link) { return (React.createElement('div', {
                 className: 'plots-view__sidebar__item ' + (_this.props.activeSlug === link.slug ? 'plots-view__sidebar--active' : ''),
                 onClick: function () { return _this.props.onLinkClick(link.slug); },
                 key: link.slug,

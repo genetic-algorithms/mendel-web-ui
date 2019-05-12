@@ -16,9 +16,14 @@
     overflow: auto;
 }
 
+.plots-view__sidebar__title-area {
+    padding-top: 20px;
+    padding-bottom: 20px;
+}
+
 .plots-view__sidebar__back {
     display: inline-block;
-    vertical-align: top;
+    vertical-align: center;
     padding: 5px;
     border-radius: 50%;
     cursor: pointer;
@@ -34,12 +39,24 @@
     fill: #333;
 }
 
+.plots-view__sidebar__title {
+    display: inline-block;
+    vertical-align: top;
+    font-size: 30px;
+    margin-left: 20px;
+    /*margin-bottom: 10px;
+    padding-top: 40px;
+    padding-bottom: 20px;
+    padding-left: 24px;
+    padding-right: 24px;*/
+}
+
 .plots-view__sidebar__select {
+    display: inline-block;
+    vertical-align: top;
     -webkit-appearance: none;
     -moz-appearance: none;
     appearance: none;
-    /* display: block;
-    padding: 12px 20px; */
     margin-left: 40px;
     border: 1px solid transparent;
     width: 100px;
