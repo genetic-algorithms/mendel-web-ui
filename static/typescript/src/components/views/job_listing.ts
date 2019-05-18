@@ -5,7 +5,7 @@ import moment from 'moment';
 import { ReduxAction } from '../../redux_action_types';
 import { apiGet, apiPost } from '../../api';
 import { setRoute, assertNotNull } from '../../util';
-//import * as confirmationDialog from '../../confirmation_dialog';
+import { ConfirmationDialog } from '../../confirmation_dialog2';
 import { DeleteIcon } from '../icons/delete';
 
 type Job = {
@@ -23,6 +23,8 @@ type Props = {
 type State = {
     jobs: Job[],
     all: boolean,
+    confirmationOpen: boolean;
+    jobIdToDelete: string;
 };
 
 class Component extends React.Component<Props, State> {
@@ -37,9 +39,14 @@ class Component extends React.Component<Props, State> {
         this.state = {
             jobs: [],
             all: false,
+            confirmationOpen: false,
+            jobIdToDelete: "",
         };
 
         this.onImportClick = this.onImportClick.bind(this);
+        this.onConfirmationOpen = this.onConfirmationOpen.bind(this);
+        this.onConfirmationCancel = this.onConfirmationCancel.bind(this);
+        this.onConfirmationOk = this.onConfirmationOk.bind(this);
     }
 
     onJobClick(jobId: string) {
@@ -75,38 +82,58 @@ class Component extends React.Component<Props, State> {
         this.fetchController.abort();
         this.fetchController = new AbortController();
 
-        apiGet(
+        return apiGet(
             '/api/job-list/',
             { filter: all ? 'all' : 'mine' },
             this.props.dispatch,
             this.fetchController.signal,
-        ).then(response => {
-            this.setState({
-                jobs: response.jobs,
+        );
+    }
+
+    deleteJob(jobId: string) {
+        this.fetchController.abort();
+        this.fetchController = new AbortController();
+
+        return apiPost(
+            '/api/delete-job/',
+            { id: jobId },
+            this.props.dispatch,
+        );
+    }
+
+    onConfirmationOpen(jobId: string) {
+        this.setState({
+            confirmationOpen: true,
+            jobIdToDelete: jobId,
+        });
+    };
+
+    onConfirmationCancel() {
+        this.setState({
+            confirmationOpen: false,
+            jobIdToDelete: "",
+        });
+    };
+
+    // Delete job
+    onConfirmationOk() {
+        this.deleteJob(this.state.jobIdToDelete).then( () => {
+            this.fetchJobs(this.state.all).then(response => {
+                this.setState({
+                    jobs: response.jobs,
+                    confirmationOpen: false,
+                    jobIdToDelete: "",
+                });
             });
         });
     }
 
-    onDeleteClick(userId: string) {
-        /*
-        confirmationDialog.open(
-            'Delete job?',
-            ['The job output and data will also be deleted. This can not be undone.'],
-            () => {
-                apiPost(
-                    '/api/delete-job/',
-                    {
-                        id: userId,
-                    },
-                    this.props.dispatch,
-                ).then(this.fetchJobs(this.state.all));
-            },
-        );
-        */
-    }
-
     componentDidMount() {
-        this.fetchJobs(this.state.all);
+        this.fetchJobs(this.state.all).then(response => {
+            this.setState({
+                jobs: response.jobs,
+            });
+        });
     }
 
     componentWillUnmount() {
@@ -137,28 +164,34 @@ class Component extends React.Component<Props, State> {
                 ),
 
                 this.state.jobs.map(job => (
-                    React.createElement('div',
-                        {
-                            className: 'job-listing-view__job',
-                            key: job.id,
-                            onClick: () => this.onJobClick(job.id),
-                        },
-                        React.createElement('div', { className: 'job-listing-view__job__id' }, job.id),
-                        React.createElement('div', { className: 'job-listing-view__job__time' }, moment(job.time).fromNow()),
-                        React.createElement('div', { className: 'job-listing-view__job__description' }, job.description),
-                        React.createElement('div', { className: 'job-listing-view__job__username' }, job.username),
-                        React.createElement('div', { className: 'job-listing-view__job__status' },
-                            capitalizeFirstLetter(job.status),
+                    React.createElement('div', { className: 'job-listing-view__job', key: job.id },
+                        React.createElement('div', { className: 'job-listing-view__job2', onClick: () => this.onJobClick(job.id) },
+                            React.createElement('div', { className: 'job-listing-view__job__id' }, job.id),
+                            React.createElement('div', { className: 'job-listing-view__job__time' }, moment(job.time).fromNow()),
+                            React.createElement('div', { className: 'job-listing-view__job__description' }, job.description),
+                            React.createElement('div', { className: 'job-listing-view__job__username' }, job.username),
+                            React.createElement('div', { className: 'job-listing-view__job__status' },
+                                capitalizeFirstLetter(job.status),
+                            ),
                         ),
                         React.createElement('div',
                             {
                                 className: 'job-listing-view__job__delete-button',
-                                onClick: () => this.onDeleteClick(job.id),
+                                onClick: () => this.onConfirmationOpen(job.id),
                             },
                             React.createElement(DeleteIcon, { width: 24, height: 24 }),
                         ),
                     )
                 )),
+            ),
+            (this.state.confirmationOpen ?
+                React.createElement(ConfirmationDialog, {
+                    title: 'Delete job?',
+                    descriptions: ['The job output and data will also be deleted. This can not be undone.'],
+                    onCancel: this.onConfirmationCancel,
+                    onOk: this.onConfirmationOk,
+                })
+                : null
             ),
         );
     }

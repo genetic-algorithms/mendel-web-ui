@@ -5,6 +5,7 @@ How to use this dialog from another Component:
 - in that component add a boolean state variable for whether this dialog should be open or closed
 - in the actions in that componet for opening and closing this dialog run setState() to change the above variable
 - in render() of that component create this dialog component or not based on the state variable
+- pass in a callback to run when the user clicks the close button
 */
 
 type Props = {

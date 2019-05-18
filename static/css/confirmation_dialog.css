@@ -20,8 +20,12 @@
 }
 
 .confirmation-dialog__content {
+    display: block;
+    margin: auto;
     position: relative;
     width: 400px;
+    max-width: 80%;
+    max-height: 80%;
     background-color: #FFF;
     padding: 24px;
     border-radius: 4px;
@@ -31,19 +35,19 @@
 .confirmation-dialog__title {
     font-size: 20px;
     font-weight: 700;
+    margin-bottom: 20px;
 }
 
 .confirmation-dialog__description {
-    /*todo: figure out how to get multiple descriptions to appear below the previous one */
-    /* display: block; */
-    padding-top: 24px;
-    padding-bottom: 24px;
-    line-height: calc(100% + 6px);
+    padding-top: 5px;
+    padding-bottom: 5px;
+    /*line-height: calc(100% + 6px);*/
 }
 
 .confirmation-dialog__buttons {
     display: flex;
     justify-content: flex-end;
+    margin-top: 10px;
 }
 
 .confirmation-dialog__button {

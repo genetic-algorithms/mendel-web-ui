@@ -62,6 +62,11 @@
     background-color: #EEE;
 }
 
+.job-listing-view__job2 {
+    width: calc(100% - 20px);
+    display: flex;
+}
+
 .job-listing-view__labels__id,
 .job-listing-view__labels__time,
 .job-listing-view__labels__description,

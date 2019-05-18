@@ -3,6 +3,7 @@ package main
 // Called for /api/job-list/ route
 
 import (
+	"log"
 	"net/http"
 	"sort"
 	"time"
@@ -17,6 +18,7 @@ type ApiJobListHandlerJob struct {
 }
 
 func apiJobListHandler(w http.ResponseWriter, r *http.Request) {
+	log.Printf("In /api/job-list/ %s ...", r.URL.Query())
 	user := getAuthenticatedUser(r)
 	if user.Id == "" {
 		http.Error(w, "401 Unauthorized", http.StatusUnauthorized)
