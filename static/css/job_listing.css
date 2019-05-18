@@ -67,20 +67,24 @@
 .job-listing-view__labels__description,
 .job-listing-view__labels__username,
 .job-listing-view__labels__status,
+.job-listing-view__labels__delete-button,
 .job-listing-view__job__id,
 .job-listing-view__job__time,
 .job-listing-view__job__description,
 .job-listing-view__job__username,
-.job-listing-view__job__status {
+.job-listing-view__job__status,
+.job-listing-view__job__delete-button {
     padding: 14px 0;
     font-size: 14px;
+    vertical-align: middle
 }
 
 .job-listing-view__labels__id,
 .job-listing-view__labels__time,
 .job-listing-view__labels__description,
 .job-listing-view__labels__username,
-.job-listing-view__labels__status {
+.job-listing-view__labels__status,
+.job-listing-view__labels__delete-button {
     font-weight: 700;
 }
 
@@ -122,4 +126,22 @@
 .job-listing-view__labels__status,
 .job-listing-view__job__status {
     width: 90px;
+}
+
+.job-listing-view__labels__delete-button,
+.job-listing-view__job__delete-button {
+    width: 20px;
+}
+
+.job-listing-view__job__delete-button {
+    padding-top: 9px;
+    cursor: pointer;
+}
+
+.job-listing-view__job__delete-button svg {
+    fill: #999;
+}
+
+.job-listing-view__job__delete-button:hover svg {
+    fill: #666;
 }

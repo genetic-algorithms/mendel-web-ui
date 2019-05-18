@@ -5,6 +5,8 @@ import moment from 'moment';
 import { ReduxAction } from '../../redux_action_types';
 import { apiGet, apiPost } from '../../api';
 import { setRoute, assertNotNull } from '../../util';
+//import * as confirmationDialog from '../../confirmation_dialog';
+import { DeleteIcon } from '../icons/delete';
 
 type Job = {
     id: string;
@@ -85,6 +87,24 @@ class Component extends React.Component<Props, State> {
         });
     }
 
+    onDeleteClick(userId: string) {
+        /*
+        confirmationDialog.open(
+            'Delete job?',
+            ['The job output and data will also be deleted. This can not be undone.'],
+            () => {
+                apiPost(
+                    '/api/delete-job/',
+                    {
+                        id: userId,
+                    },
+                    this.props.dispatch,
+                ).then(this.fetchJobs(this.state.all));
+            },
+        );
+        */
+    }
+
     componentDidMount() {
         this.fetchJobs(this.state.all);
     }
@@ -113,6 +133,7 @@ class Component extends React.Component<Props, State> {
                     React.createElement('div', { className: 'job-listing-view__labels__description' }, 'Description'),
                     React.createElement('div', { className: 'job-listing-view__labels__username' }, 'User'),
                     React.createElement('div', { className: 'job-listing-view__labels__status' }, 'Status'),
+                    React.createElement('div', { className: 'job-listing-view__labels__delete-button' }, ''),
                 ),
 
                 this.state.jobs.map(job => (
@@ -128,6 +149,13 @@ class Component extends React.Component<Props, State> {
                         React.createElement('div', { className: 'job-listing-view__job__username' }, job.username),
                         React.createElement('div', { className: 'job-listing-view__job__status' },
                             capitalizeFirstLetter(job.status),
+                        ),
+                        React.createElement('div',
+                            {
+                                className: 'job-listing-view__job__delete-button',
+                                onClick: () => this.onDeleteClick(job.id),
+                            },
+                            React.createElement(DeleteIcon, { width: 24, height: 24 }),
                         ),
                     )
                 )),

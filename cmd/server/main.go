@@ -206,6 +206,7 @@ func rootHandler(w http.ResponseWriter, _ *http.Request) {
 			staticMtime("css/create_edit_user.css"),
 			staticMtime("css/plots.css"),
 			staticMtime("css/confirmation_dialog.css"),
+			staticMtime("css/msg_dialog.css"),
 		},
 		JsFiles: []string{
 			staticMtime("js/bundle.js"),
@@ -229,6 +230,8 @@ func apiHandler(w http.ResponseWriter, r *http.Request) {
 		apiJobOutputHandler(w, r)
 	} else if r.URL.Path == "/api/job-list/" {
 		apiJobListHandler(w, r)
+	} else if r.URL.Path == "/api/delete-job/" {
+		apiDeleteJobHandler(w, r)
 	} else if r.URL.Path == "/api/user-list/" {
 		apiUserListHandler(w, r)
 	} else if r.URL.Path == "/api/create-edit-user/" {

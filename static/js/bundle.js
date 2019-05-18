@@ -285,50 +285,31 @@
         return AccountIcon;
     }(React.PureComponent));
 
-    var rootElement = null;
-    function open(title, descriptions, actionCallback) {
-        if (rootElement !== null) {
-            close();
-        }
-        var cancelButton = createElement('div', 'confirmation-dialog__button', [document.createTextNode('Cancel')]);
-        var actionButton = createElement('div', 'confirmation-dialog__button', [document.createTextNode('Ok')]);
-        var overlay = createElement('div', 'confirmation-dialog__overlay', []);
-        rootElement = createElement('div', 'confirmation-dialog', [
-            overlay,
-            createElement('div', 'confirmation-dialog__content', [
-                createElement('div', 'confirmation-dialog__title', [document.createTextNode(title)]),
-                createElement('div', 'confirmation-dialog__description', descriptions.map(function (desc) { return document.createTextNode(desc); })),
-                createElement('div', 'confirmation-dialog__buttons', (actionCallback !== undefined ? [cancelButton, actionButton] : [actionButton])),
-            ]),
-        ]);
-        if (actionCallback !== undefined) {
-            cancelButton.addEventListener('click', close);
-        }
-        overlay.addEventListener('click', close);
-        actionButton.addEventListener('click', function () {
-            close();
-            if (actionCallback !== undefined) {
-                actionCallback();
-            }
-        });
-        document.body.appendChild(assertNotNull(rootElement));
-    }
-    function close() {
-        if (rootElement === null)
-            return;
-        assertNotNull(rootElement.parentNode).removeChild(rootElement);
-        rootElement = null;
-    }
-    function createElement(tagName, className, children) {
-        var element = document.createElement(tagName);
-        element.className = className;
-        for (var i = 0; i < children.length; ++i) {
-            element.appendChild(children[i]);
-        }
-        return element;
-    }
-
     var __extends$2 = (undefined && undefined.__extends) || (function () {
+        var extendStatics = function (d, b) {
+            extendStatics = Object.setPrototypeOf ||
+                ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+                function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+            return extendStatics(d, b);
+        };
+        return function (d, b) {
+            extendStatics(d, b);
+            function __() { this.constructor = d; }
+            d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+        };
+    })();
+    var MsgDialog = (function (_super) {
+        __extends$2(MsgDialog, _super);
+        function MsgDialog() {
+            return _super !== null && _super.apply(this, arguments) || this;
+        }
+        MsgDialog.prototype.render = function () {
+            return React.createElement('div', { className: 'msg-dialog' }, React.createElement('div', { className: 'msg-dialog__overlay', onClick: this.props.onClose }), React.createElement('div', { className: 'msg-dialog__content' }, React.createElement('div', { className: 'msg-dialog__title' }, this.props.title), this.props.descriptions.map(function (desc) { return React.createElement('div', { className: 'msg-dialog__description' }, desc); }), React.createElement('div', { className: 'msg-dialog__buttons' }, React.createElement('div', { className: 'msg-dialog__button', onClick: this.props.onClose }, 'Close'))));
+        };
+        return MsgDialog;
+    }(React.Component));
+
+    var __extends$3 = (undefined && undefined.__extends) || (function () {
         var extendStatics = function (d, b) {
             extendStatics = Object.setPrototypeOf ||
                 ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
@@ -350,18 +331,11 @@
     }
     function mapDispatchToProps(dispatch) {
         return {
+            dispatch: dispatch,
             onNewJobTabClick: function () { return setRoute(dispatch, '/'); },
             onJobsTabClick: function () { return setRoute(dispatch, '/job-listing/'); },
             onUsersTabClick: function () { return setRoute(dispatch, '/user-listing/'); },
             onMyAccountClick: function () { return setRoute(dispatch, '/my-account/'); },
-            onAboutClick: function () {
-                apiGet('/api/get-versions/', {}, dispatch).then(function (resp) {
-                    open("About Mendel's Accountant", [
-                        'Mendel Web UI Version: ' + resp.mendelUiVersion,
-                        'Mendel Go Version: ' + resp.mendelGoVersion,
-                    ]);
-                });
-            },
             onLogoutClick: function () {
                 apiPost('/api/logout/', {}, dispatch).then(function () {
                     dispatch({
@@ -373,16 +347,36 @@
         };
     }
     var Component$1 = (function (_super) {
-        __extends$2(Component, _super);
+        __extends$3(Component, _super);
         function Component(props) {
             var _this = _super.call(this, props) || this;
             _this.menuButtonElement = React.createRef();
             _this.state = {
                 menuOpen: false,
+                aboutOpen: false,
+                mendelUiVersion: "",
+                mendelGoVersion: "",
             };
             _this.onDocumentClick = _this.onDocumentClick.bind(_this);
+            _this.onAboutOpen = _this.onAboutOpen.bind(_this);
+            _this.onAboutClose = _this.onAboutClose.bind(_this);
             return _this;
         }
+        Component.prototype.onAboutOpen = function () {
+            var _this = this;
+            apiGet('/api/get-versions/', {}, this.props.dispatch).then(function (resp) {
+                _this.setState({
+                    aboutOpen: true,
+                    mendelUiVersion: resp.mendelUiVersion,
+                    mendelGoVersion: resp.mendelGoVersion,
+                });
+            });
+        };
+        Component.prototype.onAboutClose = function () {
+            this.setState({
+                aboutOpen: false,
+            });
+        };
         Component.prototype.onDocumentClick = function (e) {
             if (this.state.menuOpen) {
                 this.setState({
@@ -431,45 +425,26 @@
                     onClick: this.props.onMyAccountClick,
                 }, 'My Account'), React.createElement('div', {
                     className: 'page-header__account-menu-item',
-                    onClick: this.props.onAboutClick,
+                    onClick: this.onAboutOpen,
                 }, 'About'), React.createElement('div', {
                     className: 'page-header__account-menu-item',
                     onClick: this.props.onLogoutClick,
                 }, 'Logout')) :
-                null));
+                null), (this.state.aboutOpen ?
+                React.createElement(MsgDialog, {
+                    title: "About Mendel's Accountant",
+                    descriptions: [
+                        "Mendel's Accountant is a genetic mutation tracking program used to simulate and study macroevolution in a biologically realistic way. It models genetic change over time by tracking each mutation that enters the simulated population from generation to generation to the end of the simulation. The software models each individual in the population, including their chromosomes, linkage blocks, and deleterious, favorable, and neutral mutations.",
+                        'Mendel Web UI Version: ' + this.state.mendelUiVersion,
+                        'Mendel Go Version: ' + this.state.mendelGoVersion,
+                    ],
+                    onClose: this.onAboutClose,
+                })
+                : null));
         };
         return Component;
     }(React.Component));
     var Header = ReactRedux.connect(mapStateToProps, mapDispatchToProps)(Component$1);
-
-    var __extends$3 = (undefined && undefined.__extends) || (function () {
-        var extendStatics = function (d, b) {
-            extendStatics = Object.setPrototypeOf ||
-                ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-                function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
-            return extendStatics(d, b);
-        };
-        return function (d, b) {
-            extendStatics(d, b);
-            function __() { this.constructor = d; }
-            d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-        };
-    })();
-    var CheckboxCheckedIcon = (function (_super) {
-        __extends$3(CheckboxCheckedIcon, _super);
-        function CheckboxCheckedIcon() {
-            return _super !== null && _super.apply(this, arguments) || this;
-        }
-        CheckboxCheckedIcon.prototype.render = function () {
-            return React.createElement('svg', {
-                width: this.props.width.toString(),
-                height: this.props.height.toString(),
-                viewBox: '0 0 24 24',
-                xmlns: 'http://www.w3.org/2000/svg',
-            }, React.createElement('path', { d: 'M19 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.11 0 2-.9 2-2V5c0-1.1-.89-2-2-2zm-9 14l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z' }));
-        };
-        return CheckboxCheckedIcon;
-    }(React.PureComponent));
 
     var __extends$4 = (undefined && undefined.__extends) || (function () {
         var extendStatics = function (d, b) {
@@ -484,20 +459,20 @@
             d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
         };
     })();
-    var CheckboxUncheckedIcon = (function (_super) {
-        __extends$4(CheckboxUncheckedIcon, _super);
-        function CheckboxUncheckedIcon() {
+    var CheckboxCheckedIcon = (function (_super) {
+        __extends$4(CheckboxCheckedIcon, _super);
+        function CheckboxCheckedIcon() {
             return _super !== null && _super.apply(this, arguments) || this;
         }
-        CheckboxUncheckedIcon.prototype.render = function () {
+        CheckboxCheckedIcon.prototype.render = function () {
             return React.createElement('svg', {
                 width: this.props.width.toString(),
                 height: this.props.height.toString(),
                 viewBox: '0 0 24 24',
                 xmlns: 'http://www.w3.org/2000/svg',
-            }, React.createElement('path', { d: 'M19 5v14H5V5h14m0-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z' }));
+            }, React.createElement('path', { d: 'M19 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.11 0 2-.9 2-2V5c0-1.1-.89-2-2-2zm-9 14l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z' }));
         };
-        return CheckboxUncheckedIcon;
+        return CheckboxCheckedIcon;
     }(React.PureComponent));
 
     var __extends$5 = (undefined && undefined.__extends) || (function () {
@@ -513,8 +488,37 @@
             d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
         };
     })();
+    var CheckboxUncheckedIcon = (function (_super) {
+        __extends$5(CheckboxUncheckedIcon, _super);
+        function CheckboxUncheckedIcon() {
+            return _super !== null && _super.apply(this, arguments) || this;
+        }
+        CheckboxUncheckedIcon.prototype.render = function () {
+            return React.createElement('svg', {
+                width: this.props.width.toString(),
+                height: this.props.height.toString(),
+                viewBox: '0 0 24 24',
+                xmlns: 'http://www.w3.org/2000/svg',
+            }, React.createElement('path', { d: 'M19 5v14H5V5h14m0-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z' }));
+        };
+        return CheckboxUncheckedIcon;
+    }(React.PureComponent));
+
+    var __extends$6 = (undefined && undefined.__extends) || (function () {
+        var extendStatics = function (d, b) {
+            extendStatics = Object.setPrototypeOf ||
+                ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+                function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+            return extendStatics(d, b);
+        };
+        return function (d, b) {
+            extendStatics(d, b);
+            function __() { this.constructor = d; }
+            d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+        };
+    })();
     var Checkbox = (function (_super) {
-        __extends$5(Checkbox, _super);
+        __extends$6(Checkbox, _super);
         function Checkbox(props) {
             var _this = _super.call(this, props) || this;
             _this.onClick = _this.onClick.bind(_this);
@@ -540,7 +544,7 @@
         return Checkbox;
     }(React.PureComponent));
 
-    var __extends$6 = (undefined && undefined.__extends) || (function () {
+    var __extends$7 = (undefined && undefined.__extends) || (function () {
         var extendStatics = function (d, b) {
             extendStatics = Object.setPrototypeOf ||
                 ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
@@ -554,7 +558,7 @@
         };
     })();
     var HelpIcon = (function (_super) {
-        __extends$6(HelpIcon, _super);
+        __extends$7(HelpIcon, _super);
         function HelpIcon() {
             return _super !== null && _super.apply(this, arguments) || this;
         }
@@ -569,7 +573,7 @@
         return HelpIcon;
     }(React.PureComponent));
 
-    var __extends$7 = (undefined && undefined.__extends) || (function () {
+    var __extends$8 = (undefined && undefined.__extends) || (function () {
         var extendStatics = function (d, b) {
             extendStatics = Object.setPrototypeOf ||
                 ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
@@ -583,7 +587,7 @@
         };
     })();
     var Help = (function (_super) {
-        __extends$7(Help, _super);
+        __extends$8(Help, _super);
         function Help(props) {
             var _this = _super.call(this, props) || this;
             _this.buttonRef = React.createRef();
@@ -626,7 +630,7 @@
         return Help;
     }(React.PureComponent));
 
-    var __extends$8 = (undefined && undefined.__extends) || (function () {
+    var __extends$9 = (undefined && undefined.__extends) || (function () {
         var extendStatics = function (d, b) {
             extendStatics = Object.setPrototypeOf ||
                 ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
@@ -641,7 +645,7 @@
     })();
     var HELP_URL_PREFIX = 'http://ec2-52-43-51-28.us-west-2.compute.amazonaws.com:8580/static/apps/mendel/help.html#';
     var Component$2 = (function (_super) {
-        __extends$8(Component, _super);
+        __extends$9(Component, _super);
         function Component(props) {
             var _this = _super.call(this, props) || this;
             _this.fieldChangeHandlers = {
@@ -1659,103 +1663,6 @@
     }
     var NewJob = ReactRedux.connect()(Component$2);
 
-    var __extends$9 = (undefined && undefined.__extends) || (function () {
-        var extendStatics = function (d, b) {
-            extendStatics = Object.setPrototypeOf ||
-                ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-                function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
-            return extendStatics(d, b);
-        };
-        return function (d, b) {
-            extendStatics(d, b);
-            function __() { this.constructor = d; }
-            d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-        };
-    })();
-    var Component$3 = (function (_super) {
-        __extends$9(Component, _super);
-        function Component(props) {
-            var _this = _super.call(this, props) || this;
-            _this.onFilterChanged = _this.onFilterChanged.bind(_this);
-            _this.fetchController = new AbortController();
-            _this.state = {
-                jobs: [],
-                all: false,
-            };
-            _this.onImportClick = _this.onImportClick.bind(_this);
-            return _this;
-        }
-        Component.prototype.onJobClick = function (jobId) {
-            setRoute(this.props.dispatch, '/job-detail/' + jobId + '/');
-        };
-        Component.prototype.onImportClick = function () {
-            var _this = this;
-            chooseFileContentsBase64(function (contents) {
-                apiPost('/api/import-job/', {
-                    contents: contents,
-                }, _this.props.dispatch).then(function () {
-                    _this.fetchJobs(_this.state.all);
-                });
-            });
-        };
-        Component.prototype.onFilterChanged = function (e) {
-            var value = e.currentTarget.value;
-            var all = value === 'all';
-            this.fetchJobs(all);
-            this.setState({
-                all: all,
-            });
-        };
-        Component.prototype.fetchJobs = function (all) {
-            var _this = this;
-            this.fetchController.abort();
-            this.fetchController = new AbortController();
-            apiGet('/api/job-list/', { filter: all ? 'all' : 'mine' }, this.props.dispatch, this.fetchController.signal).then(function (response) {
-                _this.setState({
-                    jobs: response.jobs,
-                });
-            });
-        };
-        Component.prototype.componentDidMount = function () {
-            this.fetchJobs(this.state.all);
-        };
-        Component.prototype.componentWillUnmount = function () {
-            this.fetchController.abort();
-        };
-        Component.prototype.render = function () {
-            var _this = this;
-            return React.createElement('div', { className: 'job-listing-view' }, React.createElement('div', { className: 'job-listing-view__title' }, 'Jobs'), React.createElement('select', {
-                className: 'job-listing-view__filter',
-                value: this.state.all ? 'all' : 'mine',
-                onChange: this.onFilterChanged,
-            }, React.createElement('option', { value: 'mine' }, 'My Jobs'), React.createElement('option', { value: 'all' }, 'All Jobs')), React.createElement('div', { className: 'job-listing-view__import button button--text', onClick: this.onImportClick }, 'Import'), React.createElement('div', { className: 'job-listing-view__jobs' }, React.createElement('div', { className: 'job-listing-view__labels' }, React.createElement('div', { className: 'job-listing-view__labels__id' }, 'Job ID'), React.createElement('div', { className: 'job-listing-view__labels__time' }, 'Time'), React.createElement('div', { className: 'job-listing-view__labels__description' }, 'Description'), React.createElement('div', { className: 'job-listing-view__labels__username' }, 'User'), React.createElement('div', { className: 'job-listing-view__labels__status' }, 'Status')), this.state.jobs.map(function (job) { return (React.createElement('div', {
-                className: 'job-listing-view__job',
-                key: job.id,
-                onClick: function () { return _this.onJobClick(job.id); },
-            }, React.createElement('div', { className: 'job-listing-view__job__id' }, job.id), React.createElement('div', { className: 'job-listing-view__job__time' }, moment(job.time).fromNow()), React.createElement('div', { className: 'job-listing-view__job__description' }, job.description), React.createElement('div', { className: 'job-listing-view__job__username' }, job.username), React.createElement('div', { className: 'job-listing-view__job__status' }, capitalizeFirstLetter(job.status)))); })));
-        };
-        return Component;
-    }(React.Component));
-    function capitalizeFirstLetter(s) {
-        return s[0].toUpperCase() + s.substring(1);
-    }
-    function chooseFileContentsBase64(callback) {
-        var input = document.createElement('input');
-        input.setAttribute('type', 'file');
-        input.click();
-        var onChange = function () {
-            var f = assertNotNull(input.files)[0];
-            var reader = new FileReader();
-            reader.onload = function () {
-                var contents = assertNotNull(reader.result).split(',')[1];
-                callback(contents);
-            };
-            reader.readAsDataURL(f);
-        };
-        input.addEventListener('change', onChange, { once: true });
-    }
-    var JobListing = ReactRedux.connect()(Component$3);
-
     var __extends$a = (undefined && undefined.__extends) || (function () {
         var extendStatics = function (d, b) {
             extendStatics = Object.setPrototypeOf ||
@@ -1798,6 +1705,151 @@
             d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
         };
     })();
+    var Component$3 = (function (_super) {
+        __extends$b(Component, _super);
+        function Component(props) {
+            var _this = _super.call(this, props) || this;
+            _this.onFilterChanged = _this.onFilterChanged.bind(_this);
+            _this.fetchController = new AbortController();
+            _this.state = {
+                jobs: [],
+                all: false,
+            };
+            _this.onImportClick = _this.onImportClick.bind(_this);
+            return _this;
+        }
+        Component.prototype.onJobClick = function (jobId) {
+            setRoute(this.props.dispatch, '/job-detail/' + jobId + '/');
+        };
+        Component.prototype.onImportClick = function () {
+            var _this = this;
+            chooseFileContentsBase64(function (contents) {
+                apiPost('/api/import-job/', {
+                    contents: contents,
+                }, _this.props.dispatch).then(function () {
+                    _this.fetchJobs(_this.state.all);
+                });
+            });
+        };
+        Component.prototype.onFilterChanged = function (e) {
+            var value = e.currentTarget.value;
+            var all = value === 'all';
+            this.fetchJobs(all);
+            this.setState({
+                all: all,
+            });
+        };
+        Component.prototype.fetchJobs = function (all) {
+            var _this = this;
+            this.fetchController.abort();
+            this.fetchController = new AbortController();
+            apiGet('/api/job-list/', { filter: all ? 'all' : 'mine' }, this.props.dispatch, this.fetchController.signal).then(function (response) {
+                _this.setState({
+                    jobs: response.jobs,
+                });
+            });
+        };
+        Component.prototype.onDeleteClick = function (userId) {
+        };
+        Component.prototype.componentDidMount = function () {
+            this.fetchJobs(this.state.all);
+        };
+        Component.prototype.componentWillUnmount = function () {
+            this.fetchController.abort();
+        };
+        Component.prototype.render = function () {
+            var _this = this;
+            return React.createElement('div', { className: 'job-listing-view' }, React.createElement('div', { className: 'job-listing-view__title' }, 'Jobs'), React.createElement('select', {
+                className: 'job-listing-view__filter',
+                value: this.state.all ? 'all' : 'mine',
+                onChange: this.onFilterChanged,
+            }, React.createElement('option', { value: 'mine' }, 'My Jobs'), React.createElement('option', { value: 'all' }, 'All Jobs')), React.createElement('div', { className: 'job-listing-view__import button button--text', onClick: this.onImportClick }, 'Import'), React.createElement('div', { className: 'job-listing-view__jobs' }, React.createElement('div', { className: 'job-listing-view__labels' }, React.createElement('div', { className: 'job-listing-view__labels__id' }, 'Job ID'), React.createElement('div', { className: 'job-listing-view__labels__time' }, 'Time'), React.createElement('div', { className: 'job-listing-view__labels__description' }, 'Description'), React.createElement('div', { className: 'job-listing-view__labels__username' }, 'User'), React.createElement('div', { className: 'job-listing-view__labels__status' }, 'Status'), React.createElement('div', { className: 'job-listing-view__labels__delete-button' }, '')), this.state.jobs.map(function (job) { return (React.createElement('div', {
+                className: 'job-listing-view__job',
+                key: job.id,
+                onClick: function () { return _this.onJobClick(job.id); },
+            }, React.createElement('div', { className: 'job-listing-view__job__id' }, job.id), React.createElement('div', { className: 'job-listing-view__job__time' }, moment(job.time).fromNow()), React.createElement('div', { className: 'job-listing-view__job__description' }, job.description), React.createElement('div', { className: 'job-listing-view__job__username' }, job.username), React.createElement('div', { className: 'job-listing-view__job__status' }, capitalizeFirstLetter(job.status)), React.createElement('div', {
+                className: 'job-listing-view__job__delete-button',
+                onClick: function () { return _this.onDeleteClick(job.id); },
+            }, React.createElement(DeleteIcon, { width: 24, height: 24 })))); })));
+        };
+        return Component;
+    }(React.Component));
+    function capitalizeFirstLetter(s) {
+        return s[0].toUpperCase() + s.substring(1);
+    }
+    function chooseFileContentsBase64(callback) {
+        var input = document.createElement('input');
+        input.setAttribute('type', 'file');
+        input.click();
+        var onChange = function () {
+            var f = assertNotNull(input.files)[0];
+            var reader = new FileReader();
+            reader.onload = function () {
+                var contents = assertNotNull(reader.result).split(',')[1];
+                callback(contents);
+            };
+            reader.readAsDataURL(f);
+        };
+        input.addEventListener('change', onChange, { once: true });
+    }
+    var JobListing = ReactRedux.connect()(Component$3);
+
+    var rootElement = null;
+    function open(title, descriptions, actionCallback) {
+        if (rootElement !== null) {
+            close();
+        }
+        var cancelButton = createElement('div', 'confirmation-dialog__button', [document.createTextNode('Cancel')]);
+        var actionButton = createElement('div', 'confirmation-dialog__button', [document.createTextNode('Ok')]);
+        var overlay = createElement('div', 'confirmation-dialog__overlay', []);
+        rootElement = createElement('div', 'confirmation-dialog', [
+            overlay,
+            createElement('div', 'confirmation-dialog__content', [
+                createElement('div', 'confirmation-dialog__title', [document.createTextNode(title)]),
+                createElement('div', 'confirmation-dialog__description', descriptions.map(function (desc) { return document.createTextNode(desc); })),
+                createElement('div', 'confirmation-dialog__buttons', (actionCallback !== undefined ? [cancelButton, actionButton] : [actionButton])),
+            ]),
+        ]);
+        if (actionCallback !== undefined) {
+            cancelButton.addEventListener('click', close);
+        }
+        overlay.addEventListener('click', close);
+        actionButton.addEventListener('click', function () {
+            close();
+            if (actionCallback !== undefined) {
+                actionCallback();
+            }
+        });
+        document.body.appendChild(assertNotNull(rootElement));
+    }
+    function close() {
+        if (rootElement === null)
+            return;
+        assertNotNull(rootElement.parentNode).removeChild(rootElement);
+        rootElement = null;
+    }
+    function createElement(tagName, className, children) {
+        var element = document.createElement(tagName);
+        element.className = className;
+        for (var i = 0; i < children.length; ++i) {
+            element.appendChild(children[i]);
+        }
+        return element;
+    }
+
+    var __extends$c = (undefined && undefined.__extends) || (function () {
+        var extendStatics = function (d, b) {
+            extendStatics = Object.setPrototypeOf ||
+                ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+                function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+            return extendStatics(d, b);
+        };
+        return function (d, b) {
+            extendStatics(d, b);
+            function __() { this.constructor = d; }
+            d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+        };
+    })();
     function mapStateToProps$1(state) {
         return {
             users: state.user_listing.users,
@@ -1826,7 +1878,7 @@
         };
     }
     var Component$4 = (function (_super) {
-        __extends$b(Component, _super);
+        __extends$c(Component, _super);
         function Component() {
             return _super !== null && _super.apply(this, arguments) || this;
         }
@@ -1850,7 +1902,7 @@
     }(React.Component));
     var UserListing = ReactRedux.connect(mapStateToProps$1, mapDispatchToProps$1)(Component$4);
 
-    var __extends$c = (undefined && undefined.__extends) || (function () {
+    var __extends$d = (undefined && undefined.__extends) || (function () {
         var extendStatics = function (d, b) {
             extendStatics = Object.setPrototypeOf ||
                 ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
@@ -1864,7 +1916,7 @@
         };
     })();
     var Component$5 = (function (_super) {
-        __extends$c(Component, _super);
+        __extends$d(Component, _super);
         function Component(props) {
             var _this = _super.call(this, props) || this;
             _this.mounted = false;
@@ -1972,7 +2024,7 @@
     }(React.Component));
     var CreateUser = ReactRedux.connect(null, null)(Component$5);
 
-    var __extends$d = (undefined && undefined.__extends) || (function () {
+    var __extends$e = (undefined && undefined.__extends) || (function () {
         var extendStatics = function (d, b) {
             extendStatics = Object.setPrototypeOf ||
                 ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
@@ -1991,7 +2043,7 @@
         };
     }
     var Component$6 = (function (_super) {
-        __extends$d(Component, _super);
+        __extends$e(Component, _super);
         function Component(props) {
             var _this = _super.call(this, props) || this;
             _this.fetchController = new AbortController();
@@ -2126,7 +2178,7 @@
         }, 5000);
     }
 
-    var __extends$e = (undefined && undefined.__extends) || (function () {
+    var __extends$f = (undefined && undefined.__extends) || (function () {
         var extendStatics = function (d, b) {
             extendStatics = Object.setPrototypeOf ||
                 ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
@@ -2145,7 +2197,7 @@
         };
     }
     var Component$7 = (function (_super) {
-        __extends$e(Component, _super);
+        __extends$f(Component, _super);
         function Component(props) {
             var _this = _super.call(this, props) || this;
             _this.mounted = false;
@@ -2258,7 +2310,7 @@
     }(React.Component));
     var MyAccount = ReactRedux.connect(mapStateToProps$3, null)(Component$7);
 
-    var __extends$f = (undefined && undefined.__extends) || (function () {
+    var __extends$g = (undefined && undefined.__extends) || (function () {
         var extendStatics = function (d, b) {
             extendStatics = Object.setPrototypeOf ||
                 ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
@@ -2272,7 +2324,7 @@
         };
     })();
     var Component$8 = (function (_super) {
-        __extends$f(Component, _super);
+        __extends$g(Component, _super);
         function Component(props) {
             var _this = _super.call(this, props) || this;
             _this.fetchOutput = _this.fetchOutput.bind(_this);
@@ -2345,7 +2397,7 @@
     }(React.Component));
     var JobDetail = ReactRedux.connect()(Component$8);
 
-    var __extends$g = (undefined && undefined.__extends) || (function () {
+    var __extends$h = (undefined && undefined.__extends) || (function () {
         var extendStatics = function (d, b) {
             extendStatics = Object.setPrototypeOf ||
                 ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
@@ -2359,7 +2411,7 @@
         };
     })();
     var BackIcon = (function (_super) {
-        __extends$g(BackIcon, _super);
+        __extends$h(BackIcon, _super);
         function BackIcon() {
             return _super !== null && _super.apply(this, arguments) || this;
         }
@@ -2374,7 +2426,7 @@
         return BackIcon;
     }(React.PureComponent));
 
-    var __extends$h = (undefined && undefined.__extends) || (function () {
+    var __extends$i = (undefined && undefined.__extends) || (function () {
         var extendStatics = function (d, b) {
             extendStatics = Object.setPrototypeOf ||
                 ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
@@ -2388,7 +2440,7 @@
         };
     })();
     var Component$9 = (function (_super) {
-        __extends$h(Component, _super);
+        __extends$i(Component, _super);
         function Component(props) {
             var _this = _super.call(this, props) || this;
             _this.resizePlot = _this.resizePlot.bind(_this);
@@ -2465,7 +2517,7 @@
     }(React.Component));
     var AverageMutations = ReactRedux.connect()(Component$9);
 
-    var __extends$i = (undefined && undefined.__extends) || (function () {
+    var __extends$j = (undefined && undefined.__extends) || (function () {
         var extendStatics = function (d, b) {
             extendStatics = Object.setPrototypeOf ||
                 ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
@@ -2479,7 +2531,7 @@
         };
     })();
     var Component$a = (function (_super) {
-        __extends$i(Component, _super);
+        __extends$j(Component, _super);
         function Component(props) {
             var _this = _super.call(this, props) || this;
             _this.resizePlot = _this.resizePlot.bind(_this);
@@ -2553,7 +2605,7 @@
     }(React.Component));
     var FitnessHistory = ReactRedux.connect()(Component$a);
 
-    var __extends$j = (undefined && undefined.__extends) || (function () {
+    var __extends$k = (undefined && undefined.__extends) || (function () {
         var extendStatics = function (d, b) {
             extendStatics = Object.setPrototypeOf ||
                 ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
@@ -2567,7 +2619,7 @@
         };
     })();
     var Component$b = (function (_super) {
-        __extends$j(Component, _super);
+        __extends$k(Component, _super);
         function Component(props) {
             var _this = _super.call(this, props) || this;
             _this.resizePlot = _this.resizePlot.bind(_this);
@@ -2688,7 +2740,7 @@
     }(React.Component));
     var DeleteriousMutations = ReactRedux.connect()(Component$b);
 
-    var __extends$k = (undefined && undefined.__extends) || (function () {
+    var __extends$l = (undefined && undefined.__extends) || (function () {
         var extendStatics = function (d, b) {
             extendStatics = Object.setPrototypeOf ||
                 ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
@@ -2702,7 +2754,7 @@
         };
     })();
     var Component$c = (function (_super) {
-        __extends$k(Component, _super);
+        __extends$l(Component, _super);
         function Component(props) {
             var _this = _super.call(this, props) || this;
             _this.resizePlot = _this.resizePlot.bind(_this);
@@ -2822,7 +2874,7 @@
     }(React.Component));
     var BeneficialMutations = ReactRedux.connect()(Component$c);
 
-    var __extends$l = (undefined && undefined.__extends) || (function () {
+    var __extends$m = (undefined && undefined.__extends) || (function () {
         var extendStatics = function (d, b) {
             extendStatics = Object.setPrototypeOf ||
                 ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
@@ -2836,7 +2888,7 @@
         };
     })();
     var Component$d = (function (_super) {
-        __extends$l(Component, _super);
+        __extends$m(Component, _super);
         function Component(props) {
             var _this = _super.call(this, props) || this;
             _this.resizePlot = _this.resizePlot.bind(_this);
@@ -3017,7 +3069,7 @@
     }(React.Component));
     var SnpFrequencies = ReactRedux.connect()(Component$d);
 
-    var __extends$m = (undefined && undefined.__extends) || (function () {
+    var __extends$n = (undefined && undefined.__extends) || (function () {
         var extendStatics = function (d, b) {
             extendStatics = Object.setPrototypeOf ||
                 ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
@@ -3031,7 +3083,7 @@
         };
     })();
     var Component$e = (function (_super) {
-        __extends$m(Component, _super);
+        __extends$n(Component, _super);
         function Component(props) {
             var _this = _super.call(this, props) || this;
             _this.resizePlot = _this.resizePlot.bind(_this);
@@ -3175,7 +3227,7 @@
     }(React.Component));
     var MinorAlleleFrequencies = ReactRedux.connect()(Component$e);
 
-    var __extends$n = (undefined && undefined.__extends) || (function () {
+    var __extends$o = (undefined && undefined.__extends) || (function () {
         var extendStatics = function (d, b) {
             extendStatics = Object.setPrototypeOf ||
                 ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
@@ -3189,7 +3241,7 @@
         };
     })();
     var NoPlot = (function (_super) {
-        __extends$n(NoPlot, _super);
+        __extends$o(NoPlot, _super);
         function NoPlot(props) {
             return _super.call(this, props) || this;
         }
@@ -3200,7 +3252,7 @@
         return NoPlot;
     }(React.PureComponent));
 
-    var __extends$o = (undefined && undefined.__extends) || (function () {
+    var __extends$p = (undefined && undefined.__extends) || (function () {
         var extendStatics = function (d, b) {
             extendStatics = Object.setPrototypeOf ||
                 ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
@@ -3262,7 +3314,7 @@
         };
     }
     var Component$f = (function (_super) {
-        __extends$o(Component, _super);
+        __extends$p(Component, _super);
         function Component(props) {
             var _this = _super.call(this, props) || this;
             _this.onSelectChanged = _this.onSelectChanged.bind(_this);
@@ -3418,7 +3470,7 @@
     }
     var Content = ReactRedux.connect(mapStateToProps$5)(Component$g);
 
-    var __extends$p = (undefined && undefined.__extends) || (function () {
+    var __extends$q = (undefined && undefined.__extends) || (function () {
         var extendStatics = function (d, b) {
             extendStatics = Object.setPrototypeOf ||
                 ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
@@ -3437,7 +3489,7 @@
         };
     }
     var Component$h = (function (_super) {
-        __extends$p(Component, _super);
+        __extends$q(Component, _super);
         function Component(props) {
             var _this = _super.call(this, props) || this;
             _this.state = {
@@ -3465,7 +3517,7 @@
     }(React.Component));
     var NonLogin = ReactRedux.connect(mapStateToProps$6)(Component$h);
 
-    var __extends$q = (undefined && undefined.__extends) || (function () {
+    var __extends$r = (undefined && undefined.__extends) || (function () {
         var extendStatics = function (d, b) {
             extendStatics = Object.setPrototypeOf ||
                 ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
@@ -3484,7 +3536,7 @@
         };
     }
     var Component$i = (function (_super) {
-        __extends$q(Component, _super);
+        __extends$r(Component, _super);
         function Component() {
             return _super !== null && _super.apply(this, arguments) || this;
         }

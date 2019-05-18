@@ -5,9 +5,9 @@ import (
 	"net/http"
 )
 
-// Called for /api/delete-user/ route
-func apiDeleteUserHandler(w http.ResponseWriter, r *http.Request) {
-	type PostUser struct {
+// Called for /api/delete-job/ route
+func apiDeleteJobHandler(w http.ResponseWriter, r *http.Request) {
+	type PostJob struct {
 		Id string `json:"id"`
 	}
 
@@ -23,21 +23,15 @@ func apiDeleteUserHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	decoder := json.NewDecoder(r.Body)
-	var postUser PostUser
-	err := decoder.Decode(&postUser)
+	var postJob PostJob
+	err := decoder.Decode(&postJob)
 	if err != nil {
 		http.Error(w, "400 Bad Request (parsing body)", http.StatusBadRequest)
 		return
 	}
 
 	globalDbLock.Lock()
-	// Before deleting the user, find all jobs owned by them and blank out OwnerId
-	for _, job := range globalDb.Jobs {
-		if job.OwnerId == postUser.Id {
-			job.OwnerId = ""
-		}
-	}
-	delete(globalDb.Users, postUser.Id)
+	delete(globalDb.Jobs, postJob.Id)
 	err = persistDatabase()
 	globalDbLock.Unlock()
 	if err != nil {

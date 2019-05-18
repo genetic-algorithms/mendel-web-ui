@@ -271,6 +271,14 @@ export function apiPost(
 ): Promise<{}>;
 
 export function apiPost(
+    url: '/api/delete-job/',
+    body: {
+        id: string;
+    },
+    dispatch: Redux.Dispatch<ReduxAction>
+): Promise<{}>;
+
+export function apiPost(
     url: '/api/login/',
     body: {
         username: string;
