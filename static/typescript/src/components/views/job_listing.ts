@@ -5,7 +5,7 @@ import moment from 'moment';
 import { ReduxAction } from '../../redux_action_types';
 import { apiGet, apiPost } from '../../api';
 import { setRoute, assertNotNull } from '../../util';
-import { ConfirmationDialog } from '../../confirmation_dialog2';
+import { ConfirmationDialog } from '../../confirmation_dialog';
 import { DeleteIcon } from '../icons/delete';
 
 type Job = {

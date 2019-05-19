@@ -1,54 +1,38 @@
-import { assertNotNull } from './util';
+import * as React from 'react';
 
-let rootElement: HTMLElement | null = null;
+/* Show an dialog to confirm an action, with Cancel and Ok buttons
+How to use this dialog from another Component:
+- in that component add a boolean state variable for whether this dialog should be open or closed
+- in the actions in that componet for opening and closing this dialog run setState() to change the above variable
+- in render() of that component create this dialog component or not based on the state variable
+- pass in 2 callbacks to run if the user clicks the cancel or ok buttons
+*/
 
-export function open(title: string, descriptions: string[], actionCallback?: () => void) {
-    if (rootElement !== null) {
-        close();
-    }
+type Props = {
+    title: string;
+    descriptions: string[];
+    onCancel: () => void;
+    onOk: () => void;
+};
 
-    const cancelButton = createElement('div', 'confirmation-dialog__button', [document.createTextNode('Cancel')]);
-    //const cancelButton = (actionCallback !== undefined ? createElement('div', 'confirmation-dialog__button', [document.createTextNode('Cancel')]) : null);
-    const actionButton = createElement('div', 'confirmation-dialog__button', [document.createTextNode('Ok')]);
-    const overlay = createElement('div', 'confirmation-dialog__overlay', []);
-
-    rootElement = createElement('div', 'confirmation-dialog', [
-        overlay,
-        createElement('div', 'confirmation-dialog__content', [
-            createElement('div', 'confirmation-dialog__title', [document.createTextNode(title)]),
-            createElement('div', 'confirmation-dialog__description', descriptions.map(desc => document.createTextNode(desc)) ),
-            createElement('div', 'confirmation-dialog__buttons', 
-                (actionCallback !== undefined ? [cancelButton, actionButton] : [actionButton]),
+export class ConfirmationDialog extends React.Component<Props> {
+    render() {
+        return React.createElement('div', { className: 'confirmation-dialog' },
+            React.createElement('div', { className: 'confirmation-dialog__overlay', onClick: this.props.onCancel }),
+            React.createElement('div', { className: 'confirmation-dialog__content' },
+                React.createElement('div', { className: 'confirmation-dialog__title' }, this.props.title),
+                this.props.descriptions.map(desc => React.createElement('div', { className: 'confirmation-dialog__description' }, desc) ),
+                React.createElement('div', { className: 'confirmation-dialog__buttons' },
+                    React.createElement('div',
+                        { className: 'confirmation-dialog__button', onClick: this.props.onCancel },
+                        'Cancel',
+                    ),
+                    React.createElement('div',
+                        { className: 'confirmation-dialog__button', onClick: this.props.onOk },
+                        'Ok',
+                    ),
+                ),
             ),
-        ]),
-    ]);
-
-    // If no callback, we only show the ok button with no action except close
-    if (actionCallback !== undefined) {
-        cancelButton.addEventListener('click', close);
+        );
     }
-    overlay.addEventListener('click', close);
-    actionButton.addEventListener('click', () => {
-        close();
-        if (actionCallback !== undefined) { actionCallback(); }
-    });
-
-    document.body.appendChild(assertNotNull(rootElement));
-}
-
-export function close() {
-    if (rootElement === null) return;
-    assertNotNull(rootElement.parentNode).removeChild(rootElement);
-    rootElement = null;
-}
-
-function createElement(tagName: string, className: string, children: Node[]) {
-    const element = document.createElement(tagName);
-    element.className = className;
-
-    for (let i = 0; i < children.length; ++i) {
-        element.appendChild(children[i]);
-    }
-
-    return element;
 }

@@ -35,7 +35,7 @@ class Component extends React.Component<Props, State> {
         this.fetchController = new AbortController();
         this.fetchTimeout = undefined;
         this.outputOffset = 0;
-        this.outputRef = null;
+        this.outputRef = null;      // this will be set to the component that holds the job output so we can auto-scroll it
 
         this.state = {
             output: '',
@@ -74,6 +74,7 @@ class Component extends React.Component<Props, State> {
         this.fetchOutput();
     }
 
+    // So that the job output is always showing the most recent lines
     scrollToBottom() {
         const outRef = this.outputRef;
         if (outRef !== null) {

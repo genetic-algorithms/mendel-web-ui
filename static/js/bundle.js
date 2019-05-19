@@ -1682,7 +1682,7 @@
             return _super !== null && _super.apply(this, arguments) || this;
         }
         ConfirmationDialog.prototype.render = function () {
-            return React.createElement('div', { className: 'confirmation-dialog' }, React.createElement('div', { className: 'confirmation-dialog__overlay', onClick: this.props.onCancel }), React.createElement('div', { className: 'confirmation-dialog__content' }, React.createElement('div', { className: 'confirmation-dialog__title' }, this.props.title), this.props.descriptions.map(function (desc) { return React.createElement('div', { className: 'confirmation-dialog__description' }, desc); }), React.createElement('div', { className: 'confirmation-dialog__buttons' }, React.createElement('div', { className: 'confirmation-dialog__button', onClick: this.props.onCancel }, 'Close'), React.createElement('div', { className: 'confirmation-dialog__button', onClick: this.props.onOk }, 'Ok'))));
+            return React.createElement('div', { className: 'confirmation-dialog' }, React.createElement('div', { className: 'confirmation-dialog__overlay', onClick: this.props.onCancel }), React.createElement('div', { className: 'confirmation-dialog__content' }, React.createElement('div', { className: 'confirmation-dialog__title' }, this.props.title), this.props.descriptions.map(function (desc) { return React.createElement('div', { className: 'confirmation-dialog__description' }, desc); }), React.createElement('div', { className: 'confirmation-dialog__buttons' }, React.createElement('div', { className: 'confirmation-dialog__button', onClick: this.props.onCancel }, 'Cancel'), React.createElement('div', { className: 'confirmation-dialog__button', onClick: this.props.onOk }, 'Ok'))));
         };
         return ConfirmationDialog;
     }(React.Component));
@@ -1853,49 +1853,6 @@
     }
     var JobListing = ReactRedux.connect()(Component$3);
 
-    var rootElement = null;
-    function open(title, descriptions, actionCallback) {
-        if (rootElement !== null) {
-            close();
-        }
-        var cancelButton = createElement('div', 'confirmation-dialog__button', [document.createTextNode('Cancel')]);
-        var actionButton = createElement('div', 'confirmation-dialog__button', [document.createTextNode('Ok')]);
-        var overlay = createElement('div', 'confirmation-dialog__overlay', []);
-        rootElement = createElement('div', 'confirmation-dialog', [
-            overlay,
-            createElement('div', 'confirmation-dialog__content', [
-                createElement('div', 'confirmation-dialog__title', [document.createTextNode(title)]),
-                createElement('div', 'confirmation-dialog__description', descriptions.map(function (desc) { return document.createTextNode(desc); })),
-                createElement('div', 'confirmation-dialog__buttons', (actionCallback !== undefined ? [cancelButton, actionButton] : [actionButton])),
-            ]),
-        ]);
-        if (actionCallback !== undefined) {
-            cancelButton.addEventListener('click', close);
-        }
-        overlay.addEventListener('click', close);
-        actionButton.addEventListener('click', function () {
-            close();
-            if (actionCallback !== undefined) {
-                actionCallback();
-            }
-        });
-        document.body.appendChild(assertNotNull(rootElement));
-    }
-    function close() {
-        if (rootElement === null)
-            return;
-        assertNotNull(rootElement.parentNode).removeChild(rootElement);
-        rootElement = null;
-    }
-    function createElement(tagName, className, children) {
-        var element = document.createElement(tagName);
-        element.className = className;
-        for (var i = 0; i < children.length; ++i) {
-            element.appendChild(children[i]);
-        }
-        return element;
-    }
-
     var __extends$d = (undefined && undefined.__extends) || (function () {
         var extendStatics = function (d, b) {
             extendStatics = Object.setPrototypeOf ||
@@ -1909,57 +1866,89 @@
             d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
         };
     })();
-    function mapStateToProps$1(state) {
-        return {
-            users: state.user_listing.users,
-        };
-    }
-    function mapDispatchToProps$1(dispatch) {
-        function fetchUsers() {
-            apiGet('/api/user-list/', {}, dispatch).then(function (response) {
-                dispatch({
-                    type: 'user_listing.USERS',
-                    value: response.users,
-                });
-            });
-        }
-        return {
-            setRoute: function (url) { return setRoute(dispatch, url); },
-            onCreateClick: function () { return setRoute(dispatch, '/create-user/'); },
-            fetchUsers: fetchUsers,
-            onDeleteClick: function (userId) {
-                open('Delete user?', ['The user will be deleted, but jobs run by the user will be kept.'], function () {
-                    apiPost('/api/delete-user/', {
-                        id: userId,
-                    }, dispatch).then(fetchUsers);
-                });
-            },
-        };
-    }
     var Component$4 = (function (_super) {
         __extends$d(Component, _super);
-        function Component() {
-            return _super !== null && _super.apply(this, arguments) || this;
+        function Component(props) {
+            var _this = _super.call(this, props) || this;
+            _this.fetchController = new AbortController();
+            _this.state = {
+                users: [],
+                confirmationOpen: false,
+                userIdToDelete: "",
+            };
+            _this.onConfirmationOpen = _this.onConfirmationOpen.bind(_this);
+            _this.onConfirmationCancel = _this.onConfirmationCancel.bind(_this);
+            _this.onConfirmationOk = _this.onConfirmationOk.bind(_this);
+            return _this;
         }
+        Component.prototype.fetchUsers = function () {
+            this.fetchController.abort();
+            this.fetchController = new AbortController();
+            return apiGet('/api/user-list/', {}, this.props.dispatch, this.fetchController.signal);
+        };
+        Component.prototype.deleteUser = function (userId) {
+            this.fetchController.abort();
+            this.fetchController = new AbortController();
+            return apiPost('/api/delete-user/', { id: userId }, this.props.dispatch);
+        };
         Component.prototype.componentDidMount = function () {
-            this.props.fetchUsers();
+            var _this = this;
+            this.fetchUsers().then(function (response) {
+                _this.setState({
+                    users: response.users,
+                });
+            });
+        };
+        Component.prototype.onConfirmationOpen = function (userId) {
+            this.setState({
+                confirmationOpen: true,
+                userIdToDelete: userId,
+            });
+        };
+        Component.prototype.onConfirmationCancel = function () {
+            this.setState({
+                confirmationOpen: false,
+                userIdToDelete: "",
+            });
+        };
+        Component.prototype.onConfirmationOk = function () {
+            var _this = this;
+            this.deleteUser(this.state.userIdToDelete).then(function () {
+                _this.fetchUsers().then(function (response) {
+                    _this.setState({
+                        users: response.users,
+                        confirmationOpen: false,
+                        userIdToDelete: "",
+                    });
+                });
+            });
+        };
+        Component.prototype.componentWillUnmount = function () {
+            this.fetchController.abort();
         };
         Component.prototype.render = function () {
             var _this = this;
             return React.createElement('div', { className: 'user-listing-view' }, React.createElement('div', { className: 'user-listing-view__title' }, 'Users'), React.createElement('div', {
                 className: 'user-listing-view__create-button button',
-                onClick: this.props.onCreateClick,
-            }, 'Create User'), React.createElement('div', { className: 'user-listing-view__users' }, this.props.users.map(function (user) { return (React.createElement('div', { className: 'user-listing-view__user', key: user.id }, React.createElement('div', {
+                onClick: function () { return setRoute(_this.props.dispatch, '/create-user/'); },
+            }, 'Create User'), React.createElement('div', { className: 'user-listing-view__users' }, this.state.users.map(function (user) { return (React.createElement('div', { className: 'user-listing-view__user', key: user.id }, React.createElement('div', {
                 className: 'user-listing-view__user__title',
-                onClick: function () { return _this.props.setRoute('/edit-user/' + user.id + '/'); },
+                onClick: function () { return setRoute(_this.props.dispatch, '/edit-user/' + user.id + '/'); },
             }, React.createElement('div', { className: 'user-listing-view__user__username' }, user.username), (user.is_admin ? React.createElement('div', { className: 'user-listing-view__user__admin' }, 'Admin') : null)), React.createElement('div', {
                 className: 'user-listing-view__user__delete-button',
-                onClick: function () { return _this.props.onDeleteClick(user.id); },
-            }, React.createElement(DeleteIcon, { width: 24, height: 24 })))); })));
+                onClick: function () { return _this.onConfirmationOpen(user.id); },
+            }, React.createElement(DeleteIcon, { width: 24, height: 24 })))); })), (this.state.confirmationOpen ?
+                React.createElement(ConfirmationDialog, {
+                    title: 'Delete user?',
+                    descriptions: ['The user will be deleted, but jobs run by the user will be kept.'],
+                    onCancel: this.onConfirmationCancel,
+                    onOk: this.onConfirmationOk,
+                })
+                : null));
         };
         return Component;
     }(React.Component));
-    var UserListing = ReactRedux.connect(mapStateToProps$1, mapDispatchToProps$1)(Component$4);
+    var UserListing = ReactRedux.connect()(Component$4);
 
     var __extends$e = (undefined && undefined.__extends) || (function () {
         var extendStatics = function (d, b) {
@@ -2096,7 +2085,7 @@
             d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
         };
     })();
-    function mapStateToProps$2(state) {
+    function mapStateToProps$1(state) {
         return {
             sessionUserId: assertNotNull(state.user).id,
         };
@@ -2218,22 +2207,22 @@
         };
         return Component;
     }(React.Component));
-    var EditUser = ReactRedux.connect(mapStateToProps$2)(Component$6);
+    var EditUser = ReactRedux.connect(mapStateToProps$1)(Component$6);
 
-    var rootElement$1 = null;
+    var rootElement = null;
     var timeout = 0;
     function show(message) {
-        if (rootElement$1 === null) {
-            rootElement$1 = document.createElement('div');
-            rootElement$1.className = 'snackbar';
-            document.body.appendChild(rootElement$1);
+        if (rootElement === null) {
+            rootElement = document.createElement('div');
+            rootElement.className = 'snackbar';
+            document.body.appendChild(rootElement);
         }
         clearTimeout(timeout);
-        rootElement$1.offsetWidth;
-        rootElement$1.textContent = message;
-        rootElement$1.classList.add('snackbar--show');
+        rootElement.offsetWidth;
+        rootElement.textContent = message;
+        rootElement.classList.add('snackbar--show');
         timeout = setTimeout(function () {
-            assertNotNull(rootElement$1).classList.remove('snackbar--show');
+            assertNotNull(rootElement).classList.remove('snackbar--show');
         }, 5000);
     }
 
@@ -2250,7 +2239,7 @@
             d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
         };
     })();
-    function mapStateToProps$3(state) {
+    function mapStateToProps$2(state) {
         return {
             user: state.user,
         };
@@ -2367,7 +2356,7 @@
         };
         return Component;
     }(React.Component));
-    var MyAccount = ReactRedux.connect(mapStateToProps$3, null)(Component$7);
+    var MyAccount = ReactRedux.connect(mapStateToProps$2, null)(Component$7);
 
     var __extends$h = (undefined && undefined.__extends) || (function () {
         var extendStatics = function (d, b) {
@@ -3370,12 +3359,12 @@
             filename: 'allele-distribution-fav',
         },
     ];
-    function mapStateToProps$4(state) {
+    function mapStateToProps$3(state) {
         return {
             plots: state.plots,
         };
     }
-    function mapDispatchToProps$2(dispatch, ownProps) {
+    function mapDispatchToProps$1(dispatch, ownProps) {
         return {
             dispatch: dispatch,
             onLinkClick: function (slug) {
@@ -3482,9 +3471,9 @@
         };
         return Component;
     }(React.Component));
-    var Plots = ReactRedux.connect(mapStateToProps$4, mapDispatchToProps$2)(Component$f);
+    var Plots = ReactRedux.connect(mapStateToProps$3, mapDispatchToProps$1)(Component$f);
 
-    function mapStateToProps$5(state) {
+    function mapStateToProps$4(state) {
         return {
             route: state.route,
         };
@@ -3541,7 +3530,7 @@
     function Component$g(props) {
         return React.createElement('div', { className: 'page-content' }, getView(props.route));
     }
-    var Content = ReactRedux.connect(mapStateToProps$5)(Component$g);
+    var Content = ReactRedux.connect(mapStateToProps$4)(Component$g);
 
     var __extends$r = (undefined && undefined.__extends) || (function () {
         var extendStatics = function (d, b) {
@@ -3556,7 +3545,7 @@
             d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
         };
     })();
-    function mapStateToProps$6(state) {
+    function mapStateToProps$5(state) {
         return {
             route: state.route,
         };
@@ -3588,7 +3577,7 @@
         };
         return Component;
     }(React.Component));
-    var NonLogin = ReactRedux.connect(mapStateToProps$6)(Component$h);
+    var NonLogin = ReactRedux.connect(mapStateToProps$5)(Component$h);
 
     var __extends$s = (undefined && undefined.__extends) || (function () {
         var extendStatics = function (d, b) {
@@ -3603,7 +3592,7 @@
             d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
         };
     })();
-    function mapStateToProps$7(state) {
+    function mapStateToProps$6(state) {
         return {
             route: state.route,
         };
@@ -3620,7 +3609,7 @@
         };
         return Component;
     }(React.Component));
-    var Root = ReactRedux.connect(mapStateToProps$7)(Component$i);
+    var Root = ReactRedux.connect(mapStateToProps$6)(Component$i);
 
     function init() {
         var store = Redux.createStore(reducer);

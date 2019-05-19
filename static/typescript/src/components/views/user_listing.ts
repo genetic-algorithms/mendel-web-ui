@@ -3,20 +3,26 @@ import * as Redux from 'redux';
 import * as ReactRedux from 'react-redux';
 import { ReduxAction } from '../../redux_action_types';
 import { DeleteIcon } from '../icons/delete';
-import * as confirmationDialog from '../../confirmation_dialog';
+import { ConfirmationDialog } from '../../confirmation_dialog';
 import { setRoute } from '../../util';
-import { ReduxState } from '../../redux_state_types';
+//import { ReduxState } from '../../redux_state_types';
 import { User } from '../../user_types';
 import { apiPost, apiGet } from '../../api';
 
 type Props = {
-    users: User[],
-    setRoute: (url: string) => void;
-    onCreateClick: () => void;
-    fetchUsers: () => void;
-    onDeleteClick: (userId: string) => void;
+    dispatch: Redux.Dispatch<ReduxAction>;
+    //setRoute: (url: string) => void;
+    //onCreateClick: () => void;
 };
 
+type State = {
+    users: User[],
+    // these state variables are used to control the visibility of the dialog component, and to store info that should be passed to it
+    confirmationOpen: boolean;
+    userIdToDelete: string;
+};
+
+/*
 function mapStateToProps(state: ReduxState) {
     return {
         users: state.user_listing.users,
@@ -24,40 +30,94 @@ function mapStateToProps(state: ReduxState) {
 }
 
 function mapDispatchToProps(dispatch: Redux.Dispatch<ReduxAction>) {
-    function fetchUsers() {
-        apiGet('/api/user-list/', {}, dispatch).then(response => {
-            dispatch({
-                type: 'user_listing.USERS',
-                value: response.users,
+    return {
+        dispatch: dispatch,
+        setRoute: (url: string) => setRoute(dispatch, url),
+        onCreateClick: () => setRoute(dispatch, '/create-user/'),
+    };
+}
+*/
+
+class Component extends React.Component<Props, State> {
+    fetchController: AbortController;
+
+    constructor(props: Props) {
+        super(props);
+        this.fetchController = new AbortController();
+
+        this.state = {
+            users: [],
+            confirmationOpen: false,
+            userIdToDelete: "",
+        };
+
+        this.onConfirmationOpen = this.onConfirmationOpen.bind(this);
+        this.onConfirmationCancel = this.onConfirmationCancel.bind(this);
+        this.onConfirmationOk = this.onConfirmationOk.bind(this);
+    }
+
+    /*
+    onCreateClick() {
+        setRoute(this.props.dispatch, '/create-user/');
+    }
+    */
+
+    fetchUsers() {
+        this.fetchController.abort();
+        this.fetchController = new AbortController();
+
+        return apiGet('/api/user-list/', {}, this.props.dispatch, this.fetchController.signal);
+    }
+
+
+    deleteUser(userId: string) {
+        this.fetchController.abort();
+        this.fetchController = new AbortController();
+
+        return apiPost(
+            '/api/delete-user/',
+            { id: userId },
+            this.props.dispatch,
+        );
+    }
+
+    componentDidMount() {
+        this.fetchUsers().then(response => {
+            this.setState({
+                users: response.users,
             });
         });
     }
 
-    return {
-        setRoute: (url: string) => setRoute(dispatch, url),
-        onCreateClick: () => setRoute(dispatch, '/create-user/'),
-        fetchUsers: fetchUsers,
-        onDeleteClick: (userId: string) => {
-            confirmationDialog.open(
-                'Delete user?',
-                ['The user will be deleted, but jobs run by the user will be kept.'],
-                () => {
-                    apiPost(
-                        '/api/delete-user/',
-                        {
-                            id: userId,
-                        },
-                        dispatch,
-                    ).then(fetchUsers);
-                },
-            );
-        },
+    onConfirmationOpen(userId: string) {
+        this.setState({
+            confirmationOpen: true,
+            userIdToDelete: userId,
+        });
     };
-}
 
-class Component extends React.Component<Props> {
-    componentDidMount() {
-        this.props.fetchUsers();
+    onConfirmationCancel() {
+        this.setState({
+            confirmationOpen: false,
+            userIdToDelete: "",
+        });
+    };
+
+    // Delete user
+    onConfirmationOk() {
+        this.deleteUser(this.state.userIdToDelete).then( () => {
+            this.fetchUsers().then(response => {
+                this.setState({
+                    users: response.users,
+                    confirmationOpen: false,
+                    userIdToDelete: "",
+                });
+            });
+        });
+    };
+
+    componentWillUnmount() {
+        this.fetchController.abort();
     }
 
     render() {
@@ -65,15 +125,15 @@ class Component extends React.Component<Props> {
             React.createElement('div', { className: 'user-listing-view__title' }, 'Users'),
             React.createElement('div', {
                 className: 'user-listing-view__create-button button',
-                onClick: this.props.onCreateClick,
+                onClick: () => setRoute(this.props.dispatch, '/create-user/'),
             }, 'Create User'),
             React.createElement('div', { className: 'user-listing-view__users' },
-                this.props.users.map(user => (
+                this.state.users.map(user => (
                     React.createElement('div', { className: 'user-listing-view__user', key: user.id },
                         React.createElement('div',
                             {
                                 className: 'user-listing-view__user__title',
-                                onClick: () => this.props.setRoute('/edit-user/' + user.id + '/'),
+                                onClick: () => setRoute(this.props.dispatch, '/edit-user/' + user.id + '/'),
                             },
                             React.createElement('div', { className: 'user-listing-view__user__username' }, user.username),
                             (user.is_admin ? React.createElement('div', { className: 'user-listing-view__user__admin' }, 'Admin') : null),
@@ -81,15 +141,25 @@ class Component extends React.Component<Props> {
                         React.createElement('div',
                             {
                                 className: 'user-listing-view__user__delete-button',
-                                onClick: () => this.props.onDeleteClick(user.id),
+                                onClick: () => this.onConfirmationOpen(user.id),
                             },
                             React.createElement(DeleteIcon, { width: 24, height: 24 }),
                         ),
                     )
                 )),
             ),
+            (this.state.confirmationOpen ?
+                React.createElement(ConfirmationDialog, {
+                    title: 'Delete user?',
+                    descriptions: ['The user will be deleted, but jobs run by the user will be kept.'],
+                    onCancel: this.onConfirmationCancel,
+                    onOk: this.onConfirmationOk,
+                })
+                : null
+            ),
         );
     }
 }
 
-export const UserListing = ReactRedux.connect(mapStateToProps, mapDispatchToProps)(Component);
+//export const UserListing = ReactRedux.connect(mapStateToProps, mapDispatchToProps)(Component);
+export const UserListing = ReactRedux.connect()(Component);
