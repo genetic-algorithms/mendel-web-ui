@@ -25,6 +25,8 @@ class Component extends React.Component<Props, State> {
     fetchController: AbortController;
     fetchTimeout: number | undefined;
     outputOffset: number;
+    //outputRef: React.RefObject<HTMLPreElement> | null;
+    outputRef: HTMLElement | null;
 
     constructor(props: Props) {
         super(props);
@@ -33,6 +35,7 @@ class Component extends React.Component<Props, State> {
         this.fetchController = new AbortController();
         this.fetchTimeout = undefined;
         this.outputOffset = 0;
+        this.outputRef = null;
 
         this.state = {
             output: '',
@@ -69,6 +72,20 @@ class Component extends React.Component<Props, State> {
 
     componentDidMount() {
         this.fetchOutput();
+    }
+
+    scrollToBottom() {
+        const outRef = this.outputRef;
+        if (outRef !== null) {
+            const scrollHeight = outRef.scrollHeight;
+            const height = outRef.clientHeight;
+            const maxScrollTop = scrollHeight - height;
+            outRef.scrollTop = maxScrollTop > 0 ? maxScrollTop : 0;
+        }
+    }
+
+    componentDidUpdate() {
+        this.scrollToBottom();
     }
 
     componentWillUnmount() {
@@ -108,7 +125,7 @@ class Component extends React.Component<Props, State> {
                 React.createElement('span', { className: 'job-detail-view__job-info' }, this.state.description),
                 React.createElement('span', { className: 'job-detail-view__job-info' }, moment(this.state.time).fromNow()),
             ),
-            React.createElement('pre', { className: 'job-detail-view__output' }, this.state.output),
+            React.createElement('pre', { className: 'job-detail-view__output', ref: (el) => this.outputRef = el }, this.state.output),
             React.createElement('div', { className: 'job-detail-view__bottom' },
                 React.createElement('div', { className: 'job-detail-view__status' },
                     'Status: ' + (this.state.done ? 'Done' : 'Running')

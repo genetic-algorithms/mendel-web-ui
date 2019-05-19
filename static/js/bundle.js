@@ -2390,6 +2390,7 @@
             _this.fetchController = new AbortController();
             _this.fetchTimeout = undefined;
             _this.outputOffset = 0;
+            _this.outputRef = null;
             _this.state = {
                 output: '',
                 done: false,
@@ -2418,6 +2419,18 @@
         Component.prototype.componentDidMount = function () {
             this.fetchOutput();
         };
+        Component.prototype.scrollToBottom = function () {
+            var outRef = this.outputRef;
+            if (outRef !== null) {
+                var scrollHeight = outRef.scrollHeight;
+                var height = outRef.clientHeight;
+                var maxScrollTop = scrollHeight - height;
+                outRef.scrollTop = maxScrollTop > 0 ? maxScrollTop : 0;
+            }
+        };
+        Component.prototype.componentDidUpdate = function () {
+            this.scrollToBottom();
+        };
         Component.prototype.componentWillUnmount = function () {
             this.fetchController.abort();
             window.clearTimeout(this.fetchTimeout);
@@ -2439,7 +2452,8 @@
             });
         };
         Component.prototype.render = function () {
-            return React.createElement('div', { className: 'job-detail-view' }, React.createElement('div', { className: 'job-detail-view__title' }, 'Job', React.createElement('span', { className: 'job-detail-view__job-info' }, this.props.jobId), React.createElement('span', { className: 'job-detail-view__job-info' }, this.state.description), React.createElement('span', { className: 'job-detail-view__job-info' }, moment(this.state.time).fromNow())), React.createElement('pre', { className: 'job-detail-view__output' }, this.state.output), React.createElement('div', { className: 'job-detail-view__bottom' }, React.createElement('div', { className: 'job-detail-view__status' }, 'Status: ' + (this.state.done ? 'Done' : 'Running')), (this.state.done ?
+            var _this = this;
+            return React.createElement('div', { className: 'job-detail-view' }, React.createElement('div', { className: 'job-detail-view__title' }, 'Job', React.createElement('span', { className: 'job-detail-view__job-info' }, this.props.jobId), React.createElement('span', { className: 'job-detail-view__job-info' }, this.state.description), React.createElement('span', { className: 'job-detail-view__job-info' }, moment(this.state.time).fromNow())), React.createElement('pre', { className: 'job-detail-view__output', ref: function (el) { return _this.outputRef = el; } }, this.state.output), React.createElement('div', { className: 'job-detail-view__bottom' }, React.createElement('div', { className: 'job-detail-view__status' }, 'Status: ' + (this.state.done ? 'Done' : 'Running')), (this.state.done ?
                 React.createElement('div', {
                     className: 'job-detail-view__plots-button button',
                     onClick: this.onPlotsClick,
