@@ -11,8 +11,6 @@ import { apiPost, apiGet } from '../../api';
 
 type Props = {
     dispatch: Redux.Dispatch<ReduxAction>;
-    //setRoute: (url: string) => void;
-    //onCreateClick: () => void;
 };
 
 type State = {
@@ -51,16 +49,15 @@ class Component extends React.Component<Props, State> {
             userIdToDelete: "",
         };
 
+        this.onCreateClick = this.onCreateClick.bind(this);
         this.onConfirmationOpen = this.onConfirmationOpen.bind(this);
         this.onConfirmationCancel = this.onConfirmationCancel.bind(this);
         this.onConfirmationOk = this.onConfirmationOk.bind(this);
     }
 
-    /*
     onCreateClick() {
         setRoute(this.props.dispatch, '/create-user/');
     }
-    */
 
     fetchUsers() {
         this.fetchController.abort();
@@ -71,9 +68,6 @@ class Component extends React.Component<Props, State> {
 
 
     deleteUser(userId: string) {
-        this.fetchController.abort();
-        this.fetchController = new AbortController();
-
         return apiPost(
             '/api/delete-user/',
             { id: userId },
@@ -125,7 +119,7 @@ class Component extends React.Component<Props, State> {
             React.createElement('div', { className: 'user-listing-view__title' }, 'Users'),
             React.createElement('div', {
                 className: 'user-listing-view__create-button button',
-                onClick: () => setRoute(this.props.dispatch, '/create-user/'),
+                onClick: this.onCreateClick,
             }, 'Create User'),
             React.createElement('div', { className: 'user-listing-view__users' },
                 this.state.users.map(user => (
@@ -161,5 +155,4 @@ class Component extends React.Component<Props, State> {
     }
 }
 
-//export const UserListing = ReactRedux.connect(mapStateToProps, mapDispatchToProps)(Component);
 export const UserListing = ReactRedux.connect()(Component);

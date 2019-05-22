@@ -18,9 +18,9 @@ export type ReduxAction = {
     type: 'LOADING_INDICATOR_INCREMENT';
 } | {
     type: 'LOADING_INDICATOR_DECREMENT';
-} | {
+/*} | {
     type: 'user_listing.USERS';
-    value: User[];
+    value: User[];*/
 } | {
     type: 'plots.INFO';
     plots: PlotInfo;

@@ -7,8 +7,8 @@ export type ReduxState = {
     user: User | null;
     route: string;
     loading_indicator_count: number;
-    user_listing: {
+    /*user_listing: {
         users: User[];
-    },
+    },*/
     plots: PlotInfo;
 };

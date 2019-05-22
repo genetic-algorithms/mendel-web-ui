@@ -62,7 +62,11 @@ class Component extends React.Component<Props, State> {
                 },
                 this.props.dispatch,
             ).then(() => {
-                this.fetchJobs(this.state.all);
+                this.fetchJobs(this.state.all).then(response => {
+                    this.setState({
+                        jobs: response.jobs,
+                    });
+                });
             });
         });
     }
@@ -71,10 +75,11 @@ class Component extends React.Component<Props, State> {
         const value = e.currentTarget.value;
         const all = value === 'all';
 
-        this.fetchJobs(all);
-
-        this.setState({
-            all: all,
+        this.fetchJobs(all).then(response => {
+            this.setState({
+                jobs: response.jobs,
+                all: all,
+            });
         });
     }
 
@@ -91,9 +96,6 @@ class Component extends React.Component<Props, State> {
     }
 
     deleteJob(jobId: string) {
-        this.fetchController.abort();
-        this.fetchController = new AbortController();
-
         return apiPost(
             '/api/delete-job/',
             { id: jobId },

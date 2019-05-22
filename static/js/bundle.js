@@ -10,9 +10,6 @@
                 user: null,
                 route: location.pathname,
                 loading_indicator_count: 0,
-                user_listing: {
-                    users: [],
-                },
                 plots: {
                     files: [],
                     tribes: [],
@@ -45,10 +42,6 @@
             case 'LOADING_INDICATOR_DECREMENT':
                 return immer__default(state, function (draft) {
                     draft.loading_indicator_count = Math.max(draft.loading_indicator_count - 1, 0);
-                });
-            case 'user_listing.USERS':
-                return immer__default(state, function (draft) {
-                    draft.user_listing.users = action.value;
                 });
             case 'plots.INFO':
                 return immer__default(state, function (draft) {
@@ -1756,16 +1749,23 @@
                 apiPost('/api/import-job/', {
                     contents: contents,
                 }, _this.props.dispatch).then(function () {
-                    _this.fetchJobs(_this.state.all);
+                    _this.fetchJobs(_this.state.all).then(function (response) {
+                        _this.setState({
+                            jobs: response.jobs,
+                        });
+                    });
                 });
             });
         };
         Component.prototype.onFilterChanged = function (e) {
+            var _this = this;
             var value = e.currentTarget.value;
             var all = value === 'all';
-            this.fetchJobs(all);
-            this.setState({
-                all: all,
+            this.fetchJobs(all).then(function (response) {
+                _this.setState({
+                    jobs: response.jobs,
+                    all: all,
+                });
             });
         };
         Component.prototype.fetchJobs = function (all) {
@@ -1774,8 +1774,6 @@
             return apiGet('/api/job-list/', { filter: all ? 'all' : 'mine' }, this.props.dispatch, this.fetchController.signal);
         };
         Component.prototype.deleteJob = function (jobId) {
-            this.fetchController.abort();
-            this.fetchController = new AbortController();
             return apiPost('/api/delete-job/', { id: jobId }, this.props.dispatch);
         };
         Component.prototype.onConfirmationOpen = function (jobId) {
@@ -1876,19 +1874,21 @@
                 confirmationOpen: false,
                 userIdToDelete: "",
             };
+            _this.onCreateClick = _this.onCreateClick.bind(_this);
             _this.onConfirmationOpen = _this.onConfirmationOpen.bind(_this);
             _this.onConfirmationCancel = _this.onConfirmationCancel.bind(_this);
             _this.onConfirmationOk = _this.onConfirmationOk.bind(_this);
             return _this;
         }
+        Component.prototype.onCreateClick = function () {
+            setRoute(this.props.dispatch, '/create-user/');
+        };
         Component.prototype.fetchUsers = function () {
             this.fetchController.abort();
             this.fetchController = new AbortController();
             return apiGet('/api/user-list/', {}, this.props.dispatch, this.fetchController.signal);
         };
         Component.prototype.deleteUser = function (userId) {
-            this.fetchController.abort();
-            this.fetchController = new AbortController();
             return apiPost('/api/delete-user/', { id: userId }, this.props.dispatch);
         };
         Component.prototype.componentDidMount = function () {
@@ -1930,7 +1930,7 @@
             var _this = this;
             return React.createElement('div', { className: 'user-listing-view' }, React.createElement('div', { className: 'user-listing-view__title' }, 'Users'), React.createElement('div', {
                 className: 'user-listing-view__create-button button',
-                onClick: function () { return setRoute(_this.props.dispatch, '/create-user/'); },
+                onClick: this.onCreateClick,
             }, 'Create User'), React.createElement('div', { className: 'user-listing-view__users' }, this.state.users.map(function (user) { return (React.createElement('div', { className: 'user-listing-view__user', key: user.id }, React.createElement('div', {
                 className: 'user-listing-view__user__title',
                 onClick: function () { return setRoute(_this.props.dispatch, '/edit-user/' + user.id + '/'); },
@@ -2392,7 +2392,7 @@
             return _this;
         }
         Component.prototype.onPlotsClick = function () {
-            setRoute(this.props.dispatch, '/plots/' + this.props.jobId + '/0/average-mutations/');
+            setRoute(this.props.dispatch, '/plots/' + this.props.jobId + '/0/fitness-history/');
         };
         Component.prototype.onConfigClick = function () {
             setRoute(this.props.dispatch, '/job-config/' + this.props.jobId + '/');

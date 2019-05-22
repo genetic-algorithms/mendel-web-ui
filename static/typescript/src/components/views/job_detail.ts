@@ -6,6 +6,8 @@ import { apiGet } from '../../api';
 import { setRoute } from '../../util';
 import moment from 'moment';
 
+// Shows the output of the job as it is running, and then the completed job.
+
 type OwnProps = {
     jobId: string;
 };
@@ -25,7 +27,6 @@ class Component extends React.Component<Props, State> {
     fetchController: AbortController;
     fetchTimeout: number | undefined;
     outputOffset: number;
-    //outputRef: React.RefObject<HTMLPreElement> | null;
     outputRef: HTMLElement | null;
 
     constructor(props: Props) {
@@ -50,7 +51,7 @@ class Component extends React.Component<Props, State> {
     }
 
     onPlotsClick() {
-        setRoute(this.props.dispatch, '/plots/' + this.props.jobId + '/0/average-mutations/');
+        setRoute(this.props.dispatch, '/plots/' + this.props.jobId + '/0/fitness-history/');
     }
 
     onConfigClick() {
