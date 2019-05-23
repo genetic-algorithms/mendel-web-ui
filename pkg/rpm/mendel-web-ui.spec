@@ -52,9 +52,9 @@ cp pkg/upstart/mendel-web-ui.conf $RPM_BUILD_ROOT/etc/init
 /etc/init/mendel-web-ui.conf
 
 %post
-mkdir -p /var/log/mendel-web-ui /var/run/mendel-web-ui/output/jobs  # main.go will create the database dir
+mkdir -p /var/log/mendel-web-ui /usr/local/var/run/mendel-web-ui/output/jobs  # main.go will create the database dir
 # this is needed because these dirs are created by root during install, but will be written to by whatever user runs the web ui
-chmod 777 /var/log/mendel-web-ui /var/run/mendel-web-ui /var/run/mendel-web-ui/output /var/run/mendel-web-ui/output/jobs
+chmod 777 /var/log/mendel-web-ui /usr/local/var/run/mendel-web-ui /usr/local/var/run/mendel-web-ui/output /usr/local/var/run/mendel-web-ui/output/jobs
 initctl stop mendel-web-ui > /dev/null 2>&1 || true
 initctl reload-configuration
 initctl start mendel-web-ui
