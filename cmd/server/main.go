@@ -60,7 +60,7 @@ var globalStaticPath string
 
 func main() {
 	if len(os.Args) < 4 {
-		fmt.Println("Usage: ./cmd/server/mendel-go-ui port binary default_config [static_dir]")
+		fmt.Println("Usage: ./cmd/server/mendel-web-ui port mendel-go-binary default_config [static_dir]")
 		return
 	}
 

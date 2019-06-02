@@ -11,6 +11,7 @@ if [[ "$runEnv" == "prod" ]]; then
 	logDir="/var/log/mendel-web-ui"
 	staticDir="/usr/local/mendel-web-ui/static"
 	cd /usr/local/var/run/mendel-web-ui    # this gives it access to the dirs: database, output
+	# we also specify in the mendel-go config file that the job output should be put in output/jobs
 	/usr/local/bin/mendel-web-ui $port /usr/local/bin/mendel-go /usr/local/share/mendel-go/mendel-defaults.ini $staticDir > $logDir/stdout.log 2> $logDir/stderr.log &
 	if [[ $? -eq 0 ]]; then
 		echo "/usr/local/bin/mendel-web-ui started, browse http://0.0.0.0:$port/"
@@ -19,8 +20,7 @@ elif [[ "$runEnv" == "dev" ]]; then
 	# We assume they run this in the mendel-web-ui github dir
 	staticDir="${2:-}"  # to override using the local static dir
 	port=8581
-	#logDir="$HOME/log/mendel-web-ui"
-	#mkdir -p $logDir
+	# we also specify in the mendel-go config file that the job output should be put in output/jobs
 	cmd/server/mendel-web-ui $port ../mendel-go/mendel-go ../mendel-go/mendel-defaults.ini $staticDir &  # stdout and stderr will go to the terminal session
 	if [[ $? -eq 0 ]]; then
 		echo "cmd/server/mendel-web-ui started, browse http://0.0.0.0:$port/"
