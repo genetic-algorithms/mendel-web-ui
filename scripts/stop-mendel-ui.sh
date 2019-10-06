@@ -15,7 +15,7 @@ elif [[ -z "$pid" ]]; then
 elif [[ "$pid" =~ " " ]]; then
 	# got multiple words instead of 1 pid
 	echo "found more than 1 process id for mendel-web-ui: $pid"
-	echo 2
+	exit 2
 fi
 
 #echo kill $pid

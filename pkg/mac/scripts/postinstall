@@ -8,6 +8,8 @@ DESTDIR=/usr/local
 # Note: our runtime dirs can't be in /var/run, because they are removed on reboot and requires root to recreate them
 mkdir -p $DESTDIR/bin $DESTDIR/share $DESTDIR/var/run/mendel-web-ui/output/jobs  # main.go will create the database dir
 ln -sf $SRCDIR/mendel-web-ui/bin/mendel-web-ui $DESTDIR/bin
+ln -sf $SRCDIR/mendel-web-ui/bin/mendel-chg-pw $DESTDIR/bin
+ln -sf $SRCDIR/mendel-web-ui/bin/mendel-chg-pw.sh $DESTDIR/bin
 ln -sf $SRCDIR/mendel-web-ui/bin/start-mendel-ui.sh $DESTDIR/bin
 ln -sf $SRCDIR/mendel-web-ui/bin/stop-mendel-ui.sh $DESTDIR/bin
 ln -sf $SRCDIR/mendel-web-ui/share/mendel-web-ui $DESTDIR/share

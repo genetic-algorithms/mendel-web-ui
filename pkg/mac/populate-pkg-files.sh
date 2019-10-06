@@ -10,6 +10,6 @@ if [[ ! -d "$BUILD_ROOT" ]]; then
 fi
 
 mkdir -p $BUILD_ROOT/bin $BUILD_ROOT/share/mendel-web-ui $BUILD_ROOT/mendel-web-ui
-cp cmd/server/mendel-web-ui scripts/start-mendel-ui.sh scripts/stop-mendel-ui.sh $BUILD_ROOT/bin
+cp cmd/server/mendel-web-ui tools/mendel-chg-pw tools/mendel-chg-pw.sh scripts/start-mendel-ui.sh scripts/stop-mendel-ui.sh $BUILD_ROOT/bin
 cp LICENSE COPYRIGHT $BUILD_ROOT/share/mendel-web-ui
 cp -a static rollup.config.js *.json $BUILD_ROOT/mendel-web-ui

@@ -29,6 +29,7 @@ mkdir -p ../github.com/genetic-algorithms
 rm -f ../github.com/genetic-algorithms/mendel-web-ui; ln -s ../../mendel-web-ui-%{version} ../github.com/genetic-algorithms/mendel-web-ui
 
 GOPATH=$RPM_BUILD_DIR scripts/build_go
+GOPATH=$RPM_BUILD_DIR go build -o tools/mendel-chg-pw tools/mendel-chg-pw.go
 
 %install
 # The install phase puts all of the files in the paths they should be in when the binary rpm is installed on a system.
@@ -37,7 +38,7 @@ GOPATH=$RPM_BUILD_DIR scripts/build_go
 # Following the LSB Filesystem Hierarchy Standard: https://refspecs.linuxfoundation.org/FHS_3.0/fhs-3.0.pdf
 rm -rf $RPM_BUILD_ROOT
 mkdir -p $RPM_BUILD_ROOT%{prefix}/bin $RPM_BUILD_ROOT%{prefix}/share/mendel-web-ui $RPM_BUILD_ROOT%{prefix}/mendel-web-ui $RPM_BUILD_ROOT/etc/init
-cp cmd/server/mendel-web-ui $RPM_BUILD_ROOT%{prefix}/bin
+cp cmd/server/mendel-web-ui tools/mendel-chg-pw tools/mendel-chg-pw.sh $RPM_BUILD_ROOT%{prefix}/bin
 cp LICENSE COPYRIGHT $RPM_BUILD_ROOT%{prefix}/share/mendel-web-ui
 cp -a static rollup.config.js *.json $RPM_BUILD_ROOT%{prefix}/mendel-web-ui
 cp pkg/upstart/mendel-web-ui.conf $RPM_BUILD_ROOT/etc/init
@@ -47,6 +48,8 @@ cp pkg/upstart/mendel-web-ui.conf $RPM_BUILD_ROOT/etc/init
 #%defattr(-, root, root)
 #%doc LICENSE COPYRIGHT
 %{prefix}/bin/mendel-web-ui
+%{prefix}/bin/mendel-chg-pw
+%{prefix}/bin/mendel-chg-pw.sh
 %{prefix}/share/mendel-web-ui
 %{prefix}/mendel-web-ui
 /etc/init/mendel-web-ui.conf

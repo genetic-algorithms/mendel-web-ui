@@ -2,9 +2,9 @@ SHELL ?= /bin/bash -e
 #BINARY ?= cmd/server/mendel-web-ui
 BINARY ?= mendel-web-ui
 # Set these 2 vars before building the pkg, and set Requires in pkg/rpm/mendel-web-ui.spec if necessary
-export VERSION ?= 1.1.4
+export VERSION ?= 1.1.5
 # Release is only needed for the rpm, and only needs to be incremented if you have to rebuild/reinstall this version multiple times
-export RELEASE ?= 5
+export RELEASE ?= 1
 # rpmbuild does not give us a good way to set topdir, so use the default location
 RPMROOT ?= $(HOME)/rpmbuild
 RPMNAME ?= mendel-web-ui
@@ -17,7 +17,11 @@ cmd/server/$(BINARY): cmd/server/*.go Makefile
 	echo 'package main; const MENDEL_UI_VERSION = "$(VERSION)-$(RELEASE)"' > cmd/server/version.go
 	scripts/build_go
 
-runserver: cmd/server/$(BINARY)
+tools/mendel-chg-pw: tools/mendel-chg-pw.go
+	glide --quiet install
+	go build -o $@ $<
+
+runserver: cmd/server/$(BINARY) tools/mendel-chg-pw
 	scripts/stop-mendel-ui.sh || true
 	scripts/start-mendel-ui.sh dev
 
@@ -35,7 +39,7 @@ rpmbuild:
 	rm -f $(RPMNAME)-$(VERSION)   # remove the sym link
 
 # Remember to up VERSION above.
-macpkg: cmd/server/$(BINARY)
+macpkg: cmd/server/$(BINARY) tools/mendel-chg-pw
 	pkg/mac/populate-pkg-files.sh pkg/mac/mendel-web-ui
 	pkgbuild --root pkg/mac/$(BINARY) --scripts pkg/mac/scripts --identifier $(MAC_PKG_IDENTIFIER) --version $(VERSION) --install-location $(MAC_PKG_INSTALL_DIR) pkg/mac/build/$(BINARY)-$(VERSION).pkg
 	rm -f pkg/mac/build/$(BINARY)-$(VERSION).pkg.zip
