@@ -1,0 +1,21 @@
+# Runs the Mendel Web UI service via systemd on EC2
+[Unit]
+Description=Mendel Web UI service
+Requires=network.target
+After=network-online.target
+
+[Service]
+WorkingDirectory=/usr/local/var/run/mendel-web-ui
+User=ec2-user
+# we also specify in the mendel-go config file that the job output should be put in output/jobs
+ExecStart=/usr/local/bin/mendel-web-ui 8581 /usr/local/bin/mendel-go /usr/local/share/mendel-go/mendel-defaults.ini /usr/local/mendel-web-ui/static
+# these are not support by this version of systemd yet
+#StandardOutput=file:/var/log/mendel-web-ui/stdout.log
+#StandardError=file:/var/log/mendel-web-ui/stderr.log
+StandardOutput=syslog
+StandardError=syslog
+Restart=always
+Type=simple
+
+[Install]
+WantedBy=multi-user.target

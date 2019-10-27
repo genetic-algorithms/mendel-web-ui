@@ -39,7 +39,11 @@ stopWebSvr() {
 			$myDir/stop-mendel-ui.sh
 		fi
 	else
-		sudo initctl stop mendel-web-ui
+		if which systemctl >/dev/null; then
+			sudo systemctl stop mendel-web-ui
+		else
+			sudo initctl stop mendel-web-ui
+		fi
 	fi
 }
 
@@ -51,11 +55,16 @@ startWebSvr() {
 			$myDir/start-mendel-ui.sh
 		fi
 	else
-		sudo initctl start mendel-web-ui
+		if which systemctl >/dev/null; then
+			sudo systemctl start mendel-web-ui
+		else
+			sudo initctl start mendel-web-ui
+		fi
 	fi
 }
 
-confirmCmds jq base64 htpasswd
+#confirmCmds jq base64 htpasswd
+confirmCmds jq
 
 set -e  # stop if any cmd fails
 stopWebSvr || true   # keep going
