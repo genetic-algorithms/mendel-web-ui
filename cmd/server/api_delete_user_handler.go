@@ -17,7 +17,7 @@ func apiDeleteUserHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if !isValidPostJson(r) {
+	if !mutils.IsValidPostJson(r) {
 		http.Error(w, "400 Bad Request (method or content-type)", http.StatusBadRequest)
 		return
 	}
@@ -30,7 +30,7 @@ func apiDeleteUserHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	globalDbLock.Lock()
+	db.Db.Lock()
 	// Before deleting the user, find all jobs owned by them and blank out OwnerId
 	for _, job := range globalDb.Jobs {
 		if job.OwnerId == postUser.Id {
@@ -38,12 +38,12 @@ func apiDeleteUserHandler(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	delete(globalDb.Users, postUser.Id)
-	err = persistDatabase()
-	globalDbLock.Unlock()
+	err = db.Db.Persist()
+	db.Db.Unlock()
 	if err != nil {
 		http.Error(w, "500 Internal Server Error (could not persist database)", http.StatusInternalServerError)
 		return
 	}
 
-	writeJsonResponse(w, map[string]string{})
+	mutils.WriteJsonResponse(w, map[string]string{})
 }

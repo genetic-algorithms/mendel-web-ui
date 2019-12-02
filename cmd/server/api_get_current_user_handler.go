@@ -12,7 +12,7 @@ func apiGetCurrentUserHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	writeJsonResponse(w, map[string]interface{}{
+	mutils.WriteJsonResponse(w, map[string]interface{}{
 		"id":       user.Id,
 		"username": user.Username,
 		"is_admin": user.IsAdmin,

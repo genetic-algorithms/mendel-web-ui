@@ -59,7 +59,8 @@ cp pkg/systemd/mendel-web-ui.service $RPM_BUILD_ROOT/lib/systemd/system
 %post
 mkdir -p /var/log/mendel-web-ui /usr/local/var/run/mendel-web-ui/output/jobs  # main.go will create the database dir
 # this is needed because these dirs are created by root during install, but will be written to by whatever user runs the web ui
-chmod 777 /var/log/mendel-web-ui /usr/local/var/run/mendel-web-ui /usr/local/var/run/mendel-web-ui/output /usr/local/var/run/mendel-web-ui/output/jobs
+#chmod 777 /var/log/mendel-web-ui /usr/local/var/run/mendel-web-ui /usr/local/var/run/mendel-web-ui/output /usr/local/var/run/mendel-web-ui/output/jobs
+chown ec2-user:ec2-user /var/log/mendel-web-ui /usr/local/var/run/mendel-web-ui /usr/local/var/run/mendel-web-ui/output /usr/local/var/run/mendel-web-ui/output/jobs
 if which systemctl >/dev/null; then
   systemctl stop mendel-web-ui > /dev/null 2>&1 || true
   systemctl daemon-reload

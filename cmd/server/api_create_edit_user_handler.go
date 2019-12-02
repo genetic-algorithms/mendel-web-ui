@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"net/http"
 
+	"github.com/genetic-algorithms/mendel-web-ui/cmd/server/db"
+	"github.com/genetic-algorithms/mendel-web-ui/cmd/server/mutils"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -22,7 +24,7 @@ func apiCreateEditUserHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if !isValidPostJson(r) {
+	if !mutils.IsValidPostJson(r) {
 		http.Error(w, "400 Bad Request (method or content-type)", http.StatusBadRequest)
 		return
 	}
@@ -36,17 +38,17 @@ func apiCreateEditUserHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	usernameExists := false
-	globalDbLock.RLock()
+	db.Db.RLock()
 	for _, u := range globalDb.Users {
 		if u.Username == postUser.Username && u.Id != postUser.Id {
 			usernameExists = true
 			break
 		}
 	}
-	globalDbLock.RUnlock()
+	db.Db.RUnlock()
 
 	if usernameExists {
-		writeJsonResponse(w, map[string]string{
+		mutils.WriteJsonResponse(w, map[string]string{
 			"status": "username_exists",
 		})
 		return
@@ -61,7 +63,7 @@ func apiCreateEditUserHandler(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	var newUser DatabaseUser
+	var newUser db.DatabaseUser
 	if postUser.Id == "" {
 		// Create user
 
@@ -70,13 +72,13 @@ func apiCreateEditUserHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		userId, err := generateUuid()
+		userId, err := mutils.GenerateUuid()
 		if err != nil {
 			http.Error(w, "500 Internal Server Error (could not generate userId)", http.StatusInternalServerError)
 			return
 		}
 
-		newUser = DatabaseUser{
+		newUser = db.DatabaseUser{
 			Id:       userId,
 			Username: postUser.Username,
 			Password: hashedPassword,
@@ -90,10 +92,10 @@ func apiCreateEditUserHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		globalDbLock.RLock()
+		db.Db.RLock()
 		var ok bool
 		newUser, ok = globalDb.Users[postUser.Id]
-		globalDbLock.RUnlock()
+		db.Db.RUnlock()
 
 		if !ok {
 			http.Error(w, "400 Bad Request (user does not exist)", http.StatusBadRequest)
@@ -107,16 +109,16 @@ func apiCreateEditUserHandler(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	globalDbLock.Lock()
+	db.Db.Lock()
 	globalDb.Users[newUser.Id] = newUser
-	err = persistDatabase()
-	globalDbLock.Unlock()
+	err = db.Db.Persist()
+	db.Db.Unlock()
 	if err != nil {
 		http.Error(w, "500 Internal Server Error (could not persist database)", http.StatusInternalServerError)
 		return
 	}
 
-	writeJsonResponse(w, map[string]string{
+	mutils.WriteJsonResponse(w, map[string]string{
 		"status": "success",
 	})
 }

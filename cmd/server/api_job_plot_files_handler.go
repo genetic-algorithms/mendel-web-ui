@@ -51,7 +51,7 @@ func apiJobPlotFilesHandler(w http.ResponseWriter, r *http.Request) {
 		return resp.Tribes[i] < resp.Tribes[j]
 	})
 
-	writeJsonResponse(w, resp)
+	mutils.WriteJsonResponse(w, resp)
 }
 
 // Read the given dir and return the non-fully-qualified files and the tribe numbers

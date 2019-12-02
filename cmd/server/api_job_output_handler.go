@@ -43,7 +43,7 @@ func apiJobOutputHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	globalRunningJobsLock.RUnlock()
 
-	writeJsonResponse(w, map[string]interface{}{
+	mutils.WriteJsonResponse(w, map[string]interface{}{
 		"output": offsetOutput,
 		"done":   !inProgress,
 		"description": job.Description,

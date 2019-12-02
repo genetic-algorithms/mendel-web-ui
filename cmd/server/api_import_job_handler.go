@@ -28,7 +28,7 @@ func apiImportJobHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if !isValidPostJson(r) {
+	if !mutils.IsValidPostJson(r) {
 		http.Error(w, "400 Bad Request (method or content-type)", http.StatusBadRequest)
 		return
 	}
@@ -45,7 +45,7 @@ func apiImportJobHandler(w http.ResponseWriter, r *http.Request) {
 	bytesReader := bytes.NewReader(contentsBytes)
 	zipReader, err := zip.NewReader(bytesReader, int64(len(contentsBytes)))
 
-	/* jobId, err := generateJobId()
+	/* jobId, err := mutils.GenerateJobId()
 	if err != nil {
 		http.Error(w, "500 Internal Server Error (could not generate jobId)", http.StatusInternalServerError)
 		return
@@ -136,16 +136,16 @@ func apiImportJobHandler(w http.ResponseWriter, r *http.Request) {
 		Status:      "succeeded",
 	}
 
-	globalDbLock.Lock()
+	db.Db.Lock()
 	globalDb.Jobs[jobId] = job
-	err = persistDatabase()
-	globalDbLock.Unlock()
+	err = db.Db.Persist()
+	db.Db.Unlock()
 	if err != nil {
 		http.Error(w, "500 Internal Server Error (could not persist database)", http.StatusInternalServerError)
 		return
 	}
 
-	writeJsonResponse(w, map[string]string{
+	mutils.WriteJsonResponse(w, map[string]string{
 		"job_id": jobId,
 	})
 }

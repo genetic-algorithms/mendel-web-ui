@@ -21,7 +21,7 @@ func apiDeleteJobHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if !isValidPostJson(r) {
+	if !mutils.IsValidPostJson(r) {
 		http.Error(w, "400 Bad Request (method or content-type)", http.StatusBadRequest)
 		return
 	}
@@ -34,7 +34,7 @@ func apiDeleteJobHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	globalDbLock.Lock()
+	db.Db.Lock()
 	// Remove the job data files first
 	jobDir := filepath.Join(globalJobsDir, postJob.Id)
 	//log.Printf("In /api/delete-job/: deleting %s ...", jobDir)
@@ -44,14 +44,14 @@ func apiDeleteJobHandler(w http.ResponseWriter, r *http.Request) {
 		// Now remove the job from the db
 		//log.Printf("In /api/delete-job/: now deleting %s from db ...", postJob.Id)
 		delete(globalDb.Jobs, postJob.Id)
-		err = persistDatabase()
+		err = db.Db.Persist()
 	}
-	globalDbLock.Unlock()
+	db.Db.Unlock()
 	if err != nil {
 		log.Printf("Error in /api/delete-job/: %v", err)
 		http.Error(w, "500 Internal Server Error (could not persist database)", http.StatusInternalServerError)
 		return
 	}
 
-	writeJsonResponse(w, map[string]string{})
+	mutils.WriteJsonResponse(w, map[string]string{})
 }

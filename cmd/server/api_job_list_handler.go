@@ -28,7 +28,7 @@ func apiJobListHandler(w http.ResponseWriter, r *http.Request) {
 	all := r.URL.Query().Get("filter") == "all"
 
 	jobs := []ApiJobListHandlerJob{}
-	globalDbLock.RLock()
+	db.Db.RLock()
 	for _, job := range globalDb.Jobs {
 		if all || user.Id == job.OwnerId {
 			jobs = append(jobs, ApiJobListHandlerJob{
@@ -40,13 +40,13 @@ func apiJobListHandler(w http.ResponseWriter, r *http.Request) {
 			})
 		}
 	}
-	globalDbLock.RUnlock()
+	db.Db.RUnlock()
 
 	sort.Slice(jobs, func(i, j int) bool {
 		return jobs[i].Time.After(jobs[j].Time)
 	})
 
-	writeJsonResponse(w, map[string][]ApiJobListHandlerJob{
+	mutils.WriteJsonResponse(w, map[string][]ApiJobListHandlerJob{
 		"jobs": jobs,
 	})
 }

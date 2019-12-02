@@ -38,7 +38,7 @@ func apiPlotFitnessHistoryHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	rows := parseSpaceSeparatedPlotFile(bytes)
+	rows := mutils.ParseSpaceSeparatedPlotFile(bytes)
 
 	generations := []int{}
 	popSize := []int{}
@@ -72,7 +72,7 @@ func apiPlotFitnessHistoryHandler(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	writeJsonResponse(w, map[string]interface{}{
+	mutils.WriteJsonResponse(w, map[string]interface{}{
 		"generations": generations,
 		"pop_size":    popSize,
 		"fitness":     fitness,

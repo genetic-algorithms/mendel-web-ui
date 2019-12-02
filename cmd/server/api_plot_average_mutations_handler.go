@@ -38,7 +38,7 @@ func apiPlotAverageMutationsHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	rows := parseSpaceSeparatedPlotFile(bytes)
+	rows := mutils.ParseSpaceSeparatedPlotFile(bytes)
 
 	generations := []int{}
 	deleterious := []float64{}
@@ -80,7 +80,7 @@ func apiPlotAverageMutationsHandler(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	writeJsonResponse(w, map[string]interface{}{
+	mutils.WriteJsonResponse(w, map[string]interface{}{
 		"generations": generations,
 		"deleterious": deleterious,
 		"neutral":     neutral,

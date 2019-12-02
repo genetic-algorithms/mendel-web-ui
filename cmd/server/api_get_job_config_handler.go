@@ -23,7 +23,7 @@ func apiGetJobConfigHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	writeJsonResponse(w, map[string]string{
+	mutils.WriteJsonResponse(w, map[string]string{
 		"config":      string(bytes),
 	})
 }

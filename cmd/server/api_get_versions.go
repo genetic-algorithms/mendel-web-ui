@@ -24,7 +24,7 @@ func apiGetVersionsHandler(w http.ResponseWriter, r *http.Request) {
 
 	goVerson := string(out)
 
-	writeJsonResponse(w, map[string]interface{}{
+	mutils.WriteJsonResponse(w, map[string]interface{}{
 		"mendelUiVersion": MENDEL_UI_VERSION,
 		"mendelGoVersion": goVerson,
 	})

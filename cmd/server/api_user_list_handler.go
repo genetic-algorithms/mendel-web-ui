@@ -15,17 +15,17 @@ func apiUserListHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	users := []DatabaseUser{}
-	globalDbLock.RLock()
+	db.Db.RLock()
 	for _, user := range globalDb.Users {
 		users = append(users, user)
 	}
-	globalDbLock.RUnlock()
+	db.Db.RUnlock()
 
 	sort.Slice(users, func(i, j int) bool {
 		return strings.Compare(users[i].Username, users[j].Username) < 0
 	})
 
-	writeJsonResponse(w, map[string][]DatabaseUser{
+	mutils.WriteJsonResponse(w, map[string][]DatabaseUser{
 		"users": users,
 	})
 }

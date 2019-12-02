@@ -13,6 +13,8 @@ import (
 	"time"
 
 	"github.com/BurntSushi/toml"
+	"github.com/genetic-algorithms/mendel-web-ui/cmd/server/db"
+	"github.com/genetic-algorithms/mendel-web-ui/cmd/server/mutils"
 )
 
 // Called for /api/create-job/ route
@@ -24,7 +26,7 @@ func apiCreateJobHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if !isValidPostJson(r) {
+	if !mutils.IsValidPostJson(r) {
 		http.Error(w, "400 Bad Request (method or content-type)", http.StatusBadRequest)
 		return
 	}
@@ -47,7 +49,7 @@ func apiCreateJobHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	jobId, err := generateJobId()
+	jobId, err := mutils.GenerateJobId()
 	if err != nil {
 		http.Error(w, "500 Internal Server Error (could not generate jobId)", http.StatusInternalServerError)
 		return
@@ -84,7 +86,7 @@ func apiCreateJobHandler(w http.ResponseWriter, r *http.Request) {
 	globalRunningJobsOutput[jobId] = outputBuilder
 	globalRunningJobsLock.Unlock()
 
-	job := DatabaseJob{
+	job := db.DatabaseJob{
 		Id:          jobId,
 		Description: config["basic"]["description"].(string),
 		Time:        time.Now().UTC(),
@@ -92,9 +94,9 @@ func apiCreateJobHandler(w http.ResponseWriter, r *http.Request) {
 		Status:      "running",
 	}
 
-	globalDbLock.Lock()
+	db.Db.Lock()
 	globalDb.Jobs[jobId] = job
-	globalDbLock.Unlock()
+	db.Db.Unlock()
 
 	go func() {
 		cmd := exec.Command(globalMendelGoBinaryPath, "-f", configFilePath)
@@ -120,10 +122,10 @@ func apiCreateJobHandler(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			log.Println(err)
 			job.Status = "failed"
-			globalDbLock.Lock()
+			db.Db.Lock()
 			globalDb.Jobs[jobId] = job
-			err = persistDatabase()
-			globalDbLock.Unlock()
+			err = db.Db.Persist()
+			db.Db.Unlock()
 			if err != nil {
 				http.Error(w, "500 Internal Server Error (could not persist database)", http.StatusInternalServerError)
 				return
@@ -131,10 +133,10 @@ func apiCreateJobHandler(w http.ResponseWriter, r *http.Request) {
 		}
 
 		job.Status = "succeeded"
-		globalDbLock.Lock()
+		db.Db.Lock()
 		globalDb.Jobs[jobId] = job
-		err = persistDatabase()
-		globalDbLock.Unlock()
+		err = db.Db.Persist()
+		db.Db.Unlock()
 		if err != nil {
 			http.Error(w, "500 Internal Server Error (could not persist database)", http.StatusInternalServerError)
 			return
@@ -151,7 +153,7 @@ func apiCreateJobHandler(w http.ResponseWriter, r *http.Request) {
 		}
 	}()
 
-	writeJsonResponse(w, map[string]string{
+	mutils.WriteJsonResponse(w, map[string]string{
 		"job_id": jobId,
 	})
 }

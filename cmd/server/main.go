@@ -1,55 +1,25 @@
 package main
 
 import (
-	"crypto/rand"
-	"encoding/hex"
-	"encoding/json"
 	"fmt"
 	"html/template"
-	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
 	"path/filepath"
 	"strings"
 	"sync"
-	"time"
 
+	"github.com/genetic-algorithms/mendel-web-ui/cmd/server/db"
 	"github.com/gorilla/securecookie"
-	"golang.org/x/crypto/bcrypt"
 )
 
 /*
 The main of the web ui server.
 */
 
-type Database struct {
-	Version        int                     `json:"version"`
-	CookieHashKey  []byte                  `json:"cookie_hash_key"`
-	CookieBlockKey []byte                  `json:"cookie_block_key"`
-	Jobs           map[string]DatabaseJob  `json:"jobs"`
-	Users          map[string]DatabaseUser `json:"users"`
-}
-
-type DatabaseJob struct {
-	Id          string    `json:"id"`
-	Description string    `json:"description"` // this is cached in the db from the job config
-	Time        time.Time `json:"time"`
-	OwnerId     string    `json:"owner_id"`
-	Status      string    `json:"status"` // running, cancelled, failed, succeeded
-}
-
-type DatabaseUser struct {
-	Id       string `json:"id"`
-	Username string `json:"username"`
-	Password []byte `json:"password"`
-	IsAdmin  bool   `json:"is_admin"`
-}
-
 // These global vars are necessary because the handler functions are not given any context
 var globalBaseTemplateParsed *template.Template
-var globalDb Database
-var globalDbLock sync.RWMutex
 var globalSecureCookie *securecookie.SecureCookie
 var globalRunningJobsOutput map[string]*strings.Builder
 var globalRunningJobsLock sync.RWMutex
@@ -80,9 +50,10 @@ func main() {
 	globalRunningJobsOutput = make(map[string]*strings.Builder)
 
 	globalBaseTemplateParsed = template.Must(template.New("base").Parse(baseTemplate))
-	globalDb = loadDatabase()
+	dbPath := "./database/database.json"
+	db.DatabaseFactory(dbPath, true) // creates a new db or populates the db.Db singleton object with the current db file content
 
-	globalSecureCookie = securecookie.New(globalDb.CookieHashKey, globalDb.CookieBlockKey)
+	globalSecureCookie = securecookie.New(db.Db.Data.CookieHashKey, db.Db.Data.CookieBlockKey)
 
 	/*
 		There are 3 routes this web ui server responds to:
@@ -96,92 +67,7 @@ func main() {
 	http.HandleFunc("/api/", apiHandler)
 
 	log.Fatal(http.ListenAndServe(":"+port, nil))
-}
-
-func loadDatabase() Database {
-	_, err := os.Stat("./database")
-	if err != nil {
-		err = os.Mkdir("./database", 0755)
-		if err != nil {
-			panic(err)
-		}
-	}
-
-	_, err = os.Stat("./database/database.json")
-	if err != nil {
-		cookieHashKey := make([]byte, 64)
-		_, err = rand.Read(cookieHashKey)
-		if err != nil {
-			panic(err)
-		}
-
-		cookieBlockKey := make([]byte, 32)
-		_, err = rand.Read(cookieBlockKey)
-		if err != nil {
-			panic(err)
-		}
-
-		dbUserId, err := generateUuid()
-		if err != nil {
-			panic(err)
-		}
-		dbUserPassword, err := generateUuid()
-		if err != nil {
-			panic(err)
-		}
-		dbUserPasswordHash, err := bcrypt.GenerateFromPassword([]byte(dbUserPassword), bcrypt.DefaultCost)
-		if err != nil {
-			panic(err)
-		}
-
-		dbUser := DatabaseUser{
-			Id:       dbUserId,
-			Username: "admin",
-			Password: dbUserPasswordHash,
-			IsAdmin:  true,
-		}
-
-		dbUsers := make(map[string]DatabaseUser)
-		dbUsers[dbUser.Id] = dbUser
-
-		db := Database{
-			Version:        1,
-			CookieHashKey:  cookieHashKey,
-			CookieBlockKey: cookieBlockKey,
-			Jobs:           make(map[string]DatabaseJob),
-			Users:          dbUsers,
-		}
-
-		dbJson, err := json.Marshal(db)
-		if err != nil {
-			panic(err)
-		}
-
-		err = ioutil.WriteFile("./database/database.json", dbJson, 0644)
-		if err != nil {
-			panic(err)
-		}
-
-		fmt.Println("Initialized database")
-		fmt.Println("Username:", dbUser.Username)
-		fmt.Println("Password:", dbUserPassword)
-
-		return db
-	}
-
-	bytes, err := ioutil.ReadFile("./database/database.json")
-	if err != nil {
-		panic(err)
-	}
-
-	var db Database
-	err = json.Unmarshal(bytes, &db)
-	if err != nil {
-		panic(err)
-	}
-
-	return db
-}
+} // end of main
 
 // Responds to / or any other route (except api or static) with the same single app page
 // (but customized to the virtual page indicated by the rest of the route)
@@ -213,7 +99,10 @@ func rootHandler(w http.ResponseWriter, _ *http.Request) {
 		},
 	}
 
-	globalBaseTemplateParsed.Execute(w, context)
+	err := globalBaseTemplateParsed.Execute(w, context)
+	if err != nil {
+		panic(err)
+	}
 }
 
 // API routes that the front end javascript calls to get data like users, jobs, plot data
@@ -269,34 +158,7 @@ func apiHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func parseSpaceSeparatedPlotFile(bytes []byte) [][]string {
-	lines := strings.Split(string(bytes), "\n")
-
-	numberLines := [][]string{}
-	for _, line := range lines {
-		if line != "" && !strings.HasPrefix(line, "#") {
-			numberLines = append(numberLines, strings.Fields(line))
-		}
-	}
-
-	return numberLines
-}
-
-func isValidPostJson(r *http.Request) bool {
-	if r.Method != "POST" {
-		return false
-	}
-
-	val, ok := r.Header["Content-Type"]
-
-	if !ok || len(val) == 0 || val[0] != "application/json" {
-		return false
-	}
-
-	return true
-}
-
-func getAuthenticatedUser(r *http.Request) DatabaseUser {
+func getAuthenticatedUser(r *http.Request) db.DatabaseUser {
 	cookie, err := r.Cookie("session")
 	if err != nil {
 		return DatabaseUser{}
@@ -313,39 +175,14 @@ func getAuthenticatedUser(r *http.Request) DatabaseUser {
 		return DatabaseUser{}
 	}
 
-	globalDbLock.RLock()
-	user, ok := globalDb.Users[user_id]
-	globalDbLock.RUnlock()
+	db.Db.RLock()
+	user, ok := db.Db.Data.Users[user_id]
+	db.Db.RUnlock()
 	if !ok {
 		return DatabaseUser{}
 	}
 
 	return user
-}
-
-// Used to generate ids to store users in the db with
-func generateUuid() (string, error) {
-	bytes := make([]byte, 16) // 32 hex chars
-
-	_, err := rand.Read(bytes)
-	if err != nil {
-		return "", err
-	}
-
-	return hex.EncodeToString(bytes), nil
-}
-
-// Used to generate the id for each job run
-func generateJobId() (string, error) {
-	bytes := make([]byte, 4) // 8 hex chars
-
-	_, err := rand.Read(bytes)
-	if err != nil {
-		return "", err
-	}
-
-	//todo: check to see if this id is already in the db, and generate another one if it is
-	return hex.EncodeToString(bytes), nil
 }
 
 func staticMtime(path string) string {
@@ -356,24 +193,4 @@ func staticMtime(path string) string {
 	}
 
 	return fmt.Sprint("/static/", path, "?v=", fileInfo.ModTime().Unix())
-}
-
-func persistDatabase() error {
-	dbJson, err := json.Marshal(globalDb)
-	if err != nil {
-		return err
-	}
-
-	return ioutil.WriteFile("./database/database.json", dbJson, 0644)
-}
-
-func writeJsonResponse(w http.ResponseWriter, data interface{}) {
-	dataJson, err := json.Marshal(data)
-	if err != nil {
-		http.Error(w, "500 Internal Server Error (could not encode json response)", http.StatusInternalServerError)
-		return
-	}
-
-	w.Header().Set("Content-Type", "application/json")
-	w.Write(dataJson)
 }

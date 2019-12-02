@@ -74,5 +74,5 @@ func apiPlotSnpFrequenciesHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	globalRunningJobsLock.RUnlock()
 
-	writeJsonResponse(w, result)
+	mutils.WriteJsonResponse(w, result)
 }

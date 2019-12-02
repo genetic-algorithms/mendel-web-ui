@@ -9,7 +9,7 @@ import (
 
 // Called for /api/login/ route
 func apiLoginHandler(w http.ResponseWriter, r *http.Request) {
-	if !isValidPostJson(r) {
+	if !mutils.IsValidPostJson(r) {
 		http.Error(w, "400 Bad Request (method or content-type)", http.StatusBadRequest)
 		return
 	}
@@ -25,7 +25,7 @@ func apiLoginHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	globalDbLock.RLock()
+	db.Db.RLock()
 	user := DatabaseUser{}
 	for _, u := range globalDb.Users {
 		if u.Username == creds.Username {
@@ -33,7 +33,7 @@ func apiLoginHandler(w http.ResponseWriter, r *http.Request) {
 			break
 		}
 	}
-	globalDbLock.RUnlock()
+	db.Db.RUnlock()
 
 	if user.Id == "" {
 		responseJson, _ := json.Marshal(map[string]string{"status": "wrong_credentials"})

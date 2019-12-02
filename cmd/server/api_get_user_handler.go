@@ -14,16 +14,16 @@ func apiGetUserHandler(w http.ResponseWriter, r *http.Request) {
 
 	userId := r.URL.Query().Get("userId")
 
-	globalDbLock.RLock()
+	db.Db.RLock()
 	user, ok := globalDb.Users[userId]
-	globalDbLock.RUnlock()
+	db.Db.RUnlock()
 
 	if !ok {
 		http.Error(w, "404 Not Found (user does not exist)", http.StatusNotFound)
 		return
 	}
 
-	writeJsonResponse(w, map[string]interface{}{
+	mutils.WriteJsonResponse(w, map[string]interface{}{
 		"id":       user.Id,
 		"username": user.Username,
 		"is_admin": user.IsAdmin,

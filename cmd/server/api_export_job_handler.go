@@ -60,7 +60,7 @@ func apiExportJobHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	writeJsonResponse(w, map[string]string{
+	mutils.WriteJsonResponse(w, map[string]string{
 		"contents": base64.StdEncoding.EncodeToString(zipBuf.Bytes()),
 	})
 }
