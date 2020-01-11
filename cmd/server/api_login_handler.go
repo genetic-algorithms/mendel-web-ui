@@ -2,6 +2,8 @@ package main
 
 import (
 	"encoding/json"
+	"github.com/genetic-algorithms/mendel-web-ui/cmd/server/db"
+	"github.com/genetic-algorithms/mendel-web-ui/cmd/server/mutils"
 	"net/http"
 
 	"golang.org/x/crypto/bcrypt"
@@ -26,8 +28,8 @@ func apiLoginHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	db.Db.RLock()
-	user := DatabaseUser{}
-	for _, u := range globalDb.Users {
+	user := db.DatabaseUser{}
+	for _, u := range db.Db.Data.Users {
 		if u.Username == creds.Username {
 			user = u
 			break
@@ -38,7 +40,11 @@ func apiLoginHandler(w http.ResponseWriter, r *http.Request) {
 	if user.Id == "" {
 		responseJson, _ := json.Marshal(map[string]string{"status": "wrong_credentials"})
 		w.Header().Set("Content-Type", "application/json")
-		w.Write(responseJson)
+		_, err = w.Write(responseJson)
+		if err != nil {
+			http.Error(w, "500 Internal Server Error (could not write response json)", http.StatusInternalServerError)
+			return
+		}
 		return
 	}
 
@@ -46,7 +52,11 @@ func apiLoginHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		responseJson, _ := json.Marshal(map[string]string{"status": "wrong_credentials"})
 		w.Header().Set("Content-Type", "application/json")
-		w.Write(responseJson)
+		_, err = w.Write(responseJson)
+		if err != nil {
+			http.Error(w, "500 Internal Server Error (could not write response json)", http.StatusInternalServerError)
+			return
+		}
 		return
 	}
 
@@ -76,5 +86,9 @@ func apiLoginHandler(w http.ResponseWriter, r *http.Request) {
 		},
 	})
 	w.Header().Set("Content-Type", "application/json")
-	w.Write(responseJson)
+	_, err = w.Write(responseJson)
+	if err != nil {
+		http.Error(w, "500 Internal Server Error (could not write response json)", http.StatusInternalServerError)
+		return
+	}
 }

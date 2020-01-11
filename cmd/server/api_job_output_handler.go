@@ -3,6 +3,8 @@ package main
 // Called for /api/job-output/ route to get the stdout of the job
 
 import (
+	"github.com/genetic-algorithms/mendel-web-ui/cmd/server/db"
+	"github.com/genetic-algorithms/mendel-web-ui/cmd/server/mutils"
 	"io/ioutil"
 	"net/http"
 	"path/filepath"
@@ -26,7 +28,7 @@ func apiJobOutputHandler(w http.ResponseWriter, r *http.Request) {
 	jobDir := filepath.Join(globalJobsDir, jobId)
 
 	globalRunningJobsLock.RLock()
-	job := globalDb.Jobs[jobId]
+	job := db.Db.Data.Jobs[jobId]
 	output, inProgress := globalRunningJobsOutput[jobId]
 	offsetOutput := ""
 

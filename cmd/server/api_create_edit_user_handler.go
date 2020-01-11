@@ -39,7 +39,7 @@ func apiCreateEditUserHandler(w http.ResponseWriter, r *http.Request) {
 
 	usernameExists := false
 	db.Db.RLock()
-	for _, u := range globalDb.Users {
+	for _, u := range db.Db.Data.Users {
 		if u.Username == postUser.Username && u.Id != postUser.Id {
 			usernameExists = true
 			break
@@ -94,7 +94,7 @@ func apiCreateEditUserHandler(w http.ResponseWriter, r *http.Request) {
 
 		db.Db.RLock()
 		var ok bool
-		newUser, ok = globalDb.Users[postUser.Id]
+		newUser, ok = db.Db.Data.Users[postUser.Id]
 		db.Db.RUnlock()
 
 		if !ok {
@@ -110,7 +110,7 @@ func apiCreateEditUserHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	db.Db.Lock()
-	globalDb.Users[newUser.Id] = newUser
+	db.Db.Data.Users[newUser.Id] = newUser
 	err = db.Db.Persist()
 	db.Db.Unlock()
 	if err != nil {

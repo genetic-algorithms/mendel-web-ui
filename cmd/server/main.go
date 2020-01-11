@@ -161,25 +161,25 @@ func apiHandler(w http.ResponseWriter, r *http.Request) {
 func getAuthenticatedUser(r *http.Request) db.DatabaseUser {
 	cookie, err := r.Cookie("session")
 	if err != nil {
-		return DatabaseUser{}
+		return db.DatabaseUser{}
 	}
 
 	session := make(map[string]string)
 	err = globalSecureCookie.Decode("session", cookie.Value, &session)
 	if err != nil {
-		return DatabaseUser{}
+		return db.DatabaseUser{}
 	}
 
 	user_id, ok := session["authenticated_user_id"]
 	if !ok {
-		return DatabaseUser{}
+		return db.DatabaseUser{}
 	}
 
 	db.Db.RLock()
 	user, ok := db.Db.Data.Users[user_id]
 	db.Db.RUnlock()
 	if !ok {
-		return DatabaseUser{}
+		return db.DatabaseUser{}
 	}
 
 	return user
@@ -188,8 +188,9 @@ func getAuthenticatedUser(r *http.Request) db.DatabaseUser {
 func staticMtime(path string) string {
 	fullPath := filepath.Join(globalStaticPath, path)
 	fileInfo, err := os.Stat(fullPath)
-	if err != nil {
+	if err != nil || fileInfo == nil {
 		log.Println("cannot stat file", fullPath)
+		return ""
 	}
 
 	return fmt.Sprint("/static/", path, "?v=", fileInfo.ModTime().Unix())

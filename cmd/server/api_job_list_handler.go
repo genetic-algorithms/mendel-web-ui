@@ -3,6 +3,8 @@ package main
 // Called for /api/job-list/ route
 
 import (
+	"github.com/genetic-algorithms/mendel-web-ui/cmd/server/db"
+	"github.com/genetic-algorithms/mendel-web-ui/cmd/server/mutils"
 	"log"
 	"net/http"
 	"sort"
@@ -29,14 +31,14 @@ func apiJobListHandler(w http.ResponseWriter, r *http.Request) {
 
 	jobs := []ApiJobListHandlerJob{}
 	db.Db.RLock()
-	for _, job := range globalDb.Jobs {
+	for _, job := range db.Db.Data.Jobs {
 		if all || user.Id == job.OwnerId {
 			jobs = append(jobs, ApiJobListHandlerJob{
 				Id:          job.Id,
 				Description: job.Description,
 				Time:        job.Time,
 				Status:      job.Status,
-				Username:    globalDb.Users[job.OwnerId].Username,
+				Username:    db.Db.Data.Users[job.OwnerId].Username,
 			})
 		}
 	}

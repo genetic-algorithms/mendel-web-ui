@@ -6,6 +6,8 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"github.com/genetic-algorithms/mendel-web-ui/cmd/server/db"
+	"github.com/genetic-algorithms/mendel-web-ui/cmd/server/mutils"
 	"io"
 	"log"
 	"net/http"
@@ -42,8 +44,16 @@ func apiImportJobHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	contentsBytes, err := base64.StdEncoding.DecodeString(postContents.Contents)
+	if err != nil {
+		http.Error(w, "400 Bad Request (decoding Contents)", http.StatusBadRequest)
+		return
+	}
 	bytesReader := bytes.NewReader(contentsBytes)
 	zipReader, err := zip.NewReader(bytesReader, int64(len(contentsBytes)))
+	if err != nil {
+		http.Error(w, "400 Bad Request (reading zip files)", http.StatusBadRequest)
+		return
+	}
 
 	/* jobId, err := mutils.GenerateJobId()
 	if err != nil {
@@ -73,7 +83,11 @@ func apiImportJobHandler(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "400 Bad Request (parsing toml)", http.StatusBadRequest)
 			return
 		}
-		srcFile.Close()
+		err = srcFile.Close()
+		if err != nil {
+			http.Error(w, "500 Internal Server Error (could not close source file)", http.StatusInternalServerError)
+			return
+		}
 		if basic, ok := config["basic"]; ok {
 			if case_id, ok := basic["case_id"]; ok {
 				jobId = case_id.(string)
@@ -102,13 +116,7 @@ func apiImportJobHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Now go thru all of the zip files to copy them to the jobs dir
 	for _, srcFileInfo := range zipReader.File {
-		srcFile, err := srcFileInfo.Open()
-		if err != nil {
-			http.Error(w, "500 Internal Server Error (could not open source file)", http.StatusInternalServerError)
-			return
-		}
-		defer srcFile.Close()
-
+		// Create the destination dir and file
 		err = os.MkdirAll(filepath.Join(jobDir, filepath.Dir(srcFileInfo.Name)), 0755)
 		if err != nil {
 			http.Error(w, "500 Internal Server Error (could not create destination directories)", http.StatusInternalServerError)
@@ -121,14 +129,25 @@ func apiImportJobHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
+		// Open the source file and copy it to the destination
+		srcFile, err := srcFileInfo.Open()
+		if err != nil {
+			http.Error(w, "500 Internal Server Error (could not open source file)", http.StatusInternalServerError)
+			return
+		}
+
 		_, err = io.Copy(destFile, srcFile)
+		if errClose := srcFile.Close(); errClose != nil {
+			http.Error(w, "500 Internal Server Error (could not close source file)", http.StatusInternalServerError)
+			return
+		}
 		if err != nil {
 			http.Error(w, "500 Internal Server Error (could not copy source to destination)", http.StatusInternalServerError)
 			return
 		}
 	}
 
-	job := DatabaseJob{
+	job := db.DatabaseJob{
 		Id:          jobId,
 		Description: description,
 		Time:        time.Now().UTC(),
@@ -137,7 +156,7 @@ func apiImportJobHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	db.Db.Lock()
-	globalDb.Jobs[jobId] = job
+	db.Db.Data.Jobs[jobId] = job
 	err = db.Db.Persist()
 	db.Db.Unlock()
 	if err != nil {

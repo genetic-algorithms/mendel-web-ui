@@ -2,6 +2,8 @@ package main
 
 import (
 	"encoding/json"
+	"github.com/genetic-algorithms/mendel-web-ui/cmd/server/db"
+	"github.com/genetic-algorithms/mendel-web-ui/cmd/server/mutils"
 	"net/http"
 )
 
@@ -32,12 +34,12 @@ func apiDeleteUserHandler(w http.ResponseWriter, r *http.Request) {
 
 	db.Db.Lock()
 	// Before deleting the user, find all jobs owned by them and blank out OwnerId
-	for _, job := range globalDb.Jobs {
+	for _, job := range db.Db.Data.Jobs {
 		if job.OwnerId == postUser.Id {
 			job.OwnerId = ""
 		}
 	}
-	delete(globalDb.Users, postUser.Id)
+	delete(db.Db.Data.Users, postUser.Id)
 	err = db.Db.Persist()
 	db.Db.Unlock()
 	if err != nil {

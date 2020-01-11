@@ -2,6 +2,8 @@ package main
 
 import (
 	"encoding/json"
+	"github.com/genetic-algorithms/mendel-web-ui/cmd/server/db"
+	"github.com/genetic-algorithms/mendel-web-ui/cmd/server/mutils"
 	"log"
 	"net/http"
 	"os"
@@ -43,7 +45,7 @@ func apiDeleteJobHandler(w http.ResponseWriter, r *http.Request) {
 	if err == nil {
 		// Now remove the job from the db
 		//log.Printf("In /api/delete-job/: now deleting %s from db ...", postJob.Id)
-		delete(globalDb.Jobs, postJob.Id)
+		delete(db.Db.Data.Jobs, postJob.Id)
 		err = db.Db.Persist()
 	}
 	db.Db.Unlock()

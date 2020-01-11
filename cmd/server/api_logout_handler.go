@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/genetic-algorithms/mendel-web-ui/cmd/server/mutils"
 	"net/http"
 )
 
@@ -33,5 +34,9 @@ func apiLogoutHandler(w http.ResponseWriter, r *http.Request) {
 	})
 
 	w.Header().Set("Content-Type", "application/json")
-	w.Write([]byte("{}"))
+	_, err = w.Write([]byte("{}"))
+	if err != nil {
+		http.Error(w, "500 Internal Server Error (could not write response)", http.StatusInternalServerError)
+		return
+	}
 }

@@ -1,6 +1,8 @@
 package main
 
 import (
+	"github.com/genetic-algorithms/mendel-web-ui/cmd/server/db"
+	"github.com/genetic-algorithms/mendel-web-ui/cmd/server/mutils"
 	"net/http"
 )
 
@@ -15,7 +17,7 @@ func apiGetUserHandler(w http.ResponseWriter, r *http.Request) {
 	userId := r.URL.Query().Get("userId")
 
 	db.Db.RLock()
-	user, ok := globalDb.Users[userId]
+	user, ok := db.Db.Data.Users[userId]
 	db.Db.RUnlock()
 
 	if !ok {

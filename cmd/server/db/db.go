@@ -4,6 +4,7 @@ import (
 	"crypto/rand"
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"os"
 	"path/filepath"
 	"sync"
@@ -72,12 +73,20 @@ func DatabaseFactory(dbPath string, createIfNecessary bool) {
 
 	// If the db file exists, open it. Otherwise initialize() will open it
 	if Db.exists(dbPath) {
+		fmt.Println("Opening db file:", dbPath)
+		bytes, err := ioutil.ReadFile(dbPath)
+		handleError(err)
+		err = json.Unmarshal(bytes, &Db.Data)
+		handleError(err)
+
+		// leave the file open for the advisory file lock
 		Db.fileDesc, err = os.Open(dbPath)
 		handleError(err)
 	} else {
 		if !createIfNecessary {
 			mutils.Fatal(5, "database file %s does not exist and we were told not to create it", dbPath)
 		}
+		fmt.Println("Creating/initializing db file:", dbPath)
 		Db.initialize(dbPath)
 	}
 }
@@ -87,7 +96,7 @@ func (db *Database) exists(dbPath string) bool {
 	return err == nil
 }
 
-// If the db file doesn't exist yet, take whatever is currently in our db struct and write it into the file
+// If the db file doesn't exist yet, initialize our db struct and write it into the file
 func (db *Database) initialize(dbPath string) {
 	if db.exists(dbPath) {
 		return
@@ -128,10 +137,7 @@ func (db *Database) initialize(dbPath string) {
 	db.fileDesc, err = os.OpenFile(dbPath, os.O_RDWR|os.O_CREATE, 0644)
 	handleError(err)
 
-	dbJson, err := json.Marshal(db.Data)
-	handleError(err)
-
-	_, err = db.fileDesc.Write(dbJson)
+	err = db.Persist()
 	handleError(err)
 
 	fmt.Println("Initialized database")
@@ -140,8 +146,8 @@ func (db *Database) initialize(dbPath string) {
 }
 
 /* For the db locking methods, we are managing 2 locks:
-1. A local mutex that prevents 2 of our local go routines from writing the db file at the same time
-2. An advisory lock on the nfsv4 file to prevent 2 mendel-web-ui servers from writing the db file at the same time
+1. A local mutex that prevents 2 of our local go routines from writing the db file at the same time. This works because the web server runs as multiple go routines in a singe process.
+2. An advisory lock on the shared nfsv4 file to prevent 2 mendel-web-ui servers (on different machines) from writing the db file at the same time
 */
 
 // Lock the db for reading (multiple read locks are allowed)
@@ -180,7 +186,7 @@ func (db *Database) Unlock() {
 	db.dbLock.Lock()
 }
 
-// Write the db to the file. (The caller must call Lock/Unlock appropriatelY)
+// Write the db to the file. (The caller must call Lock/Unlock appropriately)
 func (db *Database) Persist() error {
 	dbJson, err := json.Marshal(db.Data)
 	if err != nil {

@@ -13,11 +13,11 @@ MAC_PKG_INSTALL_DIR ?= /Users/Shared/mendel-web-ui
 
 default: runserver
 
-cmd/server/$(BINARY): cmd/server/*.go Makefile
+cmd/server/$(BINARY): cmd/server/*.go cmd/server/*/*.go Makefile
 	echo 'package main; const MENDEL_UI_VERSION = "$(VERSION)-$(RELEASE)"' > cmd/server/version.go
 	scripts/build_go
 
-tools/mendel-chg-pw: tools/mendel-chg-pw.go
+tools/mendel-chg-pw: tools/mendel-chg-pw.go cmd/server/*/*.go
 	glide --quiet install
 	go build -o $@ $<
 

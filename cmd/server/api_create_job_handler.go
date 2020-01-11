@@ -73,12 +73,15 @@ func apiCreateJobHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	err = toml.NewEncoder(configFile).Encode(config)
+	// close the file before handling the potential encode err, because we want to close it regardless
+	if errClose := configFile.Close(); errClose != nil {
+		http.Error(w, "500 Internal Server Error (could not close job config)", http.StatusInternalServerError)
+		return
+	}
 	if err != nil {
-		configFile.Close()
 		http.Error(w, "500 Internal Server Error (could not encode job config)", http.StatusInternalServerError)
 		return
 	}
-	configFile.Close()
 
 	outputBuilder := &strings.Builder{}
 
@@ -95,7 +98,7 @@ func apiCreateJobHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	db.Db.Lock()
-	globalDb.Jobs[jobId] = job
+	db.Db.Data.Jobs[jobId] = job
 	db.Db.Unlock()
 
 	go func() {
@@ -123,7 +126,7 @@ func apiCreateJobHandler(w http.ResponseWriter, r *http.Request) {
 			log.Println(err)
 			job.Status = "failed"
 			db.Db.Lock()
-			globalDb.Jobs[jobId] = job
+			db.Db.Data.Jobs[jobId] = job
 			err = db.Db.Persist()
 			db.Db.Unlock()
 			if err != nil {
@@ -134,7 +137,7 @@ func apiCreateJobHandler(w http.ResponseWriter, r *http.Request) {
 
 		job.Status = "succeeded"
 		db.Db.Lock()
-		globalDb.Jobs[jobId] = job
+		db.Db.Data.Jobs[jobId] = job
 		err = db.Db.Persist()
 		db.Db.Unlock()
 		if err != nil {
