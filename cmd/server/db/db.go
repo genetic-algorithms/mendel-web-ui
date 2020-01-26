@@ -47,7 +47,9 @@ type DatabaseData struct {
 
 type Database struct {
 	Data            DatabaseData
-	fileDesc        *os.File     // used in the advisory file lock (for inter-host locking)
+	//todo: this file descriptor is not valid in other go routine threads!!!!!!!!!!!
+	//fileDesc        *os.File     // used in the advisory file lock (for inter-host locking)
+	dbPath string	// the file path of the db
 	dbLock          sync.RWMutex // used for green thread/intra-host locking
 	readLockCounter int32        // for the above mutex
 }
@@ -58,7 +60,7 @@ var Db *Database
 // Creates the singleton Database object. The DatabaseData within it is either populated from the
 // database.json file or initialized.
 func DatabaseFactory(dbPath string, createIfNecessary bool) {
-	Db = &Database{} // for now all of the zero values of the members are acceptable. Some will be filled in by initialize(), if necessary
+	Db = &Database{dbPath: dbPath} // for now all of the zero values of the members are acceptable. Some will be filled in by initialize(), if necessary
 
 	// Ensure the db dir is there, or we can create it
 	dbDir := filepath.Dir(dbPath)
@@ -80,8 +82,8 @@ func DatabaseFactory(dbPath string, createIfNecessary bool) {
 		handleError(err)
 
 		// leave the file open for the advisory file lock
-		Db.fileDesc, err = os.Open(dbPath)
-		handleError(err)
+		//Db.fileDesc, err = os.Open(dbPath)
+		//handleError(err)
 	} else {
 		if !createIfNecessary {
 			mutils.Fatal(5, "database file %s does not exist and we were told not to create it", dbPath)
@@ -134,8 +136,8 @@ func (db *Database) initialize(dbPath string) {
 	db.Data.Users[dbUser.Id] = dbUser
 
 	// Write the data to the database file
-	db.fileDesc, err = os.OpenFile(dbPath, os.O_RDWR|os.O_CREATE, 0644)
-	handleError(err)
+	//db.fileDesc, err = os.OpenFile(dbPath, os.O_RDWR|os.O_CREATE, 0644)
+	//handleError(err)
 
 	err = db.Persist()
 	handleError(err)
@@ -143,6 +145,18 @@ func (db *Database) initialize(dbPath string) {
 	fmt.Println("Initialized database")
 	fmt.Println("Username:", dbUser.Username)
 	fmt.Println("Password:", dbUserPassword)
+}
+
+// Write the db to the file. (The caller must call Lock/Unlock appropriately)
+func (db *Database) Persist() error {
+	dbJson, err := json.Marshal(db.Data)
+	if err != nil {
+		return err
+	}
+
+	//_, err = db.fileDesc.Write(dbJson)
+	err = ioutil.WriteFile(db.dbPath, dbJson, 0644)		// this will create it if it doesn't exist
+	return err
 }
 
 /* For the db locking methods, we are managing 2 locks:
@@ -158,7 +172,7 @@ func (db *Database) RLock() {
 	//db.readLockCounter++  // need to protect against multiple go routines changing the counter
 	counter := atomic.AddInt32(&db.readLockCounter, 1)
 	//todo: if counter == 1, do advisory read lock on the db file
-	fmt.Println("Added a db read lock, counter:", counter)
+	mutils.Verbose("Added a db read lock, counter: %d", counter)
 }
 
 // Unlock the db for reading
@@ -167,34 +181,26 @@ func (db *Database) RUnlock() {
 	//db.readLockCounter--  // need to protect against multiple go routines changing the counter
 	counter := atomic.AddInt32(&db.readLockCounter, -1)
 	//todo: if counter == 0, remove advisory read lock on the db file
-	fmt.Println("Removed a db read lock, counter:", counter)
+	mutils.Verbose("Removed a db read lock, counter: %d", counter)
 
 	db.dbLock.RUnlock()
 }
 
 // Lock the db for writing (not completed until there are no other read or write locks)
 func (db *Database) Lock() {
+	mutils.Verbose("Requesting write lock...")
 	db.dbLock.Lock()
 	// will not get here until no other local go routines have any local locks
 	//todo: get advisory write lock on the db file
+	mutils.Verbose("Got write lock")
 }
 
 // Unlock the db for writing
 func (db *Database) Unlock() {
 	// 1st remove the advisory write lock on the db file
-	//todo: get advisory write lock on the db file
-	db.dbLock.Lock()
-}
-
-// Write the db to the file. (The caller must call Lock/Unlock appropriately)
-func (db *Database) Persist() error {
-	dbJson, err := json.Marshal(db.Data)
-	if err != nil {
-		return err
-	}
-
-	_, err = db.fileDesc.Write(dbJson)
-	return err
+	//todo: release advisory write lock on the db file
+	db.dbLock.Unlock()
+	mutils.Verbose("Released write lock")
 }
 
 // Internal utility functions

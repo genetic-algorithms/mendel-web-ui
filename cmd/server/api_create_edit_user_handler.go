@@ -36,6 +36,7 @@ func apiCreateEditUserHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "400 Bad Request (parsing body)", http.StatusBadRequest)
 		return
 	}
+	mutils.Verbose("/api/create-edit-user/ Username=%s, Id=%s", postUser.Username, postUser.Id)
 
 	usernameExists := false
 	db.Db.RLock()
@@ -48,9 +49,7 @@ func apiCreateEditUserHandler(w http.ResponseWriter, r *http.Request) {
 	db.Db.RUnlock()
 
 	if usernameExists {
-		mutils.WriteJsonResponse(w, map[string]string{
-			"status": "username_exists",
-		})
+		mutils.WriteJsonResponse(w, map[string]string{"status": "username_exists",})
 		return
 	}
 

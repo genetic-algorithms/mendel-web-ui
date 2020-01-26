@@ -4,6 +4,7 @@ import (
 	"crypto/rand"
 	"encoding/hex"
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -11,6 +12,8 @@ import (
 )
 
 // General utilities for the backend server side of mendel-web-ui
+
+var IsVerbose bool
 
 // Used to generate ids to store users in the db with
 func GenerateUuid() (string, error) {
@@ -49,6 +52,26 @@ func WriteJsonResponse(w http.ResponseWriter, data interface{}) {
 	if err != nil {
 		Error(err.Error())
 	}
+}
+
+func SetVerbose() {
+	v := GetEnvVarWithDefault("VERBOSE", "false")
+	if v=="1" || strings.ToLower(v)=="true" {
+		IsVerbose = true
+	} else {
+		IsVerbose = false
+	}
+}
+
+// Print error msg to stderr
+func Verbose(msg string, args ...interface{}) {
+	if !IsVerbose {
+		return
+	}
+	if !strings.HasSuffix(msg, "\n") {
+		msg += "\n"
+	}
+	fmt.Printf("Verbose: "+msg, args...)
 }
 
 // Print error msg to stderr

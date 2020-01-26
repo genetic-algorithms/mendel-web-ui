@@ -15,6 +15,7 @@ func apiUserListHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "401 Unauthorized", http.StatusUnauthorized)
 		return
 	}
+	mutils.Verbose("/api/user-list/ user.Id=%s", user.Id)
 
 	users := []db.DatabaseUser{}
 	db.Db.RLock()

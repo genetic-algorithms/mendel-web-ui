@@ -31,6 +31,7 @@ func apiDeleteUserHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "400 Bad Request (parsing body)", http.StatusBadRequest)
 		return
 	}
+	mutils.Verbose("/api/delete-user/ Id=%s", postUser.Id)
 
 	db.Db.Lock()
 	// Before deleting the user, find all jobs owned by them and blank out OwnerId

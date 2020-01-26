@@ -12,6 +12,7 @@ func apiGetCurrentUserHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "401 Unauthorized", http.StatusUnauthorized)
 		return
 	}
+	mutils.Verbose("/api/get-current-user/ user.Id=%s", user.Id)
 
 	mutils.WriteJsonResponse(w, map[string]interface{}{
 		"id":       user.Id,

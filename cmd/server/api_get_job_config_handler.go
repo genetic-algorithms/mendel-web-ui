@@ -16,6 +16,7 @@ func apiGetJobConfigHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	jobId := r.URL.Query().Get("jobId")
+	mutils.Verbose("/api/job-config/ user.Id=%s, jobId=%s", user.Id,jobId)
 
 	configFilePath := filepath.Join(globalJobsDir, jobId, "mendel_go.toml")
 	bytes, err := ioutil.ReadFile(configFilePath)

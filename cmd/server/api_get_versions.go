@@ -15,6 +15,7 @@ func apiGetVersionsHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "401 Unauthorized", http.StatusUnauthorized)
 		return
 	}
+	mutils.Verbose("/api/get-versions/")
 
 	// Get mendel-go version, but running the cmd
 	out, err := exec.Command(globalMendelGoBinaryPath, "-V").Output()

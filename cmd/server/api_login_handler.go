@@ -26,6 +26,7 @@ func apiLoginHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "400 Bad Request (parsing body)", http.StatusBadRequest)
 		return
 	}
+	mutils.Verbose("/api/login/ creds.Username=%s", creds.Username)
 
 	db.Db.RLock()
 	user := db.DatabaseUser{}

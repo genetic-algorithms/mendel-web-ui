@@ -24,6 +24,7 @@ func apiJobOutputHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "400 Bad Request (cannot convert offset to int)", http.StatusBadRequest)
 		return
 	}
+	mutils.Verbose("/api/job-output/ jobId=%s, offset=%d", jobId, offset)
 
 	jobDir := filepath.Join(globalJobsDir, jobId)
 

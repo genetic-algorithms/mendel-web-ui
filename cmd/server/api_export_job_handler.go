@@ -20,6 +20,8 @@ func apiExportJobHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	jobId := r.URL.Query().Get("jobId")
+	mutils.Verbose("/api/export-job/ user.Id=%s, jobId=%s", user.Id,jobId)
+
 
 	jobDir := filepath.Join(globalJobsDir, jobId)
 	zipBuf := new(bytes.Buffer)

@@ -28,6 +28,7 @@ func apiJobListHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	all := r.URL.Query().Get("filter") == "all"
+	mutils.Verbose("/api/job-list/ all=%t", all)
 
 	jobs := []ApiJobListHandlerJob{}
 	db.Db.RLock()

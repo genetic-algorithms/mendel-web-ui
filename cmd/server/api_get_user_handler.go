@@ -15,6 +15,7 @@ func apiGetUserHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	userId := r.URL.Query().Get("userId")
+	mutils.Verbose("/api/get-user/ userId=%s", userId)
 
 	db.Db.RLock()
 	user, ok := db.Db.Data.Users[userId]

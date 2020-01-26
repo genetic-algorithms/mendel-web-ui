@@ -17,6 +17,7 @@ func apiLogoutHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "400 Bad Request (method or content-type)", http.StatusBadRequest)
 		return
 	}
+	mutils.Verbose("/api/logout/ user.Id=%s", user.Id)
 
 	session := map[string]string{}
 

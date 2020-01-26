@@ -13,6 +13,7 @@ func apiGetDefaultConfigHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "401 Unauthorized", http.StatusUnauthorized)
 		return
 	}
+	mutils.Verbose("/api/default-config/ user.Id=%s", user.Id)
 
 	bytes, err := ioutil.ReadFile(globalDefaultConfigPath)
 	if err != nil {

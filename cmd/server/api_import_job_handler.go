@@ -42,6 +42,7 @@ func apiImportJobHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "400 Bad Request (parsing body)", http.StatusBadRequest)
 		return
 	}
+	mutils.Verbose("/api/import-job/ user.Id=%s", user.Id)
 
 	contentsBytes, err := base64.StdEncoding.DecodeString(postContents.Contents)
 	if err != nil {

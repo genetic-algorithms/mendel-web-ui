@@ -35,6 +35,7 @@ func apiDeleteJobHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "400 Bad Request (parsing body)", http.StatusBadRequest)
 		return
 	}
+	mutils.Verbose("/api/delete-job/ Is=%s", postJob.Id)
 
 	db.Db.Lock()
 	// Remove the job data files first
