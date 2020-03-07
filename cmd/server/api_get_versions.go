@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/genetic-algorithms/mendel-web-ui/cmd/server/mutils"
 	"log"
 	"net/http"
 	"os/exec"
@@ -14,6 +15,7 @@ func apiGetVersionsHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "401 Unauthorized", http.StatusUnauthorized)
 		return
 	}
+	mutils.Verbose("/api/get-versions/")
 
 	// Get mendel-go version, but running the cmd
 	out, err := exec.Command(globalMendelGoBinaryPath, "-V").Output()
@@ -24,7 +26,7 @@ func apiGetVersionsHandler(w http.ResponseWriter, r *http.Request) {
 
 	goVerson := string(out)
 
-	writeJsonResponse(w, map[string]interface{}{
+	mutils.WriteJsonResponse(w, map[string]interface{}{
 		"mendelUiVersion": MENDEL_UI_VERSION,
 		"mendelGoVersion": goVerson,
 	})

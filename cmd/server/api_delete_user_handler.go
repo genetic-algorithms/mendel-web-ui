@@ -2,6 +2,8 @@ package main
 
 import (
 	"encoding/json"
+	"github.com/genetic-algorithms/mendel-web-ui/cmd/server/db"
+	"github.com/genetic-algorithms/mendel-web-ui/cmd/server/mutils"
 	"net/http"
 )
 
@@ -17,7 +19,7 @@ func apiDeleteUserHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if !isValidPostJson(r) {
+	if !mutils.IsValidPostJson(r) {
 		http.Error(w, "400 Bad Request (method or content-type)", http.StatusBadRequest)
 		return
 	}
@@ -29,21 +31,22 @@ func apiDeleteUserHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "400 Bad Request (parsing body)", http.StatusBadRequest)
 		return
 	}
+	mutils.Verbose("/api/delete-user/ Id=%s", postUser.Id)
 
-	globalDbLock.Lock()
+	db.Db.Lock()
 	// Before deleting the user, find all jobs owned by them and blank out OwnerId
-	for _, job := range globalDb.Jobs {
+	for _, job := range db.Db.Data.Jobs {
 		if job.OwnerId == postUser.Id {
 			job.OwnerId = ""
 		}
 	}
-	delete(globalDb.Users, postUser.Id)
-	err = persistDatabase()
-	globalDbLock.Unlock()
+	delete(db.Db.Data.Users, postUser.Id)
+	err = db.Db.Persist()
+	db.Db.Unlock()
 	if err != nil {
 		http.Error(w, "500 Internal Server Error (could not persist database)", http.StatusInternalServerError)
 		return
 	}
 
-	writeJsonResponse(w, map[string]string{})
+	mutils.WriteJsonResponse(w, map[string]string{})
 }

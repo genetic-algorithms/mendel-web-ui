@@ -5,6 +5,7 @@ package main
 
 import (
 	"encoding/json"
+	"github.com/genetic-algorithms/mendel-web-ui/cmd/server/mutils"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -32,6 +33,8 @@ func apiPlotSnpFrequenciesHandler(w http.ResponseWriter, r *http.Request) {
 
 	jobId := r.URL.Query().Get("jobId")
 	tribeNum := r.URL.Query().Get("tribe") // do not convert to int, because we need it as a string anyway
+	mutils.Verbose("/api/plot-snp-frequencies/ jobId=%s, tribeNum=%s", jobId, tribeNum)
+
 	var dir string
 	if tribeNum == "" || tribeNum == "0" {
 		dir = jobId // we get the plot files from the main dir
@@ -74,5 +77,5 @@ func apiPlotSnpFrequenciesHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	globalRunningJobsLock.RUnlock()
 
-	writeJsonResponse(w, result)
+	mutils.WriteJsonResponse(w, result)
 }

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/genetic-algorithms/mendel-web-ui/cmd/server/mutils"
 	"io/ioutil"
 	"net/http"
 	"path/filepath"
@@ -15,6 +16,7 @@ func apiGetJobConfigHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	jobId := r.URL.Query().Get("jobId")
+	mutils.Verbose("/api/job-config/ user.Id=%s, jobId=%s", user.Id,jobId)
 
 	configFilePath := filepath.Join(globalJobsDir, jobId, "mendel_go.toml")
 	bytes, err := ioutil.ReadFile(configFilePath)
@@ -23,7 +25,7 @@ func apiGetJobConfigHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	writeJsonResponse(w, map[string]string{
+	mutils.WriteJsonResponse(w, map[string]string{
 		"config":      string(bytes),
 	})
 }

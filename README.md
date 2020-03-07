@@ -31,6 +31,7 @@ First, set the `VERSION` and `RELEASE` variables in `Makefile`.
 
 Note: so far the RPM has only been tested on Amazon Linux.
 
+- Increment the `VERSION` value in `Makefile`
 - Build (you build the linux rpm on mac if you 1st: `brew install rpm`):
 ```
 make rpmbuild
@@ -40,16 +41,13 @@ make rpmbuild
 ```
 yum install mendel-web-ui-*.x86_64.rpm
 ```
-- The server is started automatically by `initctl` running `/etc/init/mendel-web-ui.conf`.
-- If you just installed the rpm for the 1st time, get the admin password:
-```
-cat /var/log/mendel-web-ui/stdout.log
-```
+- The server is started automatically by `systemctl` running `/etc/init/mendel-web-ui.conf`.
 - Browse http://hostname-or-ip:8581/
-- Change the admin pw, and then create additional users as necessary.
+- If you just installed the rpm for the 1st time, the `admin` password is `changeme!` . Once logged in, change the `admin` password by clicking on `USERS` and then the `admin` user, and set the password to something you will remember. Create additional users as necessary.
 
 ### For the Mac install package:
 
+- Increment the `VERSION` value in `Makefile`
 - Build:
 ```
 make macpkg
@@ -64,12 +62,8 @@ make macinstall
 ```
 start-mendel-ui.sh
 ```
-- If you just installed the rpm for the 1st time, get the admin password:
-```
-cat /var/log/mendel-web-ui/stdout.log
-```
 - Browse http://hostname-or-ip:8581/
-- Change the admin pw, and then create additional users as necessary.
+- If you just installed the package for the 1st time, the `admin` password is `changeme!` . Once logged in, change the `admin` password by clicking on `USERS` and then the `admin` user, and set the password to something you will remember. Create additional users as necessary.
 
 To stop the web UI server:
 ```

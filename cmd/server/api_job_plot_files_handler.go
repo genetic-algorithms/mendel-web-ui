@@ -4,8 +4,8 @@ package main
 // To test, browse: http://0.0.0.0:8581/api/job-plot-files/?jobId=1281c1aa&tribe=1
 
 import (
+	"github.com/genetic-algorithms/mendel-web-ui/cmd/server/mutils"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -20,7 +20,6 @@ type ApiJobPlotFilesResp struct {
 }
 
 func apiJobPlotFilesHandler(w http.ResponseWriter, r *http.Request) {
-	log.Printf("In /api/job-plot-files/ %s ...", r.URL.Query())
 	user := getAuthenticatedUser(r)
 	if user.Id == "" {
 		http.Error(w, "401 Unauthorized", http.StatusUnauthorized)
@@ -35,8 +34,9 @@ func apiJobPlotFilesHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	// If tribe is empty or 0, return the files in the main dir, otherwise return the files in this tribe subdir
 	tribeNum := r.URL.Query().Get("tribe") // do not convert to int, because we need it as a string anyway
-	resp := ApiJobPlotFilesResp{}
+	mutils.Verbose("/api/job-plot-files/ jobId=%s, tribeNum=%s", jobId, tribeNum)
 
+	resp := ApiJobPlotFilesResp{}
 	globalRunningJobsLock.RLock()
 	jobDir := filepath.Join(globalJobsDir, jobId)
 	var err error
@@ -51,7 +51,7 @@ func apiJobPlotFilesHandler(w http.ResponseWriter, r *http.Request) {
 		return resp.Tribes[i] < resp.Tribes[j]
 	})
 
-	writeJsonResponse(w, resp)
+	mutils.WriteJsonResponse(w, resp)
 }
 
 // Read the given dir and return the non-fully-qualified files and the tribe numbers

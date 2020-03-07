@@ -2,6 +2,8 @@ package main
 
 import (
 	"encoding/json"
+	"github.com/genetic-algorithms/mendel-web-ui/cmd/server/db"
+	"github.com/genetic-algorithms/mendel-web-ui/cmd/server/mutils"
 	"net/http"
 
 	"golang.org/x/crypto/bcrypt"
@@ -9,7 +11,7 @@ import (
 
 // Called for /api/login/ route
 func apiLoginHandler(w http.ResponseWriter, r *http.Request) {
-	if !isValidPostJson(r) {
+	if !mutils.IsValidPostJson(r) {
 		http.Error(w, "400 Bad Request (method or content-type)", http.StatusBadRequest)
 		return
 	}
@@ -24,21 +26,26 @@ func apiLoginHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "400 Bad Request (parsing body)", http.StatusBadRequest)
 		return
 	}
+	mutils.Verbose("/api/login/ creds.Username=%s", creds.Username)
 
-	globalDbLock.RLock()
-	user := DatabaseUser{}
-	for _, u := range globalDb.Users {
+	db.Db.RLock()
+	user := db.DatabaseUser{}
+	for _, u := range db.Db.Data.Users {
 		if u.Username == creds.Username {
 			user = u
 			break
 		}
 	}
-	globalDbLock.RUnlock()
+	db.Db.RUnlock()
 
 	if user.Id == "" {
 		responseJson, _ := json.Marshal(map[string]string{"status": "wrong_credentials"})
 		w.Header().Set("Content-Type", "application/json")
-		w.Write(responseJson)
+		_, err = w.Write(responseJson)
+		if err != nil {
+			http.Error(w, "500 Internal Server Error (could not write response json)", http.StatusInternalServerError)
+			return
+		}
 		return
 	}
 
@@ -46,7 +53,11 @@ func apiLoginHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		responseJson, _ := json.Marshal(map[string]string{"status": "wrong_credentials"})
 		w.Header().Set("Content-Type", "application/json")
-		w.Write(responseJson)
+		_, err = w.Write(responseJson)
+		if err != nil {
+			http.Error(w, "500 Internal Server Error (could not write response json)", http.StatusInternalServerError)
+			return
+		}
 		return
 	}
 
@@ -76,5 +87,9 @@ func apiLoginHandler(w http.ResponseWriter, r *http.Request) {
 		},
 	})
 	w.Header().Set("Content-Type", "application/json")
-	w.Write(responseJson)
+	_, err = w.Write(responseJson)
+	if err != nil {
+		http.Error(w, "500 Internal Server Error (could not write response json)", http.StatusInternalServerError)
+		return
+	}
 }

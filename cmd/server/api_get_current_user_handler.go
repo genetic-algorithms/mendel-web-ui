@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/genetic-algorithms/mendel-web-ui/cmd/server/mutils"
 	"net/http"
 )
 
@@ -11,8 +12,9 @@ func apiGetCurrentUserHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "401 Unauthorized", http.StatusUnauthorized)
 		return
 	}
+	mutils.Verbose("/api/get-current-user/ user.Id=%s", user.Id)
 
-	writeJsonResponse(w, map[string]interface{}{
+	mutils.WriteJsonResponse(w, map[string]interface{}{
 		"id":       user.Id,
 		"username": user.Username,
 		"is_admin": user.IsAdmin,

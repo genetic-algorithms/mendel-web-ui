@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/genetic-algorithms/mendel-web-ui/cmd/server/mutils"
 	"io/ioutil"
 	"net/http"
 )
@@ -12,6 +13,7 @@ func apiGetDefaultConfigHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "401 Unauthorized", http.StatusUnauthorized)
 		return
 	}
+	mutils.Verbose("/api/default-config/ user.Id=%s", user.Id)
 
 	bytes, err := ioutil.ReadFile(globalDefaultConfigPath)
 	if err != nil {
@@ -19,7 +21,7 @@ func apiGetDefaultConfigHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	writeJsonResponse(w, map[string]string{
+	mutils.WriteJsonResponse(w, map[string]string{
 		"config": string(bytes),
 	})
 }

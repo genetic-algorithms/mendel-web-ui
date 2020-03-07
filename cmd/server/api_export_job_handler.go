@@ -4,6 +4,7 @@ import (
 	"archive/zip"
 	"bytes"
 	"encoding/base64"
+	"github.com/genetic-algorithms/mendel-web-ui/cmd/server/mutils"
 	"io/ioutil"
 	"net/http"
 	"os"
@@ -19,6 +20,8 @@ func apiExportJobHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	jobId := r.URL.Query().Get("jobId")
+	mutils.Verbose("/api/export-job/ user.Id=%s, jobId=%s", user.Id,jobId)
+
 
 	jobDir := filepath.Join(globalJobsDir, jobId)
 	zipBuf := new(bytes.Buffer)
@@ -60,7 +63,7 @@ func apiExportJobHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	writeJsonResponse(w, map[string]string{
+	mutils.WriteJsonResponse(w, map[string]string{
 		"contents": base64.StdEncoding.EncodeToString(zipBuf.Bytes()),
 	})
 }

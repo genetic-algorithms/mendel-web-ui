@@ -1,6 +1,8 @@
 package main
 
 import (
+	"github.com/genetic-algorithms/mendel-web-ui/cmd/server/db"
+	"github.com/genetic-algorithms/mendel-web-ui/cmd/server/mutils"
 	"net/http"
 	"sort"
 	"strings"
@@ -13,19 +15,20 @@ func apiUserListHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "401 Unauthorized", http.StatusUnauthorized)
 		return
 	}
+	mutils.Verbose("/api/user-list/ user.Id=%s", user.Id)
 
-	users := []DatabaseUser{}
-	globalDbLock.RLock()
-	for _, user := range globalDb.Users {
+	users := []db.DatabaseUser{}
+	db.Db.RLock()
+	for _, user := range db.Db.Data.Users {
 		users = append(users, user)
 	}
-	globalDbLock.RUnlock()
+	db.Db.RUnlock()
 
 	sort.Slice(users, func(i, j int) bool {
 		return strings.Compare(users[i].Username, users[j].Username) < 0
 	})
 
-	writeJsonResponse(w, map[string][]DatabaseUser{
+	mutils.WriteJsonResponse(w, map[string][]db.DatabaseUser{
 		"users": users,
 	})
 }

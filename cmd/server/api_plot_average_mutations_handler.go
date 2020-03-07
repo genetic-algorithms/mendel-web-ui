@@ -4,6 +4,7 @@ package main
 // To test, browse: http://0.0.0.0:8581/api/plot-average-mutations/?jobId=1281c1aa&tribe=1
 
 import (
+	"github.com/genetic-algorithms/mendel-web-ui/cmd/server/mutils"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -21,6 +22,8 @@ func apiPlotAverageMutationsHandler(w http.ResponseWriter, r *http.Request) {
 
 	jobId := r.URL.Query().Get("jobId")
 	tribeNum := r.URL.Query().Get("tribe") // do not convert to int, because we need it as a string anyway
+	mutils.Verbose("/api/plot-average-mutations/ jobId=%s, tribeNum=%s", jobId, tribeNum)
+
 	var dir string
 	if tribeNum == "" || tribeNum == "0" {
 		dir = jobId // we get the plot files from the main dir
@@ -38,7 +41,7 @@ func apiPlotAverageMutationsHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	rows := parseSpaceSeparatedPlotFile(bytes)
+	rows := mutils.ParseSpaceSeparatedPlotFile(bytes)
 
 	generations := []int{}
 	deleterious := []float64{}
@@ -80,7 +83,7 @@ func apiPlotAverageMutationsHandler(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	writeJsonResponse(w, map[string]interface{}{
+	mutils.WriteJsonResponse(w, map[string]interface{}{
 		"generations": generations,
 		"deleterious": deleterious,
 		"neutral":     neutral,

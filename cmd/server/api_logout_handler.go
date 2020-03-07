@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/genetic-algorithms/mendel-web-ui/cmd/server/mutils"
 	"net/http"
 )
 
@@ -12,10 +13,11 @@ func apiLogoutHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if !isValidPostJson(r) {
+	if !mutils.IsValidPostJson(r) {
 		http.Error(w, "400 Bad Request (method or content-type)", http.StatusBadRequest)
 		return
 	}
+	mutils.Verbose("/api/logout/ user.Id=%s", user.Id)
 
 	session := map[string]string{}
 
@@ -33,5 +35,9 @@ func apiLogoutHandler(w http.ResponseWriter, r *http.Request) {
 	})
 
 	w.Header().Set("Content-Type", "application/json")
-	w.Write([]byte("{}"))
+	_, err = w.Write([]byte("{}"))
+	if err != nil {
+		http.Error(w, "500 Internal Server Error (could not write response)", http.StatusInternalServerError)
+		return
+	}
 }

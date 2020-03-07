@@ -3,6 +3,8 @@ package main
 // Called for /api/job-list/ route
 
 import (
+	"github.com/genetic-algorithms/mendel-web-ui/cmd/server/db"
+	"github.com/genetic-algorithms/mendel-web-ui/cmd/server/mutils"
 	"log"
 	"net/http"
 	"sort"
@@ -26,27 +28,28 @@ func apiJobListHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	all := r.URL.Query().Get("filter") == "all"
+	mutils.Verbose("/api/job-list/ all=%t", all)
 
 	jobs := []ApiJobListHandlerJob{}
-	globalDbLock.RLock()
-	for _, job := range globalDb.Jobs {
+	db.Db.RLock()
+	for _, job := range db.Db.Data.Jobs {
 		if all || user.Id == job.OwnerId {
 			jobs = append(jobs, ApiJobListHandlerJob{
 				Id:          job.Id,
 				Description: job.Description,
 				Time:        job.Time,
 				Status:      job.Status,
-				Username:    globalDb.Users[job.OwnerId].Username,
+				Username:    db.Db.Data.Users[job.OwnerId].Username,
 			})
 		}
 	}
-	globalDbLock.RUnlock()
+	db.Db.RUnlock()
 
 	sort.Slice(jobs, func(i, j int) bool {
 		return jobs[i].Time.After(jobs[j].Time)
 	})
 
-	writeJsonResponse(w, map[string][]ApiJobListHandlerJob{
+	mutils.WriteJsonResponse(w, map[string][]ApiJobListHandlerJob{
 		"jobs": jobs,
 	})
 }

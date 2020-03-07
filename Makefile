@@ -2,7 +2,7 @@ SHELL ?= /bin/bash -e
 #BINARY ?= cmd/server/mendel-web-ui
 BINARY ?= mendel-web-ui
 # Set these 2 vars before building the pkg, and set Requires in pkg/rpm/mendel-web-ui.spec if necessary
-export VERSION ?= 1.1.7
+export VERSION ?= 1.1.8
 # Release is only needed for the rpm, and only needs to be incremented if you have to rebuild/reinstall this version multiple times due to packaging fixes
 export RELEASE ?= 1
 # rpmbuild does not give us a good way to set topdir, so use the default location
@@ -13,11 +13,11 @@ MAC_PKG_INSTALL_DIR ?= /Users/Shared/mendel-web-ui
 
 default: runserver
 
-cmd/server/$(BINARY): cmd/server/*.go Makefile
+cmd/server/$(BINARY): cmd/server/*.go cmd/server/*/*.go Makefile
 	echo 'package main; const MENDEL_UI_VERSION = "$(VERSION)-$(RELEASE)"' > cmd/server/version.go
 	scripts/build_go
 
-tools/mendel-chg-pw: tools/mendel-chg-pw.go
+tools/mendel-chg-pw: tools/mendel-chg-pw.go cmd/server/*/*.go
 	glide --quiet install
 	go build -o $@ $<
 

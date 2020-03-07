@@ -1,6 +1,8 @@
 package main
 
 import (
+	"github.com/genetic-algorithms/mendel-web-ui/cmd/server/db"
+	"github.com/genetic-algorithms/mendel-web-ui/cmd/server/mutils"
 	"net/http"
 )
 
@@ -13,17 +15,18 @@ func apiGetUserHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	userId := r.URL.Query().Get("userId")
+	mutils.Verbose("/api/get-user/ userId=%s", userId)
 
-	globalDbLock.RLock()
-	user, ok := globalDb.Users[userId]
-	globalDbLock.RUnlock()
+	db.Db.RLock()
+	user, ok := db.Db.Data.Users[userId]
+	db.Db.RUnlock()
 
 	if !ok {
 		http.Error(w, "404 Not Found (user does not exist)", http.StatusNotFound)
 		return
 	}
 
-	writeJsonResponse(w, map[string]interface{}{
+	mutils.WriteJsonResponse(w, map[string]interface{}{
 		"id":       user.Id,
 		"username": user.Username,
 		"is_admin": user.IsAdmin,
