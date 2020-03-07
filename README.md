@@ -31,6 +31,7 @@ First, set the `VERSION` and `RELEASE` variables in `Makefile`.
 
 Note: so far the RPM has only been tested on Amazon Linux.
 
+- Increment the `VERSION` value in `Makefile`
 - Build (you build the linux rpm on mac if you 1st: `brew install rpm`):
 ```
 make rpmbuild
@@ -46,6 +47,7 @@ yum install mendel-web-ui-*.x86_64.rpm
 
 ### For the Mac install package:
 
+- Increment the `VERSION` value in `Makefile`
 - Build:
 ```
 make macpkg
