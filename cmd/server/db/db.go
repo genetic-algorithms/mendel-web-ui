@@ -15,12 +15,11 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-/*
 const (
-	DB_DIR  = "./database"
-	DB_PATH = DB_DIR + "/database.json"
+	INITIAL_ADMIN_PW = "changeme!"
+	//DB_DIR  = "./database"
+	//DB_PATH = DB_DIR + "/database.json"
 )
-*/
 
 type DatabaseJob struct {
 	Id          string    `json:"id"`
@@ -46,10 +45,10 @@ type DatabaseData struct {
 }
 
 type Database struct {
-	Data            DatabaseData
+	Data DatabaseData
 	//todo: this file descriptor is not valid in other go routine threads!!!!!!!!!!!
 	//fileDesc        *os.File     // used in the advisory file lock (for inter-host locking)
-	dbPath string	// the file path of the db
+	dbPath          string       // the file path of the db
 	dbLock          sync.RWMutex // used for green thread/intra-host locking
 	readLockCounter int32        // for the above mutex
 }
@@ -81,7 +80,7 @@ func DatabaseFactory(dbPath string, createIfNecessary bool) {
 		err = json.Unmarshal(bytes, &Db.Data)
 		handleError(err)
 
-		// leave the file open for the advisory file lock
+		// not sure if we need to leave the file open for the advisory file lock
 		//Db.fileDesc, err = os.Open(dbPath)
 		//handleError(err)
 	} else {
@@ -118,7 +117,9 @@ func (db *Database) initialize(dbPath string) {
 
 	dbUserId, err := mutils.GenerateUuid()
 	handleError(err)
-	dbUserPassword, err := mutils.GenerateUuid()
+	//dbUserPassword, err := mutils.GenerateUuid()
+	//someday: force them to change this
+	dbUserPassword := INITIAL_ADMIN_PW
 	handleError(err)
 	dbUserPasswordHash, err := bcrypt.GenerateFromPassword([]byte(dbUserPassword), bcrypt.DefaultCost)
 	handleError(err)
@@ -143,8 +144,8 @@ func (db *Database) initialize(dbPath string) {
 	handleError(err)
 
 	fmt.Println("Initialized database")
-	fmt.Println("Username:", dbUser.Username)
-	fmt.Println("Password:", dbUserPassword)
+	//fmt.Println("Username:", dbUser.Username)
+	//fmt.Println("Password:", dbUserPassword)
 }
 
 // Write the db to the file. (The caller must call Lock/Unlock appropriately)
@@ -155,7 +156,7 @@ func (db *Database) Persist() error {
 	}
 
 	//_, err = db.fileDesc.Write(dbJson)
-	err = ioutil.WriteFile(db.dbPath, dbJson, 0644)		// this will create it if it doesn't exist
+	err = ioutil.WriteFile(db.dbPath, dbJson, 0644) // this will create it if it doesn't exist
 	return err
 }
 
