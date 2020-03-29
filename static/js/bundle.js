@@ -1,8 +1,8 @@
-(function (immer,React,ReactRedux,moment,Plotly,Redux,ReactDOM) {
+(function (immer, ReactRedux, React, moment, Plotly, Redux, ReactDOM) {
     'use strict';
 
     var immer__default = 'default' in immer ? immer['default'] : immer;
-    moment = moment && moment.hasOwnProperty('default') ? moment['default'] : moment;
+    moment = moment && Object.prototype.hasOwnProperty.call(moment, 'default') ? moment['default'] : moment;
 
     function reducer(state, action) {
         if (state === undefined) {
@@ -3624,4 +3624,4 @@
     }
     init();
 
-}(immer,React,ReactRedux,moment,Plotly,Redux,ReactDOM));
+}(immer, ReactRedux, React, moment, Plotly, Redux, ReactDOM));

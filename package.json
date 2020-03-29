@@ -4,15 +4,17 @@
   "private": true,
   "license": "ISC",
   "devDependencies": {
-    "@types/plotly.js": "^1.38.13",
-    "@types/react": "^16.4.18",
-    "@types/react-dom": "^16.0.9",
-    "@types/react-redux": "^6.0.9",
-    "browser-sync": "^2.26.3",
-    "immer": "^1.5.0",
-    "moment": "^2.22.2",
-    "rollup": "^0.66.6",
-    "typescript": "^3.1.6"
+    "@types/plotly.js": "^1.50.0",
+    "@types/react": "^16.9.27",
+    "@types/react-dom": "^16.9.5",
+    "@types/react-redux": "^7.1.7",
+    "browser-sync": "^2.26.7",
+    "immer": "^6.0.2",
+    "moment": "^2.24.0",
+    "rollup": "^2.2.0",
+    "typescript": "^3.8.3"
   },
-  "dependencies": {}
+  "dependencies": {
+    "fsevents": "^1.2.12"
+  }
 }

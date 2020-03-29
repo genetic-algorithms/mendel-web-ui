@@ -21,13 +21,13 @@ var baseTemplate = `
 		<body>
 			<div id="react-root"></div>
 
-			<script src="https://unpkg.com/react@16.4.2/umd/react.production.min.js"></script>
-			<script src="https://unpkg.com/react-dom@16.4.2/umd/react-dom.production.min.js"></script>
-			<script src="https://unpkg.com/redux@4.0.0/dist/redux.min.js"></script>
-			<script src="https://unpkg.com/react-redux@5.0.7/dist/react-redux.min.js"></script>
-			<script src="https://unpkg.com/immer@1.5.0/dist/immer.umd.js"></script>
-			<script src="https://unpkg.com/plotly.js@1.40.1/dist/plotly-basic.min.js"></script>
-			<script src="https://unpkg.com/moment@2.22.2/min/moment.min.js"></script>
+			<script src="https://unpkg.com/react@16.9.27/umd/react.production.min.js"></script>
+			<script src="https://unpkg.com/react-dom@16.9.5/umd/react-dom.production.min.js"></script>
+			<script src="https://unpkg.com/redux@4.0.5/dist/redux.min.js"></script>
+			<script src="https://unpkg.com/react-redux@7.1.7/dist/react-redux.min.js"></script>
+			<script src="https://unpkg.com/immer@6.0.2/dist/immer.umd.js"></script>
+			<script src="https://unpkg.com/plotly.js@1.50.0/dist/plotly-basic.min.js"></script>
+			<script src="https://unpkg.com/moment@2.24.0/min/moment.min.js"></script>
 			<script src="https://unpkg.com/toml-j0.4@1.1.1/dist/toml-browser.js"></script>
 
 			{{range .JsFiles}}

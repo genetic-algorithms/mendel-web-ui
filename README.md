@@ -74,6 +74,26 @@ stop-mendel-ui.sh
 
 - Go to https://github.com/genetic-algorithms/mendel-web-ui/releases and click `Draft a new release`
 - Set the `tag` to this version number, enter a `title` and `description`
-- Upload the zipped rpm for this version that was created in `~/rpmbuild/RPMS/x86_64/`
-- Upload the zipped mac pkg for this version that was created in `pkg/mac/build/`
+- Upload the **not zipped** rpm for this version that was created in `~/rpmbuild/RPMS/x86_64/`
+- Upload the **not zipped** mac pkg for this version that was created in `pkg/mac/build/`
 - Click `Publish release`
+
+## To Update All of the Npm Packages for the Project
+
+- Update your global packages (if you have any):
+```
+npm outdated --depth 0 -g
+# for each outdated package:
+npm -g install <pkg>
+npm outdated --depth 0 -g   # verify nothing is out of date
+```
+
+- Update your local/project packages:
+```
+npm outdated --depth 0   # to see how many top-level pkgs will be updated
+npm update   # will update all outdated pkgs
+npm list --depth 0   # to see the new versions of your top-level pkgs (needed in next step)
+# if some pkgs specified in package.json are missing, you need to: npm install <pkg>
+```
+
+- Edit `cmd/server/base_template.go` to pull the same package versions
