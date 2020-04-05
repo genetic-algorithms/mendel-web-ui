@@ -127,7 +127,7 @@ class Component extends React.Component<Props, State> {
                 React.createElement('span', { className: 'job-detail-view__job-info' }, this.state.description),
                 React.createElement('span', { className: 'job-detail-view__job-info' }, moment(this.state.time).fromNow()),
             ),
-            React.createElement('pre', { className: 'job-detail-view__output', ref: (el) => this.outputRef = el }, this.state.output),
+            React.createElement('pre', { className: 'job-detail-view__output', ref: (el: HTMLElement | null) => this.outputRef = el }, this.state.output),
             React.createElement('div', { className: 'job-detail-view__bottom' },
                 React.createElement('div', { className: 'job-detail-view__status' },
                     'Status: ' + (this.state.done ? 'Done' : 'Running')

@@ -385,7 +385,7 @@ class Component extends React.Component<Props, State> {
 
         this.setState(prevState => {
             const newFieldValues = Object.assign({}, prevState.fieldValues);
-            newFieldValues[id] = value;
+            (newFieldValues[id] as any) = value;
 
             return Object.assign({}, prevState, {
                 fieldValues: newFieldValues,
@@ -396,7 +396,7 @@ class Component extends React.Component<Props, State> {
     checkboxFieldChanged(id: keyof State['fieldValues'], checked: boolean) {
         this.setState(prevState => {
             const newFieldValues = Object.assign({}, prevState.fieldValues);
-            newFieldValues[id] = checked;
+            (newFieldValues[id] as any) = checked;
 
             return Object.assign({}, prevState, {
                 fieldValues: newFieldValues,
@@ -1777,7 +1777,7 @@ function filesToOutputBooleans(s: string) {
     };
 }
 
-// In TOML ints must NOT contain a period
+// In TOML an int must NOT contain a period
 function tomlInt(s: string) {
     return parseInt(s).toString();
 }

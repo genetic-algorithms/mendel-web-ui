@@ -5,12 +5,14 @@ This is the user interface for the [Mendel's Accountant genetic mutation trackin
 ## Develop
 
 After modifying code, compile the go code (the server portion) and start it:
-```
+
+```bash
 make runserver
 ```
 
 Then bundle the typescript code and start the front end:
-```
+
+```bash
 scripts/watch
 ```
 
@@ -19,7 +21,8 @@ That last command creates `static/js/bundle.js`, which for now should be committ
 ## Test the Backend API
 
 The backend API can be tested via browser or curl URLs like this:
-```
+
+```bash
 http://0.0.0.0:8581/api/job-plot-files/?jobId=b7f00ecc
 ```
 
@@ -33,14 +36,18 @@ Note: so far the RPM has only been tested on Amazon Linux.
 
 - Increment the `VERSION` value in `Makefile`
 - Build (you build the linux rpm on mac if you 1st: `brew install rpm`):
-```
+
+```bash
 make rpmbuild
 ```
+
 - The rpm is created in `~/rpmbuild/RPMS/x86_64/`
 - Install:
-```
+
+```bash
 yum install mendel-web-ui-*.x86_64.rpm
 ```
+
 - The server is started automatically by `systemctl` running `/etc/init/mendel-web-ui.conf`.
 - Browse http://hostname-or-ip:8581/
 - If you just installed the rpm for the 1st time, the `admin` password is `changeme!` . Once logged in, change the `admin` password by clicking on `USERS` and then the `admin` user, and set the password to something you will remember. Create additional users as necessary.
@@ -49,24 +56,31 @@ yum install mendel-web-ui-*.x86_64.rpm
 
 - Increment the `VERSION` value in `Makefile`
 - Build:
-```
+
+```bash
 make macpkg
 ```
+
 - The mac pkg is created in `pkg/mac/build/`
 - Install:
-```
+
+```bash
 make macinstall
 ```
+
 - Put `/usr/local/bin` in your path, if you haven't already.
 - Start the web UI server:
-```
+
+```bash
 start-mendel-ui.sh
 ```
+
 - Browse http://hostname-or-ip:8581/
 - If you just installed the package for the 1st time, the `admin` password is `changeme!` . Once logged in, change the `admin` password by clicking on `USERS` and then the `admin` user, and set the password to something you will remember. Create additional users as necessary.
 
 To stop the web UI server:
-```
+
+```bash
 stop-mendel-ui.sh
 ```
 
@@ -81,7 +95,8 @@ stop-mendel-ui.sh
 ## To Update All of the Npm Packages for the Project
 
 - Update your global packages (if you have any):
-```
+
+```bash
 npm outdated --depth 0 -g
 # for each outdated package:
 npm -g install <pkg>
@@ -89,7 +104,8 @@ npm outdated --depth 0 -g   # verify nothing is out of date
 ```
 
 - Update your local/project packages:
-```
+
+```bash
 npm outdated --depth 0   # to see how many top-level pkgs will be updated
 npm update   # will update all outdated pkgs
 npm list --depth 0   # to see the new versions of your top-level pkgs (needed in next step)
