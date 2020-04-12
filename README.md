@@ -107,9 +107,14 @@ npm outdated --depth 0 -g   # verify nothing is out of date
 
 ```bash
 npm outdated --depth 0   # to see how many top-level pkgs will be updated
-npm update   # will update all outdated pkgs
+npm update   # will update all outdated pkgs, but only within major version
+# for each pkg that you want to go to the next major version:
+npm install <pkg>@latest
 npm list --depth 0   # to see the new versions of your top-level pkgs (needed in next step)
 # if some pkgs specified in package.json are missing, you need to: npm install <pkg>
 ```
 
-- Edit `cmd/server/base_template.go` to pull the same package versions
+- Edit `cmd/server/base_template.go` to pull the same package versions from [unpkg.com](https://unpkg.com/).
+  - The exception to that is the `@types/` pkgs in `package.json`. Those pkg versions tend to diverge from the actual corresponding js version.
+  - To find the versions available for all pkgs in unpkg include `<pkg>/` in the url, e.g. [https://unpkg.com/react/](https://unpkg.com/react/).
+  - The pkg fsevents is not currently available in unpkg, so should not be included in `cmd/server/base_template.go` (not sure why).
