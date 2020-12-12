@@ -2,6 +2,22 @@
 
 This is the user interface for the [Mendel's Accountant genetic mutation tracking program](https://github.com/genetic-algorithms/mendel-go).
 
+# Initialize Development Environment
+
+If this is the first time developing for this project, install all of the needed tools:
+
+* Install `npm`. For example, on macOS:
+
+  ```bash
+  brew install npm
+  ````
+
+* Install of the javascript packages needed by this project (listed in `package.json`):
+
+  ```bash
+  npm install
+  ````
+
 ## Develop
 
 After modifying code, compile the go code (the server portion) and start it:
@@ -20,10 +36,10 @@ That last command creates `static/js/bundle.js`, which for now should be committ
 
 ## Test the Backend API
 
-The backend API can be tested via browser or curl URLs like this:
+The backend API can be tested directly by using a URL like this in the browser or curl:
 
 ```bash
-http://0.0.0.0:8581/api/job-plot-files/?jobId=b7f00ecc
+http://localhost:3000/api/job-plot-files/?jobId=b7f00ecc
 ```
 
 ## Build, Install, and Run the Package
@@ -111,6 +127,7 @@ npm update   # will update all outdated pkgs, but only within major version
 # for each pkg that you want to go to the next major version:
 npm install <pkg>@latest
 npm list --depth 0   # to see the new versions of your top-level pkgs (needed in next step)
+npm list <pkg>   # see the version of this pkg that are installed
 # if some pkgs specified in package.json are missing, you need to: npm install <pkg>
 ```
 

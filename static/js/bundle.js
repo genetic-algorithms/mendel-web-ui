@@ -1,8 +1,10 @@
 (function (immer, ReactRedux, React, moment, Plotly, Redux, ReactDOM) {
     'use strict';
 
-    var immer__default = 'default' in immer ? immer['default'] : immer;
-    moment = moment && Object.prototype.hasOwnProperty.call(moment, 'default') ? moment['default'] : moment;
+    function _interopDefaultLegacy (e) { return e && typeof e === 'object' && 'default' in e ? e : { 'default': e }; }
+
+    var immer__default = /*#__PURE__*/_interopDefaultLegacy(immer);
+    var moment__default = /*#__PURE__*/_interopDefaultLegacy(moment);
 
     function reducer(state, action) {
         if (state === undefined) {
@@ -18,37 +20,37 @@
         }
         switch (action.type) {
             case 'USER':
-                return immer__default(state, draft => {
+                return immer__default['default'](state, draft => {
                     draft.user = action.value;
                 });
             case 'LOGIN':
-                return immer__default(state, draft => {
+                return immer__default['default'](state, draft => {
                     draft.route = '/';
                     draft.user = action.user;
                 });
             case 'LOGOUT':
-                return immer__default(state, draft => {
+                return immer__default['default'](state, draft => {
                     draft.route = '/login/';
                     draft.user = null;
                 });
             case 'ROUTE':
-                return immer__default(state, draft => {
+                return immer__default['default'](state, draft => {
                     draft.route = action.value;
                 });
             case 'LOADING_INDICATOR_INCREMENT':
-                return immer__default(state, draft => {
+                return immer__default['default'](state, draft => {
                     draft.loading_indicator_count += 1;
                 });
             case 'LOADING_INDICATOR_DECREMENT':
-                return immer__default(state, draft => {
+                return immer__default['default'](state, draft => {
                     draft.loading_indicator_count = Math.max(draft.loading_indicator_count - 1, 0);
                 });
             case 'plots.INFO':
-                return immer__default(state, draft => {
+                return immer__default['default'](state, draft => {
                     draft.plots = action.plots;
                 });
             case 'plots.INFO_AND_ROUTE':
-                return immer__default(state, draft => {
+                return immer__default['default'](state, draft => {
                     draft.plots = action.plots;
                     draft.route = action.route;
                 });
@@ -1138,7 +1140,7 @@
                 null), React.createElement(Help, {
                 title: 'multiple_bottlenecks',
                 content: 'Used for Multiple Bottlenecks population growth model, instead of any of the other population growth and bottleneck parameters.',
-            })), React.createElement('div', { className: 'new-job-view__form-section-title' }, 'Tribes'), React.createElement('div', { className: 'new-job-view__field' }, React.createElement('label', {}, 'The number of tribes (separate populations)'), React.createElement('input', {
+            })), React.createElement('div', { className: 'new-job-view__form-section-title' }, 'Tribes'), React.createElement('div', { className: 'new-job-view__field' }, React.createElement('label', {}, 'The number of tribes, i.e. separate populations (experimental)'), React.createElement('input', {
                 type: 'number',
                 min: '1',
                 max: '100000',
@@ -1590,7 +1592,7 @@
                 className: 'job-listing-view__filter',
                 value: this.state.all ? 'all' : 'mine',
                 onChange: this.onFilterChanged,
-            }, React.createElement('option', { value: 'mine' }, 'My Jobs'), React.createElement('option', { value: 'all' }, 'All Jobs')), React.createElement('div', { className: 'job-listing-view__import button button--text', onClick: this.onImportClick }, 'Import'), React.createElement('div', { className: 'job-listing-view__jobs' }, React.createElement('div', { className: 'job-listing-view__labels' }, React.createElement('div', { className: 'job-listing-view__labels__id' }, 'Job ID'), React.createElement('div', { className: 'job-listing-view__labels__time' }, 'Time'), React.createElement('div', { className: 'job-listing-view__labels__description' }, 'Description'), React.createElement('div', { className: 'job-listing-view__labels__username' }, 'User'), React.createElement('div', { className: 'job-listing-view__labels__status' }, 'Status'), React.createElement('div', { className: 'job-listing-view__labels__delete-button' }, '')), this.state.jobs.map(job => (React.createElement('div', { className: 'job-listing-view__job', key: job.id }, React.createElement('div', { className: 'job-listing-view__job2', onClick: () => this.onJobClick(job.id) }, React.createElement('div', { className: 'job-listing-view__job__id' }, job.id), React.createElement('div', { className: 'job-listing-view__job__time' }, moment(job.time).fromNow()), React.createElement('div', { className: 'job-listing-view__job__description' }, job.description), React.createElement('div', { className: 'job-listing-view__job__username' }, job.username), React.createElement('div', { className: 'job-listing-view__job__status' }, capitalizeFirstLetter(job.status))), React.createElement('div', {
+            }, React.createElement('option', { value: 'mine' }, 'My Jobs'), React.createElement('option', { value: 'all' }, 'All Jobs')), React.createElement('div', { className: 'job-listing-view__import button button--text', onClick: this.onImportClick }, 'Import'), React.createElement('div', { className: 'job-listing-view__jobs' }, React.createElement('div', { className: 'job-listing-view__labels' }, React.createElement('div', { className: 'job-listing-view__labels__id' }, 'Job ID'), React.createElement('div', { className: 'job-listing-view__labels__time' }, 'Time'), React.createElement('div', { className: 'job-listing-view__labels__description' }, 'Description'), React.createElement('div', { className: 'job-listing-view__labels__username' }, 'User'), React.createElement('div', { className: 'job-listing-view__labels__status' }, 'Status'), React.createElement('div', { className: 'job-listing-view__labels__delete-button' }, '')), this.state.jobs.map(job => (React.createElement('div', { className: 'job-listing-view__job', key: job.id }, React.createElement('div', { className: 'job-listing-view__job2', onClick: () => this.onJobClick(job.id) }, React.createElement('div', { className: 'job-listing-view__job__id' }, job.id), React.createElement('div', { className: 'job-listing-view__job__time' }, moment__default['default'](job.time).fromNow()), React.createElement('div', { className: 'job-listing-view__job__description' }, job.description), React.createElement('div', { className: 'job-listing-view__job__username' }, job.username), React.createElement('div', { className: 'job-listing-view__job__status' }, capitalizeFirstLetter(job.status))), React.createElement('div', {
                 className: 'job-listing-view__job__delete-button',
                 onClick: () => this.onConfirmationOpen(job.id),
             }, React.createElement(DeleteIcon, { width: 24, height: 24 })))))), (this.state.confirmationOpen ?
@@ -2129,7 +2131,7 @@
             });
         }
         render() {
-            return React.createElement('div', { className: 'job-detail-view' }, React.createElement('div', { className: 'job-detail-view__title' }, 'Job', React.createElement('span', { className: 'job-detail-view__job-info' }, this.props.jobId), React.createElement('span', { className: 'job-detail-view__job-info' }, this.state.description), React.createElement('span', { className: 'job-detail-view__job-info' }, moment(this.state.time).fromNow())), React.createElement('pre', { className: 'job-detail-view__output', ref: (el) => this.outputRef = el }, this.state.output), React.createElement('div', { className: 'job-detail-view__bottom' }, React.createElement('div', { className: 'job-detail-view__status' }, 'Status: ' + (this.state.done ? 'Done' : 'Running')), (this.state.done ?
+            return React.createElement('div', { className: 'job-detail-view' }, React.createElement('div', { className: 'job-detail-view__title' }, 'Job', React.createElement('span', { className: 'job-detail-view__job-info' }, this.props.jobId), React.createElement('span', { className: 'job-detail-view__job-info' }, this.state.description), React.createElement('span', { className: 'job-detail-view__job-info' }, moment__default['default'](this.state.time).fromNow())), React.createElement('pre', { className: 'job-detail-view__output', ref: (el) => this.outputRef = el }, this.state.output), React.createElement('div', { className: 'job-detail-view__bottom' }, React.createElement('div', { className: 'job-detail-view__status' }, 'Status: ' + (this.state.done ? 'Done' : 'Running')), (this.state.done ?
                 React.createElement('div', {
                     className: 'job-detail-view__plots-button button',
                     onClick: this.onPlotsClick,

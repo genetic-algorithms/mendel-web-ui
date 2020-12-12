@@ -1304,7 +1304,7 @@ class Component extends React.Component<Props, State> {
                 React.createElement('div', { className: 'new-job-view__form-section-title' }, 'Tribes'),
 
                 React.createElement('div', { className: 'new-job-view__field' },
-                    React.createElement('label', {}, 'The number of tribes (separate populations)'),
+                    React.createElement('label', {}, 'The number of tribes, i.e. separate populations (experimental)'),
                     React.createElement('input', {
                         type: 'number',
                         min: '1',

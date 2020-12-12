@@ -101,7 +101,7 @@ func apiCreateJobHandler(w http.ResponseWriter, r *http.Request) {
 		Status:      "running",
 	}
 	db.Db.Lock()
-	db.Db.Data.Jobs[jobId] = job	// we will persist this to the db file when the job completes
+	db.Db.Data.Jobs[jobId] = job // we will persist this to the db file when the job completes
 	db.Db.Unlock()
 
 	// Run the job in its own thread
@@ -111,6 +111,8 @@ func apiCreateJobHandler(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			log.Printf("Error getting stdout pipe for job %s: %v", jobId, err)
 		}
+
+		// Use example: https://gist.github.com/mxschmitt/6c07b5b97853f05455c3fdaf48b1a8b6
 
 		err = cmd.Start()
 		if err != nil {
