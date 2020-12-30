@@ -56,7 +56,7 @@ func WriteJsonResponse(w http.ResponseWriter, data interface{}) {
 
 func SetVerbose() {
 	v := GetEnvVarWithDefault("VERBOSE", "false")
-	if v=="1" || strings.ToLower(v)=="true" {
+	if v == "1" || strings.ToLower(v) == "true" {
 		IsVerbose = true
 	} else {
 		IsVerbose = false
@@ -122,4 +122,10 @@ func IsValidPostJson(r *http.Request) bool {
 	}
 
 	return true
+}
+
+// Returns true if this file or dir exists
+func PathExists(path string) bool {
+	_, err := os.Stat(path)
+	return err == nil
 }

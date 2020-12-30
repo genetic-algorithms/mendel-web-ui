@@ -2,7 +2,7 @@ SHELL ?= /bin/bash -e
 #BINARY ?= cmd/server/mendel-web-ui
 BINARY ?= mendel-web-ui
 # Set these 2 vars before building the pkg, and set Requires in pkg/rpm/mendel-web-ui.spec if necessary
-export VERSION ?= 1.1.9
+export VERSION ?= 1.2.1
 # Release is only needed for the rpm, and only needs to be incremented if you have to rebuild/reinstall this version multiple times due to packaging fixes
 export RELEASE ?= 2
 # rpmbuild does not give us a good way to set topdir, so use the default location

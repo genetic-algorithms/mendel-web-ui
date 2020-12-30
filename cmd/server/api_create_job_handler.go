@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"encoding/json"
+	"io"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -111,8 +112,10 @@ func apiCreateJobHandler(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			log.Printf("Error getting stdout pipe for job %s: %v", jobId, err)
 		}
-
-		// Use example: https://gist.github.com/mxschmitt/6c07b5b97853f05455c3fdaf48b1a8b6
+		stderr, err := cmd.StderrPipe()
+		if err != nil {
+			log.Printf("Error getting stderr pipe for job %s: %v", jobId, err)
+		}
 
 		err = cmd.Start()
 		if err != nil {
@@ -120,7 +123,9 @@ func apiCreateJobHandler(w http.ResponseWriter, r *http.Request) {
 		}
 
 		// Repeatedly get the latest bytes of output from the running job and add them to our in-memory copy so /api/job-output/ can get them and return them to the frontend
-		scanner := bufio.NewScanner(stdout)
+		// Following this example to combine stdout and stderr: https://gist.github.com/mxschmitt/6c07b5b97853f05455c3fdaf48b1a8b6
+		// The MultiReader documentation says the list of readers are read sequentially, so put stdout before stderr
+		scanner := bufio.NewScanner(io.MultiReader(stdout, stderr))
 		for scanner.Scan() {
 			globalRunningJobsLock.Lock()
 			outputBuilder.WriteString(scanner.Text())

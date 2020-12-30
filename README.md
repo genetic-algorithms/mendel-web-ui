@@ -91,7 +91,7 @@ make macinstall
 start-mendel-ui.sh
 ```
 
-- Browse http://hostname-or-ip:8581/
+- Browse http://0.0.0.0:8581/
 - If you just installed the package for the 1st time, the `admin` password is `changeme!` . Once logged in, change the `admin` password by clicking on `USERS` and then the `admin` user, and set the password to something you will remember. Create additional users as necessary.
 
 To stop the web UI server:
@@ -104,8 +104,8 @@ stop-mendel-ui.sh
 
 - Go to https://github.com/genetic-algorithms/mendel-web-ui/releases and click `Draft a new release`
 - Set the `tag` to this version number, enter a `title` and `description`
-- Upload the **not zipped** rpm for this version that was created in `~/rpmbuild/RPMS/x86_64/`
-- Upload the **not zipped** mac pkg for this version that was created in `pkg/mac/build/`
+- Upload the rpm for this version that was created in `~/rpmbuild/RPMS/x86_64/`
+- Upload the mac pkg for this version that was created in `pkg/mac/build/`
 - Click `Publish release`
 
 ## To Update All of the Npm Packages for the Project
