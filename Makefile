@@ -18,7 +18,6 @@ cmd/server/$(BINARY): cmd/server/*.go cmd/server/*/*.go Makefile
 	scripts/build_go
 
 tools/mendel-chg-pw: tools/mendel-chg-pw.go cmd/server/*/*.go
-	glide --quiet install
 	go build -o $@ $<
 
 runserver: cmd/server/$(BINARY) tools/mendel-chg-pw

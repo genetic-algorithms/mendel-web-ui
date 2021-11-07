@@ -12,7 +12,7 @@ If this is the first time developing for this project, install all of the needed
   brew install npm
   ````
 
-* Install of the javascript packages needed by this project (listed in `package.json`):
+* Install all of the javascript packages needed by this project (listed in `package.json`):
 
   ```bash
   npm install
