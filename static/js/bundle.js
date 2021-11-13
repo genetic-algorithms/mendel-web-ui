@@ -3,8 +3,31 @@
 
     function _interopDefaultLegacy (e) { return e && typeof e === 'object' && 'default' in e ? e : { 'default': e }; }
 
-    var immer__default = /*#__PURE__*/_interopDefaultLegacy(immer);
+    function _interopNamespace(e) {
+        if (e && e.__esModule) return e;
+        var n = Object.create(null);
+        if (e) {
+            Object.keys(e).forEach(function (k) {
+                if (k !== 'default') {
+                    var d = Object.getOwnPropertyDescriptor(e, k);
+                    Object.defineProperty(n, k, d.get ? d : {
+                        enumerable: true,
+                        get: function () { return e[k]; }
+                    });
+                }
+            });
+        }
+        n["default"] = e;
+        return Object.freeze(n);
+    }
+
+    var immer__namespace = /*#__PURE__*/_interopNamespace(immer);
+    var ReactRedux__namespace = /*#__PURE__*/_interopNamespace(ReactRedux);
+    var React__namespace = /*#__PURE__*/_interopNamespace(React);
     var moment__default = /*#__PURE__*/_interopDefaultLegacy(moment);
+    var Plotly__namespace = /*#__PURE__*/_interopNamespace(Plotly);
+    var Redux__namespace = /*#__PURE__*/_interopNamespace(Redux);
+    var ReactDOM__namespace = /*#__PURE__*/_interopNamespace(ReactDOM);
 
     function reducer(state, action) {
         if (state === undefined) {
@@ -20,37 +43,37 @@
         }
         switch (action.type) {
             case 'USER':
-                return immer__default['default'](state, draft => {
+                return immer__namespace.default(state, draft => {
                     draft.user = action.value;
                 });
             case 'LOGIN':
-                return immer__default['default'](state, draft => {
+                return immer__namespace.default(state, draft => {
                     draft.route = '/';
                     draft.user = action.user;
                 });
             case 'LOGOUT':
-                return immer__default['default'](state, draft => {
+                return immer__namespace.default(state, draft => {
                     draft.route = '/login/';
                     draft.user = null;
                 });
             case 'ROUTE':
-                return immer__default['default'](state, draft => {
+                return immer__namespace.default(state, draft => {
                     draft.route = action.value;
                 });
             case 'LOADING_INDICATOR_INCREMENT':
-                return immer__default['default'](state, draft => {
+                return immer__namespace.default(state, draft => {
                     draft.loading_indicator_count += 1;
                 });
             case 'LOADING_INDICATOR_DECREMENT':
-                return immer__default['default'](state, draft => {
+                return immer__namespace.default(state, draft => {
                     draft.loading_indicator_count = Math.max(draft.loading_indicator_count - 1, 0);
                 });
             case 'plots.INFO':
-                return immer__default['default'](state, draft => {
+                return immer__namespace.default(state, draft => {
                     draft.plots = action.plots;
                 });
             case 'plots.INFO_AND_ROUTE':
-                return immer__default['default'](state, draft => {
+                return immer__namespace.default(state, draft => {
                     draft.plots = action.plots;
                     draft.route = action.route;
                 });
@@ -155,7 +178,7 @@
         });
     }
 
-    class Component extends React.Component {
+    class Component$i extends React__namespace.Component {
         constructor(props) {
             super(props);
             this.state = {
@@ -209,14 +232,14 @@
             });
         }
         render() {
-            return React.createElement('div', { className: 'login-view' }, React.createElement('div', { className: 'login-view__title' }, 'Login'), React.createElement('form', { className: 'login-view__form', onSubmit: this.onSubmit }, React.createElement('input', {
+            return React__namespace.createElement('div', { className: 'login-view' }, React__namespace.createElement('div', { className: 'login-view__title' }, 'Login'), React__namespace.createElement('form', { className: 'login-view__form', onSubmit: this.onSubmit }, React__namespace.createElement('input', {
                 className: 'login-view__input',
                 type: 'text',
                 placeholder: 'Username',
                 value: this.state.username,
                 required: true,
                 onChange: this.onUsernameChange,
-            }), React.createElement('input', {
+            }), React__namespace.createElement('input', {
                 className: 'login-view__password login-view__input',
                 type: 'password',
                 placeholder: 'Password',
@@ -224,40 +247,40 @@
                 required: true,
                 onChange: this.onPasswordChange,
             }), (this.state.wrongCredentials ?
-                React.createElement('div', { className: 'login-view__form-error' }, 'Incorrect credentials') :
-                null), React.createElement('button', {
+                React__namespace.createElement('div', { className: 'login-view__form-error' }, 'Incorrect credentials') :
+                null), React__namespace.createElement('button', {
                 className: 'login-view__submit button' + (this.state.submitting ? ' login-view--submitting' : ''),
                 type: 'submit',
-            }, React.createElement('span', { className: 'login-view__submit-text' }, 'Login'))));
+            }, React__namespace.createElement('span', { className: 'login-view__submit-text' }, 'Login'))));
         }
     }
-    const Login = ReactRedux.connect()(Component);
+    const Login = ReactRedux__namespace.connect()(Component$i);
 
-    class AccountIcon extends React.PureComponent {
+    class AccountIcon extends React__namespace.PureComponent {
         render() {
-            return React.createElement('svg', {
+            return React__namespace.createElement('svg', {
                 width: this.props.width.toString(),
                 height: this.props.height.toString(),
                 viewBox: '0 0 24 24',
                 xmlns: 'http://www.w3.org/2000/svg',
-            }, React.createElement('path', { d: 'M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z' }));
+            }, React__namespace.createElement('path', { d: 'M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z' }));
         }
     }
 
-    class MsgDialog extends React.Component {
+    class MsgDialog extends React__namespace.Component {
         render() {
-            return React.createElement('div', { className: 'msg-dialog' }, React.createElement('div', { className: 'msg-dialog__overlay', onClick: this.props.onClose }), React.createElement('div', { className: 'msg-dialog__content' }, React.createElement('div', { className: 'msg-dialog__title' }, this.props.title), this.props.descriptions.map(desc => React.createElement('div', { className: 'msg-dialog__description' }, desc)), React.createElement('div', { className: 'msg-dialog__buttons' }, React.createElement('div', { className: 'msg-dialog__button', onClick: this.props.onClose }, 'Close'))));
+            return React__namespace.createElement('div', { className: 'msg-dialog' }, React__namespace.createElement('div', { className: 'msg-dialog__overlay', onClick: this.props.onClose }), React__namespace.createElement('div', { className: 'msg-dialog__content' }, React__namespace.createElement('div', { className: 'msg-dialog__title' }, this.props.title), this.props.descriptions.map(desc => React__namespace.createElement('div', { className: 'msg-dialog__description' }, desc)), React__namespace.createElement('div', { className: 'msg-dialog__buttons' }, React__namespace.createElement('div', { className: 'msg-dialog__button', onClick: this.props.onClose }, 'Close'))));
         }
     }
 
-    function mapStateToProps(state) {
+    function mapStateToProps$6(state) {
         return {
             user: state.user,
             route: state.route,
             loading: state.loading_indicator_count !== 0,
         };
     }
-    function mapDispatchToProps(dispatch) {
+    function mapDispatchToProps$1(dispatch) {
         return {
             dispatch: dispatch,
             onNewJobTabClick: () => setRoute(dispatch, '/'),
@@ -274,10 +297,10 @@
             },
         };
     }
-    class Component$1 extends React.Component {
+    class Component$h extends React__namespace.Component {
         constructor(props) {
             super(props);
-            this.menuButtonElement = React.createRef();
+            this.menuButtonElement = React__namespace.createRef();
             this.state = {
                 menuOpen: false,
                 aboutOpen: false,
@@ -327,39 +350,39 @@
             document.removeEventListener('click', this.onDocumentClick);
         }
         render() {
-            return React.createElement('div', { className: 'page-header' }, React.createElement('div', { className: 'page-header__tabs' }, React.createElement('div', {
+            return React__namespace.createElement('div', { className: 'page-header' }, React__namespace.createElement('div', { className: 'page-header__tabs' }, React__namespace.createElement('div', {
                 className: 'page-header__tab ' + (this.props.route === '/' ? 'page-header--active-tab' : ''),
                 onClick: this.props.onNewJobTabClick,
-            }, 'New Job'), React.createElement('div', {
+            }, 'New Job'), React__namespace.createElement('div', {
                 className: 'page-header__tab ' + (this.props.route === '/job-listing/' ? 'page-header--active-tab' : ''),
                 onClick: this.props.onJobsTabClick,
             }, 'Jobs'), (this.props.user && this.props.user.is_admin ?
-                React.createElement('div', {
+                React__namespace.createElement('div', {
                     className: 'page-header__tab ' + (this.props.route === '/user-listing/' ? 'page-header--active-tab' : ''),
                     onClick: this.props.onUsersTabClick,
                 }, 'Users') :
                 null)), (this.props.loading ?
-                React.createElement('div', { className: 'page-header__loading-indicator' }) :
+                React__namespace.createElement('div', { className: 'page-header__loading-indicator' }) :
                 null), (this.props.user ?
-                React.createElement('div', {
+                React__namespace.createElement('div', {
                     className: 'page-header__account-menu-button',
                     ref: this.menuButtonElement,
-                }, React.createElement(AccountIcon, { width: 24, height: 24 })) :
+                }, React__namespace.createElement(AccountIcon, { width: 24, height: 24 })) :
                 null), (this.props.user ?
-                React.createElement('div', {
+                React__namespace.createElement('div', {
                     className: 'page-header__account-menu ' + (this.state.menuOpen ? 'page-header--account-menu-open' : ''),
-                }, React.createElement('div', {
+                }, React__namespace.createElement('div', {
                     className: 'page-header__account-menu-item',
                     onClick: this.props.onMyAccountClick,
-                }, 'My Account'), React.createElement('div', {
+                }, 'My Account'), React__namespace.createElement('div', {
                     className: 'page-header__account-menu-item',
                     onClick: this.onAboutOpen,
-                }, 'About'), React.createElement('div', {
+                }, 'About'), React__namespace.createElement('div', {
                     className: 'page-header__account-menu-item',
                     onClick: this.props.onLogoutClick,
                 }, 'Logout')) :
                 null), (this.state.aboutOpen ?
-                React.createElement(MsgDialog, {
+                React__namespace.createElement(MsgDialog, {
                     title: "About Mendel's Accountant",
                     descriptions: [
                         "Mendel's Accountant is a genetic mutation tracking program used to simulate and study macroevolution in a biologically realistic way. It models genetic change over time by tracking each mutation that enters the simulated population from generation to generation to the end of the simulation. The software models each individual in the population, including their chromosomes, linkage blocks, and deleterious, favorable, and neutral mutations.",
@@ -371,31 +394,31 @@
                 : null));
         }
     }
-    const Header = ReactRedux.connect(mapStateToProps, mapDispatchToProps)(Component$1);
+    const Header = ReactRedux__namespace.connect(mapStateToProps$6, mapDispatchToProps$1)(Component$h);
 
-    class CheckboxCheckedIcon extends React.PureComponent {
+    class CheckboxCheckedIcon extends React__namespace.PureComponent {
         render() {
-            return React.createElement('svg', {
+            return React__namespace.createElement('svg', {
                 width: this.props.width.toString(),
                 height: this.props.height.toString(),
                 viewBox: '0 0 24 24',
                 xmlns: 'http://www.w3.org/2000/svg',
-            }, React.createElement('path', { d: 'M19 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.11 0 2-.9 2-2V5c0-1.1-.89-2-2-2zm-9 14l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z' }));
+            }, React__namespace.createElement('path', { d: 'M19 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.11 0 2-.9 2-2V5c0-1.1-.89-2-2-2zm-9 14l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z' }));
         }
     }
 
-    class CheckboxUncheckedIcon extends React.PureComponent {
+    class CheckboxUncheckedIcon extends React__namespace.PureComponent {
         render() {
-            return React.createElement('svg', {
+            return React__namespace.createElement('svg', {
                 width: this.props.width.toString(),
                 height: this.props.height.toString(),
                 viewBox: '0 0 24 24',
                 xmlns: 'http://www.w3.org/2000/svg',
-            }, React.createElement('path', { d: 'M19 5v14H5V5h14m0-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z' }));
+            }, React__namespace.createElement('path', { d: 'M19 5v14H5V5h14m0-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z' }));
         }
     }
 
-    class Checkbox extends React.PureComponent {
+    class Checkbox extends React__namespace.PureComponent {
         constructor(props) {
             super(props);
             this.onClick = this.onClick.bind(this);
@@ -406,7 +429,7 @@
             }
         }
         render() {
-            return React.createElement('div', {
+            return React__namespace.createElement('div', {
                 className: [
                     'checkbox',
                     this.props.checked ? 'checkbox--checked' : '',
@@ -414,27 +437,27 @@
                 ].join(' '),
                 onClick: this.onClick,
             }, (this.props.checked ?
-                React.createElement(CheckboxCheckedIcon, { width: 24, height: 24 }) :
-                React.createElement(CheckboxUncheckedIcon, { width: 24, height: 24 })));
+                React__namespace.createElement(CheckboxCheckedIcon, { width: 24, height: 24 }) :
+                React__namespace.createElement(CheckboxUncheckedIcon, { width: 24, height: 24 })));
         }
     }
 
-    class HelpIcon extends React.PureComponent {
+    class HelpIcon extends React__namespace.PureComponent {
         render() {
-            return React.createElement('svg', {
+            return React__namespace.createElement('svg', {
                 width: this.props.width.toString(),
                 height: this.props.height.toString(),
                 viewBox: '0 0 24 24',
                 xmlns: 'http://www.w3.org/2000/svg',
-            }, React.createElement('path', { d: 'M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17h-2v-2h2v2zm2.07-7.75l-.9.92C13.45 12.9 13 13.5 13 15h-2v-.5c0-1.1.45-2.1 1.17-2.83l1.24-1.26c.37-.36.59-.86.59-1.41 0-1.1-.9-2-2-2s-2 .9-2 2H8c0-2.21 1.79-4 4-4s4 1.79 4 4c0 .88-.36 1.68-.93 2.25z' }));
+            }, React__namespace.createElement('path', { d: 'M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17h-2v-2h2v2zm2.07-7.75l-.9.92C13.45 12.9 13 13.5 13 15h-2v-.5c0-1.1.45-2.1 1.17-2.83l1.24-1.26c.37-.36.59-.86.59-1.41 0-1.1-.9-2-2-2s-2 .9-2 2H8c0-2.21 1.79-4 4-4s4 1.79 4 4c0 .88-.36 1.68-.93 2.25z' }));
         }
     }
 
-    class Help extends React.PureComponent {
+    class Help extends React__namespace.PureComponent {
         constructor(props) {
             super(props);
-            this.buttonRef = React.createRef();
-            this.menuRef = React.createRef();
+            this.buttonRef = React__namespace.createRef();
+            this.menuRef = React__namespace.createRef();
             this.state = {
                 open: false,
             };
@@ -463,16 +486,16 @@
             document.removeEventListener('click', this.onDocumentClick);
         }
         render() {
-            return React.createElement('div', { className: 'new-job-view__help' }, React.createElement('div', { className: 'new-job-view__help-button', ref: this.buttonRef, onClick: this.onButtonClick }, React.createElement(HelpIcon, { width: 24, height: 24 })), (this.state.open ?
-                React.createElement('div', { className: 'new-job-view__help-menu', ref: this.menuRef }, React.createElement('div', { className: 'new-job-view__help-menu-title' }, this.props.title), React.createElement('div', { className: 'new-job-view__help-menu-content' }, this.props.content), (this.props.url ?
-                    React.createElement('a', { className: 'new-job-view__help-menu-link', href: this.props.url, target: '_blank' }, 'Read More') :
+            return React__namespace.createElement('div', { className: 'new-job-view__help' }, React__namespace.createElement('div', { className: 'new-job-view__help-button', ref: this.buttonRef, onClick: this.onButtonClick }, React__namespace.createElement(HelpIcon, { width: 24, height: 24 })), (this.state.open ?
+                React__namespace.createElement('div', { className: 'new-job-view__help-menu', ref: this.menuRef }, React__namespace.createElement('div', { className: 'new-job-view__help-menu-title' }, this.props.title), React__namespace.createElement('div', { className: 'new-job-view__help-menu-content' }, this.props.content), (this.props.url ?
+                    React__namespace.createElement('a', { className: 'new-job-view__help-menu-link', href: this.props.url, target: '_blank' }, 'Read More') :
                     null)) :
                 null));
         }
     }
 
     const HELP_URL_PREFIX = 'http://ec2-52-43-51-28.us-west-2.compute.amazonaws.com:8580/static/apps/mendel/help.html#';
-    class Component$2 extends React.Component {
+    class Component$g extends React__namespace.Component {
         constructor(props) {
             super(props);
             this.fieldChangeHandlers = {
@@ -669,13 +692,13 @@
             }
         }
         render() {
-            return React.createElement('div', { className: 'new-job-view' }, React.createElement('div', { className: 'new-job-view__loading' }), React.createElement('form', { className: 'new-job-view__form', onSubmit: this.onSubmit }, React.createElement('div', { className: 'new-job-view__form-section-title' }, 'Basic'), React.createElement('div', { className: 'new-job-view__field' }, React.createElement('label', {}, 'Job description'), React.createElement('input', {
+            return React__namespace.createElement('div', { className: 'new-job-view' }, React__namespace.createElement('div', { className: 'new-job-view__loading' }), React__namespace.createElement('form', { className: 'new-job-view__form', onSubmit: this.onSubmit }, React__namespace.createElement('div', { className: 'new-job-view__form-section-title' }, 'Basic'), React__namespace.createElement('div', { className: 'new-job-view__field' }, React__namespace.createElement('label', {}, 'Job description'), React__namespace.createElement('input', {
                 type: 'text',
                 value: this.state.fieldValues.description,
                 onChange: this.fieldChangeHandlers.description,
             }), (this.state.fieldValues.description !== this.state.defaultValues.description ?
-                React.createElement('div', { className: 'new-job-view__not-default' }) :
-                null)), React.createElement('div', { className: 'new-job-view__field' }, React.createElement('label', {}, 'Population size (initial or fixed)'), React.createElement('input', {
+                React__namespace.createElement('div', { className: 'new-job-view__not-default' }) :
+                null)), React__namespace.createElement('div', { className: 'new-job-view__field' }, React__namespace.createElement('label', {}, 'Population size (initial or fixed)'), React__namespace.createElement('input', {
                 type: 'number',
                 min: '2',
                 max: '1000000',
@@ -683,11 +706,11 @@
                 value: this.state.fieldValues.pop_size,
                 onChange: this.fieldChangeHandlers.pop_size,
             }), (parseInt(this.state.fieldValues.pop_size) !== parseInt(this.state.defaultValues.pop_size) ?
-                React.createElement('div', { className: 'new-job-view__not-default' }) :
-                null), React.createElement(Help, {
+                React__namespace.createElement('div', { className: 'new-job-view__not-default' }) :
+                null), React__namespace.createElement(Help, {
                 title: 'pop_size',
                 content: 'This is the number of reproducing adults, after selection. This number is normally kept constant, except when fertility is insufficient to allow replacement, or when population growth is specified below. For smaller computer systems such as PCs, population size must remain small (100-5000) or the program will run out of memory. Population sizes smaller than 1000 can be strongly affected by inbreeding and drift.',
-            })), React.createElement('div', { className: 'new-job-view__field' }, React.createElement('label', {}, 'Generations'), React.createElement('input', {
+            })), React__namespace.createElement('div', { className: 'new-job-view__field' }, React__namespace.createElement('label', {}, 'Generations'), React__namespace.createElement('input', {
                 type: 'number',
                 min: '0',
                 max: '1000000',
@@ -695,11 +718,11 @@
                 value: this.state.fieldValues.num_generations,
                 onChange: this.fieldChangeHandlers.num_generations,
             }), (parseInt(this.state.fieldValues.num_generations) !== parseInt(this.state.defaultValues.num_generations) ?
-                React.createElement('div', { className: 'new-job-view__not-default' }) :
-                null), React.createElement(Help, {
+                React__namespace.createElement('div', { className: 'new-job-view__not-default' }) :
+                null), React__namespace.createElement(Help, {
                 title: 'num_generations',
                 content: 'The number of generations the program should run. If there are too many generations specified, smaller computers will run out of memory because of the accumulation of large numbers of mutations, and the experiment will terminate prematurely. This problem can be mitigated by tracking only the larger-effect mutations (see computation parameters).  The program also terminates prematurely if fitness reaches a specified extinction threshold (default = 0.0) or if the population size shrinks to just one individual. In the special case of pop_growth_model==exponential, this value can be 0 which indicates the run should continue until max_pop_size is reached.',
-            })), React.createElement('div', { className: 'new-job-view__form-section-title' }, 'Mutations'), React.createElement('div', { className: 'new-job-view__field' }, React.createElement('label', {}, 'Total mutation rate (per individual per generation)'), React.createElement('input', {
+            })), React__namespace.createElement('div', { className: 'new-job-view__form-section-title' }, 'Mutations'), React__namespace.createElement('div', { className: 'new-job-view__field' }, React__namespace.createElement('label', {}, 'Total mutation rate (per individual per generation)'), React__namespace.createElement('input', {
                 type: 'number',
                 min: '0',
                 max: '1000',
@@ -707,11 +730,11 @@
                 value: this.state.fieldValues.mutn_rate,
                 onChange: this.fieldChangeHandlers.mutn_rate,
             }), (parseFloat(this.state.fieldValues.mutn_rate) !== parseFloat(this.state.defaultValues.mutn_rate) ?
-                React.createElement('div', { className: 'new-job-view__not-default' }) :
-                null), React.createElement(Help, {
+                React__namespace.createElement('div', { className: 'new-job-view__not-default' }) :
+                null), React__namespace.createElement(Help, {
                 title: 'mutn_rate',
                 content: 'This is the average number of new mutations per individual per generation. In humans, this number is believed to be approximately 100. The mutation rate can be adjusted to be proportional to the size of the functional genome. Thus if only 10% of the human genome actually functions (assuming the rest to be biologically inert), or if only 10% of the genome is modeled (as is the default), then the biologically relevant human mutation rate would be just 10. Rates of less than 1 new mutation per individual are allowed, including zero.',
-            })), React.createElement('div', { className: 'new-job-view__field' }, React.createElement('label', {}, 'Functional genome size'), React.createElement('input', {
+            })), React__namespace.createElement('div', { className: 'new-job-view__field' }, React__namespace.createElement('label', {}, 'Functional genome size'), React__namespace.createElement('input', {
                 type: 'number',
                 min: '100',
                 max: '10000000000000',
@@ -719,20 +742,20 @@
                 value: this.state.fieldValues.genome_size,
                 onChange: this.fieldChangeHandlers.genome_size,
             }), (parseFloat(this.state.fieldValues.genome_size) !== parseFloat(this.state.defaultValues.genome_size) ?
-                React.createElement('div', { className: 'new-job-view__not-default' }) :
-                null), React.createElement(Help, {
+                React__namespace.createElement('div', { className: 'new-job-view__not-default' }) :
+                null), React__namespace.createElement(Help, {
                 title: 'genome_size',
                 content: 'The distribution of deleterious mutational effects must in some way be adjusted to account for genome size. An approximate yet reasonable means for doing this is to define the minimal mutational effect as being 1 divided by the functional haploid genome size. The result of this adjustment is that smaller genomes have “flatter” distributions of deleterious mutations, while larger genomes have “steeper” distribution curves. Because we consider all entirely neutral mutations separately, we only consider the size of the functional genome, so we choose the default genome size to be 300 million (10% of the actual human genome size).',
                 url: HELP_URL_PREFIX + 'hgs',
-            })), React.createElement('div', { className: 'new-job-view__field' }, React.createElement('label', {}, 'Mutation rate model'), React.createElement('select', {
+            })), React__namespace.createElement('div', { className: 'new-job-view__field' }, React__namespace.createElement('label', {}, 'Mutation rate model'), React__namespace.createElement('select', {
                 value: this.state.fieldValues.mutn_rate_model,
                 onChange: this.fieldChangeHandlers.mutn_rate_model,
-            }, React.createElement('option', { value: 'fixed' }, 'Fixed'), React.createElement('option', { value: 'poisson' }, 'Poisson (default)')), (this.state.fieldValues.mutn_rate_model !== this.state.defaultValues.mutn_rate_model ?
-                React.createElement('div', { className: 'new-job-view__not-default' }) :
-                null), React.createElement(Help, {
+            }, React__namespace.createElement('option', { value: 'fixed' }, 'Fixed'), React__namespace.createElement('option', { value: 'poisson' }, 'Poisson (default)')), (this.state.fieldValues.mutn_rate_model !== this.state.defaultValues.mutn_rate_model ?
+                React__namespace.createElement('div', { className: 'new-job-view__not-default' }) :
+                null), React__namespace.createElement(Help, {
                 title: 'mutn_rate_model',
                 content: 'Choices: "poisson" - mutn_rate is determined by a poisson distribution, or "fixed" - mutn_rate is rounded to the nearest int',
-            })), React.createElement('div', { className: 'new-job-view__field' }, React.createElement('label', {}, 'Beneficial/deleterious ratio within non-neutral mutations'), React.createElement('input', {
+            })), React__namespace.createElement('div', { className: 'new-job-view__field' }, React__namespace.createElement('label', {}, 'Beneficial/deleterious ratio within non-neutral mutations'), React__namespace.createElement('input', {
                 type: 'number',
                 min: '0',
                 max: '1',
@@ -740,11 +763,11 @@
                 value: this.state.fieldValues.frac_fav_mutn,
                 onChange: this.fieldChangeHandlers.frac_fav_mutn,
             }), (parseFloat(this.state.fieldValues.frac_fav_mutn) !== parseFloat(this.state.defaultValues.frac_fav_mutn) ?
-                React.createElement('div', { className: 'new-job-view__not-default' }) :
-                null), React.createElement(Help, {
+                React__namespace.createElement('div', { className: 'new-job-view__not-default' }) :
+                null), React__namespace.createElement(Help, {
                 title: 'frac_fav_mutn',
                 content: 'While some sources suggest this number might be as high as 1:1000, most sources suggest it is more realistically about 1:1,000,000. For studying the accumulation of only deleterious or only beneficial mutations, the fraction of beneficials can be set to zero or 1.',
-            })), React.createElement('div', { className: 'new-job-view__field' }, React.createElement('label', {}, 'Fraction of the total number of mutations that are perfectly neutral'), React.createElement('input', {
+            })), React__namespace.createElement('div', { className: 'new-job-view__field' }, React__namespace.createElement('label', {}, 'Fraction of the total number of mutations that are perfectly neutral'), React__namespace.createElement('input', {
                 type: 'number',
                 min: '0',
                 max: '1',
@@ -752,20 +775,20 @@
                 value: this.state.fieldValues.fraction_neutral,
                 onChange: this.fieldChangeHandlers.fraction_neutral,
             }), (parseFloat(this.state.fieldValues.fraction_neutral) !== parseFloat(this.state.defaultValues.fraction_neutral) ?
-                React.createElement('div', { className: 'new-job-view__not-default' }) :
-                null), React.createElement(Help, {
+                React__namespace.createElement('div', { className: 'new-job-view__not-default' }) :
+                null), React__namespace.createElement(Help, {
                 title: 'frac_fav_mutn',
                 content: 'It is not clear that any mutations are perfectly neutral, but in the past it has often been claimed that most of the human genome is non-function “junk DNA”, and that mutations in these regions are truly neutral. For the human default, we allow (but do not believe) that 90% of the genome is junk DNA, and so 90% of all human mutations have absolutely no biological effect. Because of the computational cost of tracking so many neutral mutations we specify zero neutrals be simulated, and discount the genome size so it only reflects non-neutral mutations.',
                 url: HELP_URL_PREFIX + 'fmun',
-            })), React.createElement('div', { className: 'new-job-view__field' }, React.createElement('label', {}, 'Fitness effect model'), React.createElement('select', {
+            })), React__namespace.createElement('div', { className: 'new-job-view__field' }, React__namespace.createElement('label', {}, 'Fitness effect model'), React__namespace.createElement('select', {
                 value: this.state.fieldValues.fitness_effect_model,
                 onChange: this.fieldChangeHandlers.fitness_effect_model,
-            }, React.createElement('option', { value: 'fixed' }, 'Fixed'), React.createElement('option', { value: 'uniform' }, 'Uniform'), React.createElement('option', { value: 'weibull' }, 'Weibull (default)')), (this.state.fieldValues.fitness_effect_model !== this.state.defaultValues.fitness_effect_model ?
-                React.createElement('div', { className: 'new-job-view__not-default' }) :
-                null), React.createElement(Help, {
+            }, React__namespace.createElement('option', { value: 'fixed' }, 'Fixed'), React__namespace.createElement('option', { value: 'uniform' }, 'Uniform'), React__namespace.createElement('option', { value: 'weibull' }, 'Weibull (default)')), (this.state.fieldValues.fitness_effect_model !== this.state.defaultValues.fitness_effect_model ?
+                React__namespace.createElement('div', { className: 'new-job-view__not-default' }) :
+                null), React__namespace.createElement(Help, {
                 title: 'fitness_effect_model',
                 content: 'Choices: "weibull" - the fitness effect of each mutation is determined by the Weibull distribution, "fixed" - use fixed values for mutation fitness effect as set in uniform_fitness_effect_*, or "uniform" - even distribution between 0 and uniform_fitness_effect_* as max.',
-            })), React.createElement('div', { className: 'new-job-view__field new-job-view--indented' }, React.createElement('label', {}, 'For fixed: effect for each deleterious mutation'), React.createElement('input', {
+            })), React__namespace.createElement('div', { className: 'new-job-view__field new-job-view--indented' }, React__namespace.createElement('label', {}, 'For fixed: effect for each deleterious mutation'), React__namespace.createElement('input', {
                 type: 'number',
                 min: '0',
                 max: '0.1',
@@ -774,11 +797,11 @@
                 value: this.state.fieldValues.uniform_fitness_effect_del,
                 onChange: this.fieldChangeHandlers.uniform_fitness_effect_del,
             }), (parseFloat(this.state.fieldValues.uniform_fitness_effect_del) !== parseFloat(this.state.defaultValues.uniform_fitness_effect_del) ?
-                React.createElement('div', { className: 'new-job-view__not-default' }) :
-                null), React.createElement(Help, {
+                React__namespace.createElement('div', { className: 'new-job-view__not-default' }) :
+                null), React__namespace.createElement(Help, {
                 title: 'uniform_fitness_effect_del',
                 content: 'Used for fitness_effect_model=fixed. Each deleterious mutation should have this fitness effect.',
-            })), React.createElement('div', { className: 'new-job-view__field new-job-view--indented' }, React.createElement('label', {}, 'For fixed: effect for each beneficial mutation'), React.createElement('input', {
+            })), React__namespace.createElement('div', { className: 'new-job-view__field new-job-view--indented' }, React__namespace.createElement('label', {}, 'For fixed: effect for each beneficial mutation'), React__namespace.createElement('input', {
                 type: 'number',
                 min: '0',
                 max: '0.1',
@@ -788,11 +811,11 @@
                 value: this.state.fieldValues.uniform_fitness_effect_fav,
                 onChange: this.fieldChangeHandlers.uniform_fitness_effect_fav,
             }), (parseFloat(this.state.fieldValues.uniform_fitness_effect_fav) !== parseFloat(this.state.defaultValues.uniform_fitness_effect_fav) ?
-                React.createElement('div', { className: 'new-job-view__not-default' }) :
-                null), React.createElement(Help, {
+                React__namespace.createElement('div', { className: 'new-job-view__not-default' }) :
+                null), React__namespace.createElement(Help, {
                 title: 'uniform_fitness_effect_fav',
                 content: 'Used for fitness_effect_model=fixed. Each beneficial mutation should have this fitness effect.',
-            })), React.createElement('div', { className: 'new-job-view__field' }, React.createElement('label', {}, 'Fraction of deleterious mutations with “major effect”'), React.createElement('input', {
+            })), React__namespace.createElement('div', { className: 'new-job-view__field' }, React__namespace.createElement('label', {}, 'Fraction of deleterious mutations with “major effect”'), React__namespace.createElement('input', {
                 type: 'number',
                 min: '0.000000001',
                 max: '0.9',
@@ -800,11 +823,11 @@
                 value: this.state.fieldValues.high_impact_mutn_fraction,
                 onChange: this.fieldChangeHandlers.high_impact_mutn_fraction,
             }), (parseFloat(this.state.fieldValues.high_impact_mutn_fraction) !== parseFloat(this.state.defaultValues.high_impact_mutn_fraction) ?
-                React.createElement('div', { className: 'new-job-view__not-default' }) :
-                null), React.createElement(Help, {
+                React__namespace.createElement('div', { className: 'new-job-view__not-default' }) :
+                null), React__namespace.createElement(Help, {
                 title: 'high_impact_mutn_fraction',
                 content: 'Most mutations have an effect on fitness that is too small to measure directly. However, mutations will have measurable effects in the far “tail” of the mutation distribution curve. By utilizing the frequency and distribution of “measurable” mutation effects, one can constrain the most significant portion of the distribution curve as it relates to the selection process. For most species, there may not yet be enough data, even for the major mutations, to accurately model the exact distribution of mutations. When such data is not yet available, we are forced to simply estimate, to the best of our ability and based on data from other organisms, the fraction of “major mutations”.  The human default is 0.001.',
-            })), React.createElement('div', { className: 'new-job-view__field' }, React.createElement('label', {}, 'Minimum deleterious effect defined as “major”'), React.createElement('input', {
+            })), React__namespace.createElement('div', { className: 'new-job-view__field' }, React__namespace.createElement('label', {}, 'Minimum deleterious effect defined as “major”'), React__namespace.createElement('input', {
                 type: 'number',
                 min: '0.0001',
                 max: '0.9',
@@ -812,11 +835,11 @@
                 value: this.state.fieldValues.high_impact_mutn_threshold,
                 onChange: this.fieldChangeHandlers.high_impact_mutn_threshold,
             }), (parseFloat(this.state.fieldValues.high_impact_mutn_threshold) !== parseFloat(this.state.defaultValues.high_impact_mutn_threshold) ?
-                React.createElement('div', { className: 'new-job-view__not-default' }) :
-                null), React.createElement(Help, {
+                React__namespace.createElement('div', { className: 'new-job-view__not-default' }) :
+                null), React__namespace.createElement(Help, {
                 title: 'high_impact_mutn_threshold',
                 content: 'A somewhat arbitrary level must be selected for defining what constitutes a “measurable”, or “major”, mutation effect. MENDEL uses a default value for this cut-off of 0.10. This is because under realistic clinical conditions, it is questionable that we can reliably measure a single mutation’s fitness effect when it changes fitness by less than 10%.',
-            })), React.createElement('div', { className: 'new-job-view__field' }, React.createElement('label', {}, 'Maximum beneficial fitness effect'), React.createElement('input', {
+            })), React__namespace.createElement('div', { className: 'new-job-view__field' }, React__namespace.createElement('label', {}, 'Maximum beneficial fitness effect'), React__namespace.createElement('input', {
                 type: 'number',
                 min: '0',
                 max: '1',
@@ -825,12 +848,12 @@
                 value: this.state.fieldValues.max_fav_fitness_gain,
                 onChange: this.fieldChangeHandlers.max_fav_fitness_gain,
             }), (parseFloat(this.state.fieldValues.max_fav_fitness_gain) !== parseFloat(this.state.defaultValues.max_fav_fitness_gain) ?
-                React.createElement('div', { className: 'new-job-view__not-default' }) :
-                null), React.createElement(Help, {
+                React__namespace.createElement('div', { className: 'new-job-view__not-default' }) :
+                null), React__namespace.createElement(Help, {
                 title: 'max_fav_fitness_gain',
                 content: 'A realistic upper limit must be placed upon beneficial mutations. This is because a single nucleotide change can expand total biological functionality of an organism only to a limited degree. The larger the genome and the greater the total genomic information, the less a single nucleotide is likely to increase the total. Researchers must make a judgment for themselves of what is a reasonable maximal value for a single base change. The MENDEL default value for this limit is 0.01. This limit implies that a single point mutation can increase total biological functionality by as much as 1%.',
                 url: HELP_URL_PREFIX + 'rdbm',
-            })), React.createElement('div', { className: 'new-job-view__field' }, React.createElement('label', {}, 'Fraction recessive (rest dominant)'), React.createElement('input', {
+            })), React__namespace.createElement('div', { className: 'new-job-view__field' }, React__namespace.createElement('label', {}, 'Fraction recessive (rest dominant)'), React__namespace.createElement('input', {
                 type: 'number',
                 min: '0',
                 max: '1',
@@ -838,11 +861,11 @@
                 value: this.state.fieldValues.fraction_recessive,
                 onChange: this.fieldChangeHandlers.fraction_recessive,
             }), (parseFloat(this.state.fieldValues.fraction_recessive) !== parseFloat(this.state.defaultValues.fraction_recessive) ?
-                React.createElement('div', { className: 'new-job-view__not-default' }) :
-                null), React.createElement(Help, {
+                React__namespace.createElement('div', { className: 'new-job-view__not-default' }) :
+                null), React__namespace.createElement(Help, {
                 title: 'fraction_recessive',
                 content: 'This parameter simply specifies the percentage of mutations that are recessive. If set to 0.8, then 80% of mutations are recessive, so the remaining 20% will automatically be made dominant.',
-            })), React.createElement('div', { className: 'new-job-view__field' }, React.createElement('label', {}, 'Expression of recessive mutations (in heterozygote)'), React.createElement('input', {
+            })), React__namespace.createElement('div', { className: 'new-job-view__field' }, React__namespace.createElement('label', {}, 'Expression of recessive mutations (in heterozygote)'), React__namespace.createElement('input', {
                 type: 'number',
                 min: '0',
                 max: '0.5',
@@ -850,11 +873,11 @@
                 value: this.state.fieldValues.recessive_hetero_expression,
                 onChange: this.fieldChangeHandlers.recessive_hetero_expression,
             }), (parseFloat(this.state.fieldValues.recessive_hetero_expression) !== parseFloat(this.state.defaultValues.recessive_hetero_expression) ?
-                React.createElement('div', { className: 'new-job-view__not-default' }) :
-                null), React.createElement(Help, {
+                React__namespace.createElement('div', { className: 'new-job-view__not-default' }) :
+                null), React__namespace.createElement(Help, {
                 title: 'recessive_hetero_expression',
                 content: 'It is widely believed that recessive mutations are not completely silent in the heterozygous condition, but are still expressed at some low level. Although the co-dominance value is 0.5 expression, a reasonable setting would be 0.05.',
-            })), React.createElement('div', { className: 'new-job-view__field' }, React.createElement('label', {}, 'Expression of dominant mutations (in heterozygote)'), React.createElement('input', {
+            })), React__namespace.createElement('div', { className: 'new-job-view__field' }, React__namespace.createElement('label', {}, 'Expression of dominant mutations (in heterozygote)'), React__namespace.createElement('input', {
                 type: 'number',
                 min: '0.5',
                 max: '1',
@@ -862,16 +885,16 @@
                 value: this.state.fieldValues.dominant_hetero_expression,
                 onChange: this.fieldChangeHandlers.dominant_hetero_expression,
             }), (parseFloat(this.state.fieldValues.dominant_hetero_expression) !== parseFloat(this.state.defaultValues.dominant_hetero_expression) ?
-                React.createElement('div', { className: 'new-job-view__not-default' }) :
-                null), React.createElement(Help, {
+                React__namespace.createElement('div', { className: 'new-job-view__not-default' }) :
+                null), React__namespace.createElement(Help, {
                 title: 'dominant_hetero_expression',
                 content: 'It is widely believed that dominant mutations are not completely dominant in the heterozygous condition, but are only expressed only at some very high level. Although the co-dominance value is 0.5, a reasonable setting would be 0.95.',
-            })), React.createElement('div', { className: 'new-job-view__form-section-title' }, 'Selection'), React.createElement('div', { className: 'new-job-view__field' }, React.createElement('label', {}, 'Selection model'), React.createElement('select', {
+            })), React__namespace.createElement('div', { className: 'new-job-view__form-section-title' }, 'Selection'), React__namespace.createElement('div', { className: 'new-job-view__field' }, React__namespace.createElement('label', {}, 'Selection model'), React__namespace.createElement('select', {
                 value: this.state.fieldValues.selection_model,
                 onChange: this.fieldChangeHandlers.selection_model,
-            }, React.createElement('option', { value: 'fulltrunc' }, 'Full truncation'), React.createElement('option', { value: 'ups' }, 'Unrestricted probability selection'), React.createElement('option', { value: 'spps' }, 'Strict proportionality probability selection (default)'), React.createElement('option', { value: 'partialtrunc' }, 'Partial truncation')), (this.state.fieldValues.selection_model !== this.state.defaultValues.selection_model ?
-                React.createElement('div', { className: 'new-job-view__not-default' }) :
-                null)), React.createElement('div', { className: 'new-job-view__field' }, React.createElement('label', {}, 'Heritability'), React.createElement('input', {
+            }, React__namespace.createElement('option', { value: 'fulltrunc' }, 'Full truncation'), React__namespace.createElement('option', { value: 'ups' }, 'Unrestricted probability selection'), React__namespace.createElement('option', { value: 'spps' }, 'Strict proportionality probability selection (default)'), React__namespace.createElement('option', { value: 'partialtrunc' }, 'Partial truncation')), (this.state.fieldValues.selection_model !== this.state.defaultValues.selection_model ?
+                React__namespace.createElement('div', { className: 'new-job-view__not-default' }) :
+                null)), React__namespace.createElement('div', { className: 'new-job-view__field' }, React__namespace.createElement('label', {}, 'Heritability'), React__namespace.createElement('input', {
                 type: 'number',
                 min: '0',
                 max: '1',
@@ -879,11 +902,11 @@
                 value: this.state.fieldValues.heritability,
                 onChange: this.fieldChangeHandlers.heritability,
             }), (parseFloat(this.state.fieldValues.heritability) !== parseFloat(this.state.defaultValues.heritability) ?
-                React.createElement('div', { className: 'new-job-view__not-default' }) :
-                null), React.createElement(Help, {
+                React__namespace.createElement('div', { className: 'new-job-view__not-default' }) :
+                null), React__namespace.createElement(Help, {
                 title: 'heritability',
                 content: 'Because a large part of phenotypic performance is affected by an individual’s circumstances (the “environment”), selection in nature is less effective than would be predicted simply from genotypic fitness values. Non-heritable environmental effects on phenotypic performance must be modeled realistically. A heritability value of 0.2 implies that on average, only 20% of an individual’s phenotypic performance is passed on to the next generation, with the rest being due to non-heritable factors. For a very general character such as reproductive fitness, 0.2 is an extremely generous heritability value. In most field contexts, it is in fact usually lower than this, typically being below the limit of detection.',
-            })), React.createElement('div', { className: 'new-job-view__field' }, React.createElement('label', {}, 'Non-scaling noise'), React.createElement('input', {
+            })), React__namespace.createElement('div', { className: 'new-job-view__field' }, React__namespace.createElement('label', {}, 'Non-scaling noise'), React__namespace.createElement('input', {
                 type: 'number',
                 min: '0',
                 max: '1',
@@ -891,12 +914,12 @@
                 value: this.state.fieldValues.non_scaling_noise,
                 onChange: this.fieldChangeHandlers.non_scaling_noise,
             }), (parseFloat(this.state.fieldValues.non_scaling_noise) !== parseFloat(this.state.defaultValues.non_scaling_noise) ?
-                React.createElement('div', { className: 'new-job-view__not-default' }) :
-                null), React.createElement(Help, {
+                React__namespace.createElement('div', { className: 'new-job-view__not-default' }) :
+                null), React__namespace.createElement(Help, {
                 title: 'non_scaling_noise',
                 content: 'If a population’s fitness is increasing or declining, heritability (as calculated in the normal way), tends to scale with fitness, and so the implied “environmental noise” diminishes or increases as fitness diminishes or increases. This seems counter-intuitive. Also, with truncation selection, phenotypic variance becomes un-naturally small. For these reasons, it is desirable to model a component of environmental noise that does not scale with fitness variation. The units for this non-scaling noise parameter are based upon standard deviations from the initial fitness of 1.0. For simplicity, a reasonable value is 0.05, but reasonable values probably exceed 0.01 and might exceed 0.1.',
                 url: HELP_URL_PREFIX + 'nsn',
-            })), React.createElement('div', { className: 'new-job-view__field' }, React.createElement('label', {}, 'For Partial Truncation: partial truncation value'), React.createElement('input', {
+            })), React__namespace.createElement('div', { className: 'new-job-view__field' }, React__namespace.createElement('label', {}, 'For Partial Truncation: partial truncation value'), React__namespace.createElement('input', {
                 type: 'number',
                 min: '0',
                 max: '1',
@@ -905,11 +928,11 @@
                 value: this.state.fieldValues.partial_truncation_value,
                 onChange: this.fieldChangeHandlers.partial_truncation_value,
             }), (parseFloat(this.state.fieldValues.partial_truncation_value) !== parseFloat(this.state.defaultValues.partial_truncation_value) ?
-                React.createElement('div', { className: 'new-job-view__not-default' }) :
-                null), React.createElement(Help, {
+                React__namespace.createElement('div', { className: 'new-job-view__not-default' }) :
+                null), React__namespace.createElement(Help, {
                 title: 'partial_truncation_value',
                 content: 'Used in Parial Truncation selection, an individuals fitness is divided by: partial_truncation_value + (1. - partial_truncation_value)*randomnum(1).',
-            })), React.createElement('div', { className: 'new-job-view__form-section-title' }, 'Population'), React.createElement('div', { className: 'new-job-view__field' }, React.createElement('label', {}, 'Reproductive rate'), React.createElement('input', {
+            })), React__namespace.createElement('div', { className: 'new-job-view__form-section-title' }, 'Population'), React__namespace.createElement('div', { className: 'new-job-view__field' }, React__namespace.createElement('label', {}, 'Reproductive rate'), React__namespace.createElement('input', {
                 type: 'number',
                 min: '1',
                 max: '25',
@@ -917,27 +940,27 @@
                 value: this.state.fieldValues.reproductive_rate,
                 onChange: this.fieldChangeHandlers.reproductive_rate,
             }), (parseFloat(this.state.fieldValues.reproductive_rate) !== parseFloat(this.state.defaultValues.reproductive_rate) ?
-                React.createElement('div', { className: 'new-job-view__not-default' }) :
-                null), React.createElement(Help, {
+                React__namespace.createElement('div', { className: 'new-job-view__not-default' }) :
+                null), React__namespace.createElement(Help, {
                 title: 'reproductive_rate',
                 content: 'This is the number of offspring per reproducing individual. When population size is constant, this variable defines the maximum amount of selection. There must be an average of at least one offspring per individual (after the selection process) for the population to maintain its size and avoid rapid extinction. Except where random death is considered, the entire surplus population is removed based upon phenotypic selection. The typical value for humans is two offspring per selected individual (or four offspring per reproducing female).',
-            })), React.createElement('div', { className: 'new-job-view__field' }, React.createElement('label', {}, 'Num offspring model'), React.createElement('select', {
+            })), React__namespace.createElement('div', { className: 'new-job-view__field' }, React__namespace.createElement('label', {}, 'Num offspring model'), React__namespace.createElement('select', {
                 value: this.state.fieldValues.num_offspring_model,
                 onChange: this.fieldChangeHandlers.num_offspring_model,
-            }, React.createElement('option', { value: 'uniform' }, 'Uniform'), React.createElement('option', { value: 'fixed' }, 'Fixed (default)')), (this.state.fieldValues.num_offspring_model !== this.state.defaultValues.num_offspring_model ?
-                React.createElement('div', { className: 'new-job-view__not-default' }) :
-                null), React.createElement(Help, {
+            }, React__namespace.createElement('option', { value: 'uniform' }, 'Uniform'), React__namespace.createElement('option', { value: 'fixed' }, 'Fixed (default)')), (this.state.fieldValues.num_offspring_model !== this.state.defaultValues.num_offspring_model ?
+                React__namespace.createElement('div', { className: 'new-job-view__not-default' }) :
+                null), React__namespace.createElement(Help, {
                 title: 'num_offspring_model',
                 content: 'Choices: "fixed" - reproductive_rate rounded to the nearest integer, or "uniform" - an even distribution such that the mean is reproductive_rate',
-            })), React.createElement('div', { className: 'new-job-view__field' }, React.createElement('label', {}, 'Crossover model'), React.createElement('select', {
+            })), React__namespace.createElement('div', { className: 'new-job-view__field' }, React__namespace.createElement('label', {}, 'Crossover model'), React__namespace.createElement('select', {
                 value: this.state.fieldValues.crossover_model,
                 onChange: this.fieldChangeHandlers.crossover_model,
-            }, React.createElement('option', { value: 'none' }, 'None'), React.createElement('option', { value: 'partial' }, 'Partial (default)'), React.createElement('option', { value: 'full' }, 'Full')), (this.state.fieldValues.crossover_model !== this.state.defaultValues.crossover_model ?
-                React.createElement('div', { className: 'new-job-view__not-default' }) :
-                null), React.createElement(Help, {
+            }, React__namespace.createElement('option', { value: 'none' }, 'None'), React__namespace.createElement('option', { value: 'partial' }, 'Partial (default)'), React__namespace.createElement('option', { value: 'full' }, 'Full')), (this.state.fieldValues.crossover_model !== this.state.defaultValues.crossover_model ?
+                React__namespace.createElement('div', { className: 'new-job-view__not-default' }) :
+                null), React__namespace.createElement(Help, {
                 title: 'crossover_model',
                 content: 'Choices: "partial" - mean_num_crossovers per chromosome pair, "none" - no crossover, or "full" - each LB has a 50/50 chance of coming from dad or mom',
-            })), React.createElement('div', { className: 'new-job-view__field new-job-view--indented' }, React.createElement('label', {}, 'For Partial: Mean crossovers per chromosome pair'), React.createElement('input', {
+            })), React__namespace.createElement('div', { className: 'new-job-view__field new-job-view--indented' }, React__namespace.createElement('label', {}, 'For Partial: Mean crossovers per chromosome pair'), React__namespace.createElement('input', {
                 type: 'number',
                 min: '0',
                 max: '100',
@@ -946,11 +969,11 @@
                 value: this.state.fieldValues.mean_num_crossovers,
                 onChange: this.fieldChangeHandlers.mean_num_crossovers,
             }), (parseInt(this.state.fieldValues.mean_num_crossovers) !== parseInt(this.state.defaultValues.mean_num_crossovers) ?
-                React.createElement('div', { className: 'new-job-view__not-default' }) :
-                null), React.createElement(Help, {
+                React__namespace.createElement('div', { className: 'new-job-view__not-default' }) :
+                null), React__namespace.createElement(Help, {
                 title: 'mean_num_crossovers',
                 content: 'Used only for crossover_model=partial. The average number of crossovers per chromosome PAIR during Meiosis 1 Metaphase.',
-            })), React.createElement('div', { className: 'new-job-view__field' }, React.createElement('label', {}, 'Haploid chromosome number'), React.createElement('input', {
+            })), React__namespace.createElement('div', { className: 'new-job-view__field' }, React__namespace.createElement('label', {}, 'Haploid chromosome number'), React__namespace.createElement('input', {
                 type: 'number',
                 min: '1',
                 max: '100',
@@ -958,11 +981,11 @@
                 value: this.state.fieldValues.haploid_chromosome_number,
                 onChange: this.fieldChangeHandlers.haploid_chromosome_number,
             }), (parseInt(this.state.fieldValues.haploid_chromosome_number) !== parseInt(this.state.defaultValues.haploid_chromosome_number) ?
-                React.createElement('div', { className: 'new-job-view__not-default' }) :
-                null), React.createElement(Help, {
+                React__namespace.createElement('div', { className: 'new-job-view__not-default' }) :
+                null), React__namespace.createElement(Help, {
                 title: 'haploid_chromosome_number',
                 content: 'The number of linkage blocks is evenly distributed over a user-specified haploid number of chromosomes (default=23).',
-            })), React.createElement('div', { className: 'new-job-view__field' }, React.createElement('label', {}, 'Number of linkage subunits per individual'), React.createElement('input', {
+            })), React__namespace.createElement('div', { className: 'new-job-view__field' }, React__namespace.createElement('label', {}, 'Number of linkage subunits per individual'), React__namespace.createElement('input', {
                 type: 'number',
                 min: '1',
                 max: '100000',
@@ -970,11 +993,11 @@
                 value: this.state.fieldValues.num_linkage_subunits,
                 onChange: this.fieldChangeHandlers.num_linkage_subunits,
             }), (parseInt(this.state.fieldValues.num_linkage_subunits) !== parseInt(this.state.defaultValues.num_linkage_subunits) ?
-                React.createElement('div', { className: 'new-job-view__not-default' }) :
-                null), React.createElement(Help, {
+                React__namespace.createElement('div', { className: 'new-job-view__not-default' }) :
+                null), React__namespace.createElement(Help, {
                 title: 'num_linkage_subunits',
                 content: 'The number of linkage blocks. The number of linkage blocks should be an integer multiple of the number of chromosome (e.g. the default value of 989 is 43 times the default 23 chromosomes).',
-            })), React.createElement('div', { className: 'new-job-view__field' }, React.createElement('label', {}, 'Number of initial contrasting alleles per individual'), React.createElement('input', {
+            })), React__namespace.createElement('div', { className: 'new-job-view__field' }, React__namespace.createElement('label', {}, 'Number of initial contrasting alleles per individual'), React__namespace.createElement('input', {
                 type: 'number',
                 min: '0',
                 max: '1000000000',
@@ -982,11 +1005,11 @@
                 value: this.state.fieldValues.num_contrasting_alleles,
                 onChange: this.fieldChangeHandlers.num_contrasting_alleles,
             }), (parseInt(this.state.fieldValues.num_contrasting_alleles) !== parseInt(this.state.defaultValues.num_contrasting_alleles) ?
-                React.createElement('div', { className: 'new-job-view__not-default' }) :
-                null), React.createElement(Help, {
+                React__namespace.createElement('div', { className: 'new-job-view__not-default' }) :
+                null), React__namespace.createElement(Help, {
                 title: 'num_contrasting_alleles',
                 content: 'Number of initial contrasting alleles (pairs) given to each individual. Used to start the population with pre-existing diversity.',
-            })), React.createElement('div', { className: 'new-job-view__field new-job-view--indented' }, React.createElement('label', {}, 'The total fitness effect of all of the favorable initial alleles in an individual'), React.createElement('input', {
+            })), React__namespace.createElement('div', { className: 'new-job-view__field new-job-view--indented' }, React__namespace.createElement('label', {}, 'The total fitness effect of all of the favorable initial alleles in an individual'), React__namespace.createElement('input', {
                 type: 'number',
                 min: '0',
                 max: '100000',
@@ -995,20 +1018,20 @@
                 value: this.state.fieldValues.max_total_fitness_increase,
                 onChange: this.fieldChangeHandlers.max_total_fitness_increase,
             }), (parseFloat(this.state.fieldValues.max_total_fitness_increase) !== parseFloat(this.state.defaultValues.max_total_fitness_increase) ?
-                React.createElement('div', { className: 'new-job-view__not-default' }) :
-                null), React.createElement(Help, {
+                React__namespace.createElement('div', { className: 'new-job-view__not-default' }) :
+                null), React__namespace.createElement(Help, {
                 title: 'max_total_fitness_increase',
                 content: 'Used along with num_contrasting_alleles to set the total fitness effect of all of the favorable initial alleles in an individual.',
-            })), React.createElement('div', { className: 'new-job-view__field new-job-view--indented' }, React.createElement('label', {}, 'Initial Alleles model'), React.createElement('select', {
+            })), React__namespace.createElement('div', { className: 'new-job-view__field new-job-view--indented' }, React__namespace.createElement('label', {}, 'Initial Alleles model'), React__namespace.createElement('select', {
                 disabled: parseFloat(this.state.fieldValues.num_contrasting_alleles) === 0,
                 value: this.state.fieldValues.initial_allele_fitness_model,
                 onChange: this.fieldChangeHandlers.initial_allele_fitness_model,
-            }, React.createElement('option', { value: 'variablefreq' }, 'Variable Frequencies (default)'), React.createElement('option', { value: 'allunique' }, 'All Unique Alleles')), (this.state.fieldValues.initial_allele_fitness_model !== this.state.defaultValues.initial_allele_fitness_model ?
-                React.createElement('div', { className: 'new-job-view__not-default' }) :
-                null), React.createElement(Help, {
+            }, React__namespace.createElement('option', { value: 'variablefreq' }, 'Variable Frequencies (default)'), React__namespace.createElement('option', { value: 'allunique' }, 'All Unique Alleles')), (this.state.fieldValues.initial_allele_fitness_model !== this.state.defaultValues.initial_allele_fitness_model ?
+                React__namespace.createElement('div', { className: 'new-job-view__not-default' }) :
+                null), React__namespace.createElement(Help, {
                 title: 'initial_allele_fitness_model',
                 content: 'Choices: "variablefreq" - different frequenceis for different fraction of the alleles like 0.25:0.1, 0.5:0.25, 0.25:0.5, "allunique" - unique allele pairs in every indiv',
-            })), React.createElement('div', { className: 'new-job-view__field new-job-view--indented' }, React.createElement('label', {}, 'For All Unique: Fraction of the population with initial alleles'), React.createElement('input', {
+            })), React__namespace.createElement('div', { className: 'new-job-view__field new-job-view--indented' }, React__namespace.createElement('label', {}, 'For All Unique: Fraction of the population with initial alleles'), React__namespace.createElement('input', {
                 type: 'number',
                 min: '0',
                 max: '1',
@@ -1018,30 +1041,30 @@
                 value: this.state.fieldValues.initial_alleles_pop_frac,
                 onChange: this.fieldChangeHandlers.initial_alleles_pop_frac,
             }), (parseFloat(this.state.fieldValues.initial_alleles_pop_frac) !== parseFloat(this.state.defaultValues.initial_alleles_pop_frac) ?
-                React.createElement('div', { className: 'new-job-view__not-default' }) :
-                null), React.createElement(Help, {
+                React__namespace.createElement('div', { className: 'new-job-view__not-default' }) :
+                null), React__namespace.createElement(Help, {
                 title: 'initial_alleles_pop_frac',
                 content: 'Used for All Unique model along with num_contrasting_alleles to set the fraction of the initial population that should have num_contrasting_alleles alleles',
-            })), React.createElement('div', { className: 'new-job-view__field new-job-view--indented' }, React.createElement('label', {}, 'For Variable Frequencies: alleleFraction1:frequency1, alleleFraction2:frequency2, ...'), React.createElement('input', {
+            })), React__namespace.createElement('div', { className: 'new-job-view__field new-job-view--indented' }, React__namespace.createElement('label', {}, 'For Variable Frequencies: alleleFraction1:frequency1, alleleFraction2:frequency2, ...'), React__namespace.createElement('input', {
                 type: 'text',
                 disabled: (parseFloat(this.state.fieldValues.num_contrasting_alleles) === 0 ||
                     this.state.fieldValues.initial_allele_fitness_model === 'allunique'),
                 value: this.state.fieldValues.initial_alleles_frequencies,
                 onChange: this.fieldChangeHandlers.initial_alleles_frequencies,
             }), (this.state.fieldValues.initial_alleles_frequencies !== this.state.defaultValues.initial_alleles_frequencies ?
-                React.createElement('div', { className: 'new-job-view__not-default' }) :
-                null), React.createElement(Help, {
+                React__namespace.createElement('div', { className: 'new-job-view__not-default' }) :
+                null), React__namespace.createElement(Help, {
                 title: 'initial_alleles_frequencies',
                 content: 'Used for Variable Frequencies model along with num_contrasting_alleles to define portions of the total num_contrasting_alleles alleles and what frequency each should have',
-            })), React.createElement('div', { className: 'new-job-view__field' }, React.createElement('label', {}, 'Population growth model'), React.createElement('select', {
+            })), React__namespace.createElement('div', { className: 'new-job-view__field' }, React__namespace.createElement('label', {}, 'Population growth model'), React__namespace.createElement('select', {
                 value: this.state.fieldValues.pop_growth_model,
                 onChange: this.fieldChangeHandlers.pop_growth_model,
-            }, React.createElement('option', { value: 'none' }, 'None (default)'), React.createElement('option', { value: 'exponential' }, 'Exponential'), React.createElement('option', { value: 'capacity' }, 'Carrying capacity'), React.createElement('option', { value: 'founders' }, 'Founders effect'), React.createElement('option', { value: 'multi-bottleneck' }, 'Multiple bottlenecks')), (this.state.fieldValues.pop_growth_model !== this.state.defaultValues.pop_growth_model ?
-                React.createElement('div', { className: 'new-job-view__not-default' }) :
-                null), React.createElement(Help, {
+            }, React__namespace.createElement('option', { value: 'none' }, 'None (default)'), React__namespace.createElement('option', { value: 'exponential' }, 'Exponential'), React__namespace.createElement('option', { value: 'capacity' }, 'Carrying capacity'), React__namespace.createElement('option', { value: 'founders' }, 'Founders effect'), React__namespace.createElement('option', { value: 'multi-bottleneck' }, 'Multiple bottlenecks')), (this.state.fieldValues.pop_growth_model !== this.state.defaultValues.pop_growth_model ?
+                React__namespace.createElement('div', { className: 'new-job-view__not-default' }) :
+                null), React__namespace.createElement(Help, {
                 title: 'pop_growth_model',
                 content: 'Choices: "none" - no population growth, "exponential" - exponential growth model until max pop or number of generations, "capacity" - pop growth to asymptotically approach the pop carrying capacity, "founders" - exponential growth until bottleneck generations, a 2nd exponential growth rate after bottleneck until the carrying capacity or number of generations is reached, "multi-bottleneck" - like founders except an arbitrary number of comma-separated 5-tuples growth-rate:max-pop:bottle-start:bottle-size:bottle-gens',
-            })), React.createElement('div', { className: 'new-job-view__field new-job-view--indented' }, React.createElement('label', {}, 'Population growth rate each generation'), React.createElement('input', {
+            })), React__namespace.createElement('div', { className: 'new-job-view__field new-job-view--indented' }, React__namespace.createElement('label', {}, 'Population growth rate each generation'), React__namespace.createElement('input', {
                 type: 'number',
                 min: '0',
                 max: '10',
@@ -1051,11 +1074,11 @@
                 value: this.state.fieldValues.pop_growth_rate,
                 onChange: this.fieldChangeHandlers.pop_growth_rate,
             }), (parseFloat(this.state.fieldValues.pop_growth_rate) !== parseFloat(this.state.defaultValues.pop_growth_rate) ?
-                React.createElement('div', { className: 'new-job-view__not-default' }) :
-                null), React.createElement(Help, {
+                React__namespace.createElement('div', { className: 'new-job-view__not-default' }) :
+                null), React__namespace.createElement(Help, {
                 title: 'pop_growth_rate',
                 content: 'Population growth rate each generation (e.g. 1.05 is 5% increase). Used for pop_growth_model==Exponential, Carrying capacity, and Founders effect.',
-            })), React.createElement('div', { className: 'new-job-view__field new-job-view--indented' }, React.createElement('label', {}, 'For Founders: Population growth rate after the bottleneck'), React.createElement('input', {
+            })), React__namespace.createElement('div', { className: 'new-job-view__field new-job-view--indented' }, React__namespace.createElement('label', {}, 'For Founders: Population growth rate after the bottleneck'), React__namespace.createElement('input', {
                 type: 'number',
                 min: '0',
                 max: '10',
@@ -1064,11 +1087,11 @@
                 value: this.state.fieldValues.pop_growth_rate2,
                 onChange: this.fieldChangeHandlers.pop_growth_rate2,
             }), (parseFloat(this.state.fieldValues.pop_growth_rate2) !== parseFloat(this.state.defaultValues.pop_growth_rate2) ?
-                React.createElement('div', { className: 'new-job-view__not-default' }) :
-                null), React.createElement(Help, {
+                React__namespace.createElement('div', { className: 'new-job-view__not-default' }) :
+                null), React__namespace.createElement(Help, {
                 title: 'pop_growth_rate2',
                 content: 'Population growth rate after the population bottleneck. Used for pop_growth_model==Founders effect.',
-            })), React.createElement('div', { className: 'new-job-view__field new-job-view--indented' }, React.createElement('label', {}, 'For Exponential: Maximum population size'), React.createElement('input', {
+            })), React__namespace.createElement('div', { className: 'new-job-view__field new-job-view--indented' }, React__namespace.createElement('label', {}, 'For Exponential: Maximum population size'), React__namespace.createElement('input', {
                 type: 'number',
                 min: '0',
                 max: '100000',
@@ -1077,11 +1100,11 @@
                 value: this.state.fieldValues.max_pop_size,
                 onChange: this.fieldChangeHandlers.max_pop_size,
             }), (parseInt(this.state.fieldValues.max_pop_size) !== parseInt(this.state.defaultValues.max_pop_size) ?
-                React.createElement('div', { className: 'new-job-view__not-default' }) :
-                null), React.createElement(Help, {
+                React__namespace.createElement('div', { className: 'new-job-view__not-default' }) :
+                null), React__namespace.createElement(Help, {
                 title: 'max_pop_size',
                 content: 'The run will stop when this population size is reached or num_generations is reached, whichever comes first. Set to 0 for no max. Used for pop_growth_model==exponential.',
-            })), React.createElement('div', { className: 'new-job-view__field new-job-view--indented' }, React.createElement('label', {}, 'Population carrying capacity'), React.createElement('input', {
+            })), React__namespace.createElement('div', { className: 'new-job-view__field new-job-view--indented' }, React__namespace.createElement('label', {}, 'Population carrying capacity'), React__namespace.createElement('input', {
                 type: 'number',
                 min: '10',
                 max: '100000',
@@ -1092,12 +1115,12 @@
                 value: this.state.fieldValues.carrying_capacity,
                 onChange: this.fieldChangeHandlers.carrying_capacity,
             }), (parseInt(this.state.fieldValues.carrying_capacity) !== parseInt(this.state.defaultValues.carrying_capacity) ?
-                React.createElement('div', { className: 'new-job-view__not-default' }) :
-                null), React.createElement(Help, {
+                React__namespace.createElement('div', { className: 'new-job-view__not-default' }) :
+                null), React__namespace.createElement(Help, {
                 title: 'carrying_capacity',
                 content: 'The limit that the population size should approach. Used for pop_growth_model==Carrying capacity and Founders effect.',
                 url: 'https://en.wikipedia.org/wiki/Carrying_capacity',
-            })), React.createElement('div', { className: 'new-job-view__field new-job-view--indented' }, React.createElement('label', {}, 'Generation number of a population bottleneck'), React.createElement('input', {
+            })), React__namespace.createElement('div', { className: 'new-job-view__field new-job-view--indented' }, React__namespace.createElement('label', {}, 'Generation number of a population bottleneck'), React__namespace.createElement('input', {
                 type: 'number',
                 min: '0',
                 max: '100000',
@@ -1106,11 +1129,11 @@
                 value: this.state.fieldValues.bottleneck_generation,
                 onChange: this.fieldChangeHandlers.bottleneck_generation,
             }), (parseInt(this.state.fieldValues.bottleneck_generation) !== parseInt(this.state.defaultValues.bottleneck_generation) ?
-                React.createElement('div', { className: 'new-job-view__not-default' }) :
-                null), React.createElement(Help, {
+                React__namespace.createElement('div', { className: 'new-job-view__not-default' }) :
+                null), React__namespace.createElement(Help, {
                 title: 'bottleneck_generation',
                 content: 'The generation number at which the population size bottleneck should start. Use 0 for no bottleneck. Currently only used for pop_growth_model==founders',
-            })), React.createElement('div', { className: 'new-job-view__field new-job-view--indented' }, React.createElement('label', {}, 'The population size during the bottleneck'), React.createElement('input', {
+            })), React__namespace.createElement('div', { className: 'new-job-view__field new-job-view--indented' }, React__namespace.createElement('label', {}, 'The population size during the bottleneck'), React__namespace.createElement('input', {
                 type: 'number',
                 min: '0',
                 max: '100000',
@@ -1119,8 +1142,8 @@
                 value: this.state.fieldValues.bottleneck_pop_size,
                 onChange: this.fieldChangeHandlers.bottleneck_pop_size,
             }), (parseInt(this.state.fieldValues.bottleneck_pop_size) !== parseInt(this.state.defaultValues.bottleneck_pop_size) ?
-                React.createElement('div', { className: 'new-job-view__not-default' }) :
-                null)), React.createElement('div', { className: 'new-job-view__field new-job-view--indented' }, React.createElement('label', {}, 'The number of generations the bottleneck should last'), React.createElement('input', {
+                React__namespace.createElement('div', { className: 'new-job-view__not-default' }) :
+                null)), React__namespace.createElement('div', { className: 'new-job-view__field new-job-view--indented' }, React__namespace.createElement('label', {}, 'The number of generations the bottleneck should last'), React__namespace.createElement('input', {
                 type: 'number',
                 min: '0',
                 max: '100000',
@@ -1129,18 +1152,18 @@
                 value: this.state.fieldValues.num_bottleneck_generations,
                 onChange: this.fieldChangeHandlers.num_bottleneck_generations,
             }), (parseInt(this.state.fieldValues.num_bottleneck_generations) !== parseInt(this.state.defaultValues.num_bottleneck_generations) ?
-                React.createElement('div', { className: 'new-job-view__not-default' }) :
-                null)), React.createElement('div', { className: 'new-job-view__field new-job-view--indented' }, React.createElement('label', {}, 'For Multiple Bottlenecks: growth-rate:max-pop:bottle-start:bottle-size:bottle-gens, …'), React.createElement('input', {
+                React__namespace.createElement('div', { className: 'new-job-view__not-default' }) :
+                null)), React__namespace.createElement('div', { className: 'new-job-view__field new-job-view--indented' }, React__namespace.createElement('label', {}, 'For Multiple Bottlenecks: growth-rate:max-pop:bottle-start:bottle-size:bottle-gens, …'), React__namespace.createElement('input', {
                 type: 'text',
                 disabled: this.state.fieldValues.pop_growth_model !== 'multi-bottleneck',
                 value: this.state.fieldValues.multiple_bottlenecks,
                 onChange: this.fieldChangeHandlers.multiple_bottlenecks,
             }), (this.state.fieldValues.multiple_bottlenecks !== this.state.defaultValues.multiple_bottlenecks ?
-                React.createElement('div', { className: 'new-job-view__not-default' }) :
-                null), React.createElement(Help, {
+                React__namespace.createElement('div', { className: 'new-job-view__not-default' }) :
+                null), React__namespace.createElement(Help, {
                 title: 'multiple_bottlenecks',
                 content: 'Used for Multiple Bottlenecks population growth model, instead of any of the other population growth and bottleneck parameters.',
-            })), React.createElement('div', { className: 'new-job-view__form-section-title' }, 'Tribes'), React.createElement('div', { className: 'new-job-view__field' }, React.createElement('label', {}, 'The number of tribes, i.e. separate populations (experimental)'), React.createElement('input', {
+            })), React__namespace.createElement('div', { className: 'new-job-view__form-section-title' }, 'Tribes'), React__namespace.createElement('div', { className: 'new-job-view__field' }, React__namespace.createElement('label', {}, 'The number of tribes, i.e. separate populations (experimental)'), React__namespace.createElement('input', {
                 type: 'number',
                 min: '1',
                 max: '100000',
@@ -1148,35 +1171,35 @@
                 value: this.state.fieldValues.num_tribes,
                 onChange: this.fieldChangeHandlers.num_tribes,
             }), (parseInt(this.state.fieldValues.num_tribes) !== parseInt(this.state.defaultValues.num_tribes) ?
-                React.createElement('div', { className: 'new-job-view__not-default' }) :
-                null), React.createElement(Help, {
+                React__namespace.createElement('div', { className: 'new-job-view__not-default' }) :
+                null), React__namespace.createElement(Help, {
                 title: 'num_tribes',
                 content: 'Tribes mate and evolve separately. Many tribes can exhaust system resources quickly.',
-            })), React.createElement('div', { className: 'new-job-view__form-section-title' }, 'Output Files'), React.createElement('div', { className: 'new-job-view__field' }, React.createElement('label', {}, 'mendel.fit'), React.createElement('div', { className: 'new-job-view__checkbox-wrapper' }, React.createElement(Checkbox, {
+            })), React__namespace.createElement('div', { className: 'new-job-view__form-section-title' }, 'Output Files'), React__namespace.createElement('div', { className: 'new-job-view__field' }, React__namespace.createElement('label', {}, 'mendel.fit'), React__namespace.createElement('div', { className: 'new-job-view__checkbox-wrapper' }, React__namespace.createElement(Checkbox, {
                 checked: this.state.fieldValues.files_to_output_fit,
                 onChange: this.fieldChangeHandlers.files_to_output_fit,
             })), (this.state.fieldValues.files_to_output_fit !== this.state.defaultValues.files_to_output_fit ?
-                React.createElement('div', { className: 'new-job-view__not-default' }) :
-                null), React.createElement(Help, {
+                React__namespace.createElement('div', { className: 'new-job-view__not-default' }) :
+                null), React__namespace.createElement(Help, {
                 title: 'files_to_output',
                 content: 'This contains data needed for the "Fitness History" plot.',
-            })), React.createElement('div', { className: 'new-job-view__field' }, React.createElement('label', {}, 'mendel.hst'), React.createElement('div', { className: 'new-job-view__checkbox-wrapper' }, React.createElement(Checkbox, {
+            })), React__namespace.createElement('div', { className: 'new-job-view__field' }, React__namespace.createElement('label', {}, 'mendel.hst'), React__namespace.createElement('div', { className: 'new-job-view__checkbox-wrapper' }, React__namespace.createElement(Checkbox, {
                 checked: this.state.fieldValues.files_to_output_hst,
                 onChange: this.fieldChangeHandlers.files_to_output_hst,
             })), (this.state.fieldValues.files_to_output_hst !== this.state.defaultValues.files_to_output_hst ?
-                React.createElement('div', { className: 'new-job-view__not-default' }) :
-                null), React.createElement(Help, {
+                React__namespace.createElement('div', { className: 'new-job-view__not-default' }) :
+                null), React__namespace.createElement(Help, {
                 title: 'files_to_output',
                 content: 'This contains data needed for the "Average Mutations/Individual" plot.',
-            })), React.createElement('div', { className: 'new-job-view__field' }, React.createElement('label', {}, 'Allele bin and distribution files'), React.createElement('div', { className: 'new-job-view__checkbox-wrapper' }, React.createElement(Checkbox, {
+            })), React__namespace.createElement('div', { className: 'new-job-view__field' }, React__namespace.createElement('label', {}, 'Allele bin and distribution files'), React__namespace.createElement('div', { className: 'new-job-view__checkbox-wrapper' }, React__namespace.createElement(Checkbox, {
                 checked: this.state.fieldValues.files_to_output_allele_bins,
                 onChange: this.fieldChangeHandlers.files_to_output_allele_bins,
             })), (this.state.fieldValues.files_to_output_allele_bins !== this.state.defaultValues.files_to_output_allele_bins ?
-                React.createElement('div', { className: 'new-job-view__not-default' }) :
-                null), React.createElement(Help, {
+                React__namespace.createElement('div', { className: 'new-job-view__not-default' }) :
+                null), React__namespace.createElement(Help, {
                 title: 'files_to_output',
                 content: 'This contains data needed for the "SNP Frequencies", "Minor Allele Frequencies", and allele distribution plots.',
-            })), React.createElement('div', { className: 'new-job-view__form-section-title' }, 'Computation'), React.createElement('div', { className: 'new-job-view__field' }, React.createElement('label', {}, 'Do not track mutations below this fitness effect'), React.createElement('input', {
+            })), React__namespace.createElement('div', { className: 'new-job-view__form-section-title' }, 'Computation'), React__namespace.createElement('div', { className: 'new-job-view__field' }, React__namespace.createElement('label', {}, 'Do not track mutations below this fitness effect'), React__namespace.createElement('input', {
                 type: 'number',
                 min: '0',
                 max: '10',
@@ -1185,19 +1208,19 @@
                 value: this.state.fieldValues.tracking_threshold,
                 onChange: this.fieldChangeHandlers.tracking_threshold,
             }), (parseFloat(this.state.fieldValues.tracking_threshold) !== parseFloat(this.state.defaultValues.tracking_threshold) ?
-                React.createElement('div', { className: 'new-job-view__not-default' }) :
-                null), React.createElement(Help, {
+                React__namespace.createElement('div', { className: 'new-job-view__not-default' }) :
+                null), React__namespace.createElement(Help, {
                 title: 'tracking_threshold',
                 content: 'Below this fitness effect value, near neutral mutations will be pooled into the cumulative fitness of the LB, instead of tracked individually. This saves on memory and computation time, but some stats will not be available. This value is automatically set to a high value if allele output is not requested, because there is no benefit to tracking in that case.',
-            })), React.createElement('div', { className: 'new-job-view__field' }, React.createElement('label', {}, 'Track neutral mutations'), React.createElement('div', { className: 'new-job-view__checkbox-wrapper' }, React.createElement(Checkbox, {
+            })), React__namespace.createElement('div', { className: 'new-job-view__field' }, React__namespace.createElement('label', {}, 'Track neutral mutations'), React__namespace.createElement('div', { className: 'new-job-view__checkbox-wrapper' }, React__namespace.createElement(Checkbox, {
                 checked: this.state.fieldValues.track_neutrals,
                 onChange: this.fieldChangeHandlers.track_neutrals,
             })), (this.state.fieldValues.track_neutrals !== this.state.defaultValues.track_neutrals ?
-                React.createElement('div', { className: 'new-job-view__not-default' }) :
-                null), React.createElement(Help, {
+                React__namespace.createElement('div', { className: 'new-job-view__not-default' }) :
+                null), React__namespace.createElement(Help, {
                 title: 'track_neutrals',
                 content: 'Checking this box will cause Mendel to track neutral mutations as long as tracking_threshold is also set to 0.0. This button must be checked if neutral mutations are to be simulated.',
-            })), React.createElement('div', { className: 'new-job-view__field' }, React.createElement('label', {}, 'End simulation if population fitness falls to this'), React.createElement('input', {
+            })), React__namespace.createElement('div', { className: 'new-job-view__field' }, React__namespace.createElement('label', {}, 'End simulation if population fitness falls to this'), React__namespace.createElement('input', {
                 type: 'number',
                 min: '0',
                 max: '1',
@@ -1205,11 +1228,11 @@
                 value: this.state.fieldValues.extinction_threshold,
                 onChange: this.fieldChangeHandlers.extinction_threshold,
             }), (parseFloat(this.state.fieldValues.extinction_threshold) !== parseFloat(this.state.defaultValues.extinction_threshold) ?
-                React.createElement('div', { className: 'new-job-view__not-default' }) :
-                null), React.createElement(Help, {
+                React__namespace.createElement('div', { className: 'new-job-view__not-default' }) :
+                null), React__namespace.createElement(Help, {
                 title: 'extinction_threshold',
                 content: 'If the mean fitness of the population falls to this value or below, it is considered mutational meltdown and the simulation is stopped.',
-            })), React.createElement('div', { className: 'new-job-view__field' }, React.createElement('label', {}, 'Plot alleles every n generations'), React.createElement('input', {
+            })), React__namespace.createElement('div', { className: 'new-job-view__field' }, React__namespace.createElement('label', {}, 'Plot alleles every n generations'), React__namespace.createElement('input', {
                 type: 'number',
                 min: '0',
                 max: '100000',
@@ -1218,20 +1241,20 @@
                 value: this.state.fieldValues.plot_allele_gens,
                 onChange: this.fieldChangeHandlers.plot_allele_gens,
             }), (parseInt(this.state.fieldValues.plot_allele_gens) !== parseInt(this.state.defaultValues.plot_allele_gens) ?
-                React.createElement('div', { className: 'new-job-view__not-default' }) :
-                null), React.createElement(Help, {
+                React__namespace.createElement('div', { className: 'new-job-view__not-default' }) :
+                null), React__namespace.createElement(Help, {
                 title: 'plot_allele_gens',
                 content: 'A value of 0 means only plot alleles for the last generation.',
-            })), React.createElement('div', { className: 'new-job-view__field' }, React.createElement('label', {}, 'Omit the 1st allele bin'), React.createElement('div', { className: 'new-job-view__checkbox-wrapper' }, React.createElement(Checkbox, {
+            })), React__namespace.createElement('div', { className: 'new-job-view__field' }, React__namespace.createElement('label', {}, 'Omit the 1st allele bin'), React__namespace.createElement('div', { className: 'new-job-view__checkbox-wrapper' }, React__namespace.createElement(Checkbox, {
                 disabled: !this.state.fieldValues.files_to_output_allele_bins,
                 checked: this.state.fieldValues.omit_first_allele_bin,
                 onChange: this.fieldChangeHandlers.omit_first_allele_bin,
             })), (this.state.fieldValues.omit_first_allele_bin !== this.state.defaultValues.omit_first_allele_bin ?
-                React.createElement('div', { className: 'new-job-view__not-default' }) :
-                null), React.createElement(Help, {
+                React__namespace.createElement('div', { className: 'new-job-view__not-default' }) :
+                null), React__namespace.createElement(Help, {
                 title: 'omit_first_allele_bin',
                 content: 'If checked, do not output the 0-1% allele bin for allele plots. This is consistent with the way most geneticists plot this data.',
-            })), React.createElement('div', { className: 'new-job-view__field' }, React.createElement('label', {}, 'The verbosity of the output'), React.createElement('input', {
+            })), React__namespace.createElement('div', { className: 'new-job-view__field' }, React__namespace.createElement('label', {}, 'The verbosity of the output'), React__namespace.createElement('input', {
                 type: 'number',
                 min: '0',
                 max: '100000',
@@ -1239,11 +1262,11 @@
                 value: this.state.fieldValues.verbosity,
                 onChange: this.fieldChangeHandlers.verbosity,
             }), (parseInt(this.state.fieldValues.verbosity) !== parseInt(this.state.defaultValues.verbosity) ?
-                React.createElement('div', { className: 'new-job-view__not-default' }) :
-                null), React.createElement(Help, {
+                React__namespace.createElement('div', { className: 'new-job-view__not-default' }) :
+                null), React__namespace.createElement(Help, {
                 title: 'verbosity',
                 content: 'A value of 1 is recommended. Higher values will output more information, but will also take longer to gather.',
-            })), React.createElement('div', { className: 'new-job-view__form-section-title' }, 'Advanced Options'), React.createElement('div', { className: 'new-job-view__field' }, React.createElement('label', {}, 'Random number generator (RNG) seed'), React.createElement('input', {
+            })), React__namespace.createElement('div', { className: 'new-job-view__form-section-title' }, 'Advanced Options'), React__namespace.createElement('div', { className: 'new-job-view__field' }, React__namespace.createElement('label', {}, 'Random number generator (RNG) seed'), React__namespace.createElement('input', {
                 type: 'number',
                 min: '-9223372036854775808',
                 max: '9223372036854775807',
@@ -1251,11 +1274,11 @@
                 value: this.state.fieldValues.random_number_seed,
                 onChange: this.fieldChangeHandlers.random_number_seed,
             }), (parseInt(this.state.fieldValues.random_number_seed) !== parseInt(this.state.defaultValues.random_number_seed) ?
-                React.createElement('div', { className: 'new-job-view__not-default' }) :
-                null), React.createElement(Help, {
+                React__namespace.createElement('div', { className: 'new-job-view__not-default' }) :
+                null), React__namespace.createElement(Help, {
                 title: 'random_number_seed',
                 content: 'At several stages within the MENDEL program, a random number generator is required. When an experiment needs to be independently replicated, the “random number seed” must be changed. If this is not done, the second experiment will be an exact duplicate of the earlier run. Or you can set this value to 0 and get a unique seed every time.',
-            })), React.createElement('div', { className: 'new-job-view__field' }, React.createElement('label', {}, 'Number of CPUs to use for the simulation'), React.createElement('input', {
+            })), React__namespace.createElement('div', { className: 'new-job-view__field' }, React__namespace.createElement('label', {}, 'Number of CPUs to use for the simulation'), React__namespace.createElement('input', {
                 type: 'number',
                 min: '0',
                 max: '100000',
@@ -1263,19 +1286,19 @@
                 value: this.state.fieldValues.num_threads,
                 onChange: this.fieldChangeHandlers.num_threads,
             }), (parseInt(this.state.fieldValues.num_threads) !== parseInt(this.state.defaultValues.num_threads) ?
-                React.createElement('div', { className: 'new-job-view__not-default' }) :
-                null), React.createElement(Help, {
+                React__namespace.createElement('div', { className: 'new-job-view__not-default' }) :
+                null), React__namespace.createElement(Help, {
                 title: 'num_threads',
                 content: 'The number of concurrent CPU threads that should be used in the simulation. If this is set to 0 (recommended) it will automatically use all available CPUs.',
-            })), React.createElement('div', { className: 'new-job-view__field' }, React.createElement('label', {}, 'Force system garbage collection each generation'), React.createElement('div', { className: 'new-job-view__checkbox-wrapper' }, React.createElement(Checkbox, {
+            })), React__namespace.createElement('div', { className: 'new-job-view__field' }, React__namespace.createElement('label', {}, 'Force system garbage collection each generation'), React__namespace.createElement('div', { className: 'new-job-view__checkbox-wrapper' }, React__namespace.createElement(Checkbox, {
                 checked: this.state.fieldValues.force_gc,
                 onChange: this.fieldChangeHandlers.force_gc,
             })), (this.state.fieldValues.force_gc !== this.state.defaultValues.force_gc ?
-                React.createElement('div', { className: 'new-job-view__not-default' }) :
-                null), React.createElement(Help, {
+                React__namespace.createElement('div', { className: 'new-job-view__not-default' }) :
+                null), React__namespace.createElement(Help, {
                 title: 'force_gc',
                 content: 'Check this box to explicitly run Go garbage collection after mating each generation. (Otherwise Go decides when to run gargage collection.) Setting this can cut memory usage, sometimes as much as 40%, but it also increases the run time.',
-            })), React.createElement('div', { className: 'new-job-view__field' }, React.createElement('label', {}, 'Run Go garbage collection during allele counting after this %'), React.createElement('input', {
+            })), React__namespace.createElement('div', { className: 'new-job-view__field' }, React__namespace.createElement('label', {}, 'Run Go garbage collection during allele counting after this %'), React__namespace.createElement('input', {
                 type: 'number',
                 min: '0',
                 max: '100000',
@@ -1283,11 +1306,11 @@
                 value: this.state.fieldValues.allele_count_gc_interval,
                 onChange: this.fieldChangeHandlers.allele_count_gc_interval,
             }), (parseInt(this.state.fieldValues.allele_count_gc_interval) !== parseInt(this.state.defaultValues.allele_count_gc_interval) ?
-                React.createElement('div', { className: 'new-job-view__not-default' }) :
-                null), React.createElement(Help, {
+                React__namespace.createElement('div', { className: 'new-job-view__not-default' }) :
+                null), React__namespace.createElement(Help, {
                 title: 'allele_count_gc_interval',
                 content: 'if 0 < n < 100 explicitly call Go garbage collection after counting this percent of individuals (with a min bound of 100 individuals and max bound of 500), or if n >= 100 call GC after counting alleles from this many individuals. This helps memory not balloon right at the end of a long run, but will take a little longer.',
-            })), React.createElement('div', { className: 'new-job-view__actions' }, React.createElement('input', { className: 'new-job-view__action button', type: 'submit', value: 'Start' }), React.createElement('div', { className: 'new-job-view__action button button--text', onClick: this.onImportClick }, 'Import'), React.createElement('div', { className: 'new-job-view__action button button--text', onClick: this.onExportClick }, 'Export'))));
+            })), React__namespace.createElement('div', { className: 'new-job-view__actions' }, React__namespace.createElement('input', { className: 'new-job-view__action button', type: 'submit', value: 'Start' }), React__namespace.createElement('div', { className: 'new-job-view__action button button--text', onClick: this.onImportClick }, 'Import'), React__namespace.createElement('div', { className: 'new-job-view__action button button--text', onClick: this.onExportClick }, 'Export'))));
         }
     }
     function stateToConfig(state) {
@@ -1483,26 +1506,26 @@
         };
         input.addEventListener('change', onChange, { once: true });
     }
-    const NewJob = ReactRedux.connect()(Component$2);
+    const NewJob = ReactRedux__namespace.connect()(Component$g);
 
-    class ConfirmationDialog extends React.Component {
+    class ConfirmationDialog extends React__namespace.Component {
         render() {
-            return React.createElement('div', { className: 'confirmation-dialog' }, React.createElement('div', { className: 'confirmation-dialog__overlay', onClick: this.props.onCancel }), React.createElement('div', { className: 'confirmation-dialog__content' }, React.createElement('div', { className: 'confirmation-dialog__title' }, this.props.title), this.props.descriptions.map(desc => React.createElement('div', { className: 'confirmation-dialog__description' }, desc)), React.createElement('div', { className: 'confirmation-dialog__buttons' }, React.createElement('div', { className: 'confirmation-dialog__button', onClick: this.props.onCancel }, 'Cancel'), React.createElement('div', { className: 'confirmation-dialog__button', onClick: this.props.onOk }, 'Ok'))));
+            return React__namespace.createElement('div', { className: 'confirmation-dialog' }, React__namespace.createElement('div', { className: 'confirmation-dialog__overlay', onClick: this.props.onCancel }), React__namespace.createElement('div', { className: 'confirmation-dialog__content' }, React__namespace.createElement('div', { className: 'confirmation-dialog__title' }, this.props.title), this.props.descriptions.map(desc => React__namespace.createElement('div', { className: 'confirmation-dialog__description' }, desc)), React__namespace.createElement('div', { className: 'confirmation-dialog__buttons' }, React__namespace.createElement('div', { className: 'confirmation-dialog__button', onClick: this.props.onCancel }, 'Cancel'), React__namespace.createElement('div', { className: 'confirmation-dialog__button', onClick: this.props.onOk }, 'Ok'))));
         }
     }
 
-    class DeleteIcon extends React.PureComponent {
+    class DeleteIcon extends React__namespace.PureComponent {
         render() {
-            return React.createElement('svg', {
+            return React__namespace.createElement('svg', {
                 width: this.props.width.toString(),
                 height: this.props.height.toString(),
                 viewBox: '0 0 24 24',
                 xmlns: 'http://www.w3.org/2000/svg',
-            }, React.createElement('path', { d: 'M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z' }));
+            }, React__namespace.createElement('path', { d: 'M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z' }));
         }
     }
 
-    class Component$3 extends React.Component {
+    class Component$f extends React__namespace.Component {
         constructor(props) {
             super(props);
             this.onFilterChanged = this.onFilterChanged.bind(this);
@@ -1588,15 +1611,15 @@
             this.fetchController.abort();
         }
         render() {
-            return React.createElement('div', { className: 'job-listing-view' }, React.createElement('div', { className: 'job-listing-view__title' }, 'Jobs'), React.createElement('select', {
+            return React__namespace.createElement('div', { className: 'job-listing-view' }, React__namespace.createElement('div', { className: 'job-listing-view__title' }, 'Jobs'), React__namespace.createElement('select', {
                 className: 'job-listing-view__filter',
                 value: this.state.all ? 'all' : 'mine',
                 onChange: this.onFilterChanged,
-            }, React.createElement('option', { value: 'mine' }, 'My Jobs'), React.createElement('option', { value: 'all' }, 'All Jobs')), React.createElement('div', { className: 'job-listing-view__import button button--text', onClick: this.onImportClick }, 'Import'), React.createElement('div', { className: 'job-listing-view__jobs' }, React.createElement('div', { className: 'job-listing-view__labels' }, React.createElement('div', { className: 'job-listing-view__labels__id' }, 'Job ID'), React.createElement('div', { className: 'job-listing-view__labels__time' }, 'Time'), React.createElement('div', { className: 'job-listing-view__labels__description' }, 'Description'), React.createElement('div', { className: 'job-listing-view__labels__username' }, 'User'), React.createElement('div', { className: 'job-listing-view__labels__status' }, 'Status'), React.createElement('div', { className: 'job-listing-view__labels__delete-button' }, '')), this.state.jobs.map(job => (React.createElement('div', { className: 'job-listing-view__job', key: job.id }, React.createElement('div', { className: 'job-listing-view__job2', onClick: () => this.onJobClick(job.id) }, React.createElement('div', { className: 'job-listing-view__job__id' }, job.id), React.createElement('div', { className: 'job-listing-view__job__time' }, moment__default['default'](job.time).fromNow()), React.createElement('div', { className: 'job-listing-view__job__description' }, job.description), React.createElement('div', { className: 'job-listing-view__job__username' }, job.username), React.createElement('div', { className: 'job-listing-view__job__status' }, capitalizeFirstLetter(job.status))), React.createElement('div', {
+            }, React__namespace.createElement('option', { value: 'mine' }, 'My Jobs'), React__namespace.createElement('option', { value: 'all' }, 'All Jobs')), React__namespace.createElement('div', { className: 'job-listing-view__import button button--text', onClick: this.onImportClick }, 'Import'), React__namespace.createElement('div', { className: 'job-listing-view__jobs' }, React__namespace.createElement('div', { className: 'job-listing-view__labels' }, React__namespace.createElement('div', { className: 'job-listing-view__labels__id' }, 'Job ID'), React__namespace.createElement('div', { className: 'job-listing-view__labels__time' }, 'Time'), React__namespace.createElement('div', { className: 'job-listing-view__labels__description' }, 'Description'), React__namespace.createElement('div', { className: 'job-listing-view__labels__username' }, 'User'), React__namespace.createElement('div', { className: 'job-listing-view__labels__status' }, 'Status'), React__namespace.createElement('div', { className: 'job-listing-view__labels__delete-button' }, '')), this.state.jobs.map(job => (React__namespace.createElement('div', { className: 'job-listing-view__job', key: job.id }, React__namespace.createElement('div', { className: 'job-listing-view__job2', onClick: () => this.onJobClick(job.id) }, React__namespace.createElement('div', { className: 'job-listing-view__job__id' }, job.id), React__namespace.createElement('div', { className: 'job-listing-view__job__time' }, moment__default["default"](job.time).fromNow()), React__namespace.createElement('div', { className: 'job-listing-view__job__description' }, job.description), React__namespace.createElement('div', { className: 'job-listing-view__job__username' }, job.username), React__namespace.createElement('div', { className: 'job-listing-view__job__status' }, capitalizeFirstLetter(job.status))), React__namespace.createElement('div', {
                 className: 'job-listing-view__job__delete-button',
                 onClick: () => this.onConfirmationOpen(job.id),
-            }, React.createElement(DeleteIcon, { width: 24, height: 24 })))))), (this.state.confirmationOpen ?
-                React.createElement(ConfirmationDialog, {
+            }, React__namespace.createElement(DeleteIcon, { width: 24, height: 24 })))))), (this.state.confirmationOpen ?
+                React__namespace.createElement(ConfirmationDialog, {
                     title: 'Delete job?',
                     descriptions: ['The job output and data will also be deleted. This can not be undone.'],
                     onCancel: this.onConfirmationCancel,
@@ -1623,9 +1646,9 @@
         };
         input.addEventListener('change', onChange, { once: true });
     }
-    const JobListing = ReactRedux.connect()(Component$3);
+    const JobListing = ReactRedux__namespace.connect()(Component$f);
 
-    class Component$4 extends React.Component {
+    class Component$e extends React__namespace.Component {
         constructor(props) {
             super(props);
             this.fetchController = new AbortController();
@@ -1687,17 +1710,17 @@
             this.fetchController.abort();
         }
         render() {
-            return React.createElement('div', { className: 'user-listing-view' }, React.createElement('div', { className: 'user-listing-view__title' }, 'Users'), React.createElement('div', {
+            return React__namespace.createElement('div', { className: 'user-listing-view' }, React__namespace.createElement('div', { className: 'user-listing-view__title' }, 'Users'), React__namespace.createElement('div', {
                 className: 'user-listing-view__create-button button',
                 onClick: this.onCreateClick,
-            }, 'Create User'), React.createElement('div', { className: 'user-listing-view__users' }, this.state.users.map(user => (React.createElement('div', { className: 'user-listing-view__user', key: user.id }, React.createElement('div', {
+            }, 'Create User'), React__namespace.createElement('div', { className: 'user-listing-view__users' }, this.state.users.map(user => (React__namespace.createElement('div', { className: 'user-listing-view__user', key: user.id }, React__namespace.createElement('div', {
                 className: 'user-listing-view__user__title',
                 onClick: () => setRoute(this.props.dispatch, '/edit-user/' + user.id + '/'),
-            }, React.createElement('div', { className: 'user-listing-view__user__username' }, user.username), (user.is_admin ? React.createElement('div', { className: 'user-listing-view__user__admin' }, 'Admin') : null)), React.createElement('div', {
+            }, React__namespace.createElement('div', { className: 'user-listing-view__user__username' }, user.username), (user.is_admin ? React__namespace.createElement('div', { className: 'user-listing-view__user__admin' }, 'Admin') : null)), React__namespace.createElement('div', {
                 className: 'user-listing-view__user__delete-button',
                 onClick: () => this.onConfirmationOpen(user.id),
-            }, React.createElement(DeleteIcon, { width: 24, height: 24 })))))), (this.state.confirmationOpen ?
-                React.createElement(ConfirmationDialog, {
+            }, React__namespace.createElement(DeleteIcon, { width: 24, height: 24 })))))), (this.state.confirmationOpen ?
+                React__namespace.createElement(ConfirmationDialog, {
                     title: 'Delete user?',
                     descriptions: ['The user will be deleted, but jobs run by the user will be kept.'],
                     onCancel: this.onConfirmationCancel,
@@ -1706,9 +1729,9 @@
                 : null));
         }
     }
-    const UserListing = ReactRedux.connect()(Component$4);
+    const UserListing = ReactRedux__namespace.connect()(Component$e);
 
-    class Component$5 extends React.Component {
+    class Component$d extends React__namespace.Component {
         constructor(props) {
             super(props);
             this.mounted = false;
@@ -1782,43 +1805,43 @@
             this.mounted = false;
         }
         render() {
-            return React.createElement('div', { className: 'create-edit-user-view' }, React.createElement('div', { className: 'create-edit-user-view__title' }, 'Create User'), React.createElement('form', { className: 'create-edit-user-view__form', onSubmit: this.onSubmit }, React.createElement('label', null, 'Username'), React.createElement('input', {
+            return React__namespace.createElement('div', { className: 'create-edit-user-view' }, React__namespace.createElement('div', { className: 'create-edit-user-view__title' }, 'Create User'), React__namespace.createElement('form', { className: 'create-edit-user-view__form', onSubmit: this.onSubmit }, React__namespace.createElement('label', null, 'Username'), React__namespace.createElement('input', {
                 type: 'text',
                 required: true,
                 value: this.state.username,
                 onChange: this.onUsernameChange,
             }), (this.state.usernameExists ?
-                React.createElement('div', { className: 'create-edit-user-view__error' }, 'Username is already taken') :
-                null), React.createElement('label', null, 'Password'), React.createElement('input', {
+                React__namespace.createElement('div', { className: 'create-edit-user-view__error' }, 'Username is already taken') :
+                null), React__namespace.createElement('label', null, 'Password'), React__namespace.createElement('input', {
                 type: 'password',
                 required: true,
                 value: this.state.password,
                 onChange: this.onPasswordChange,
-            }), React.createElement('label', null, 'Confirm Password'), React.createElement('input', {
+            }), React__namespace.createElement('label', null, 'Confirm Password'), React__namespace.createElement('input', {
                 type: 'password',
                 required: true,
                 value: this.state.confirmPassword,
                 onChange: this.onConfirmPasswordChange,
             }), (this.state.confirmPassword !== this.state.password ?
-                React.createElement('div', { className: 'create-edit-user-view__error' }, 'Does not match password') :
-                null), React.createElement('div', { className: 'create-edit-user-view__checkbox-wrapper' }, React.createElement(Checkbox, {
+                React__namespace.createElement('div', { className: 'create-edit-user-view__error' }, 'Does not match password') :
+                null), React__namespace.createElement('div', { className: 'create-edit-user-view__checkbox-wrapper' }, React__namespace.createElement(Checkbox, {
                 checked: this.state.isAdmin,
                 onChange: this.onIsAdminChange,
-            }), React.createElement('label', { onClick: this.onIsAdminChange }, 'Admin')), React.createElement('input', {
+            }), React__namespace.createElement('label', { onClick: this.onIsAdminChange }, 'Admin')), React__namespace.createElement('input', {
                 className: 'button',
                 type: 'submit',
                 value: 'Create',
             })));
         }
     }
-    const CreateUser = ReactRedux.connect(null, null)(Component$5);
+    const CreateUser = ReactRedux__namespace.connect(null, null)(Component$d);
 
-    function mapStateToProps$1(state) {
+    function mapStateToProps$5(state) {
         return {
             sessionUserId: assertNotNull(state.user).id,
         };
     }
-    class Component$6 extends React.Component {
+    class Component$c extends React__namespace.Component {
         constructor(props) {
             super(props);
             this.fetchController = new AbortController();
@@ -1907,30 +1930,30 @@
             this.fetchController.abort();
         }
         render() {
-            return React.createElement('div', { className: 'create-edit-user-view' }, React.createElement('div', { className: 'create-edit-user-view__title' }, 'Edit User'), React.createElement('form', { className: 'create-edit-user-view__form', onSubmit: this.onSubmit }, React.createElement('label', null, 'Username'), React.createElement('input', {
+            return React__namespace.createElement('div', { className: 'create-edit-user-view' }, React__namespace.createElement('div', { className: 'create-edit-user-view__title' }, 'Edit User'), React__namespace.createElement('form', { className: 'create-edit-user-view__form', onSubmit: this.onSubmit }, React__namespace.createElement('label', null, 'Username'), React__namespace.createElement('input', {
                 type: 'text',
                 required: true,
                 value: this.state.username,
                 onChange: this.onUsernameChange,
             }), (this.state.usernameExists ?
-                React.createElement('div', { className: 'create-edit-user-view__error' }, 'Username is already taken') :
-                null), React.createElement('label', null, 'Password'), React.createElement('input', {
+                React__namespace.createElement('div', { className: 'create-edit-user-view__error' }, 'Username is already taken') :
+                null), React__namespace.createElement('label', null, 'Password'), React__namespace.createElement('input', {
                 type: 'password',
                 value: this.state.password,
                 onChange: this.onPasswordChange,
-            }), React.createElement('label', null, 'Confirm Password'), React.createElement('input', {
+            }), React__namespace.createElement('label', null, 'Confirm Password'), React__namespace.createElement('input', {
                 type: 'password',
                 value: this.state.confirmPassword,
                 onChange: this.onConfirmPasswordChange,
             }), (this.state.confirmPassword !== this.state.password ?
-                React.createElement('div', { className: 'create-edit-user-view__error' }, 'Does not match password') :
-                null), React.createElement('div', { className: 'create-edit-user-view__checkbox-wrapper' }, React.createElement(Checkbox, {
+                React__namespace.createElement('div', { className: 'create-edit-user-view__error' }, 'Does not match password') :
+                null), React__namespace.createElement('div', { className: 'create-edit-user-view__checkbox-wrapper' }, React__namespace.createElement(Checkbox, {
                 checked: this.state.isAdmin,
                 onChange: this.onIsAdminChange,
-            }), React.createElement('label', { onClick: this.onIsAdminChange }, 'Admin')), React.createElement('input', { className: 'button', type: 'submit', value: 'Save' })));
+            }), React__namespace.createElement('label', { onClick: this.onIsAdminChange }, 'Admin')), React__namespace.createElement('input', { className: 'button', type: 'submit', value: 'Save' })));
         }
     }
-    const EditUser = ReactRedux.connect(mapStateToProps$1)(Component$6);
+    const EditUser = ReactRedux__namespace.connect(mapStateToProps$5)(Component$c);
 
     let rootElement = null;
     let timeout = 0;
@@ -1949,12 +1972,12 @@
         }, 5000);
     }
 
-    function mapStateToProps$2(state) {
+    function mapStateToProps$4(state) {
         return {
             user: state.user,
         };
     }
-    class Component$7 extends React.Component {
+    class Component$b extends React__namespace.Component {
         constructor(props) {
             super(props);
             this.mounted = false;
@@ -2034,37 +2057,37 @@
             this.mounted = false;
         }
         render() {
-            return React.createElement('div', { className: 'create-edit-user-view' }, React.createElement('div', { className: 'create-edit-user-view__title' }, 'My Account'), React.createElement('form', { className: 'create-edit-user-view__form', onSubmit: this.onSubmit }, React.createElement('label', null, 'Username'), React.createElement('input', {
+            return React__namespace.createElement('div', { className: 'create-edit-user-view' }, React__namespace.createElement('div', { className: 'create-edit-user-view__title' }, 'My Account'), React__namespace.createElement('form', { className: 'create-edit-user-view__form', onSubmit: this.onSubmit }, React__namespace.createElement('label', null, 'Username'), React__namespace.createElement('input', {
                 type: 'text',
                 required: true,
                 value: this.state.username,
                 onChange: this.onUsernameChange,
             }), (this.state.usernameExists ?
-                React.createElement('div', { className: 'create-edit-user-view__error' }, 'Username is already taken') :
-                null), React.createElement('label', null, 'Password'), React.createElement('input', {
+                React__namespace.createElement('div', { className: 'create-edit-user-view__error' }, 'Username is already taken') :
+                null), React__namespace.createElement('label', null, 'Password'), React__namespace.createElement('input', {
                 type: 'password',
                 value: this.state.password,
                 onChange: this.onPasswordChange,
-            }), React.createElement('label', null, 'Confirm Password'), React.createElement('input', {
+            }), React__namespace.createElement('label', null, 'Confirm Password'), React__namespace.createElement('input', {
                 type: 'password',
                 value: this.state.confirmPassword,
                 onChange: this.onConfirmPasswordChange,
             }), (this.state.confirmPassword !== this.state.password ?
-                React.createElement('div', { className: 'create-edit-user-view__error' }, 'Does not match password') :
+                React__namespace.createElement('div', { className: 'create-edit-user-view__error' }, 'Does not match password') :
                 null), (assertNotNull(this.props.user).is_admin ?
-                React.createElement('div', { className: 'create-edit-user-view__checkbox-wrapper' }, React.createElement(Checkbox, {
+                React__namespace.createElement('div', { className: 'create-edit-user-view__checkbox-wrapper' }, React__namespace.createElement(Checkbox, {
                     checked: this.state.isAdmin,
                     onChange: this.onIsAdminChange,
-                }), React.createElement('label', { onClick: this.onIsAdminChange }, 'Admin')) : null), React.createElement('input', {
+                }), React__namespace.createElement('label', { onClick: this.onIsAdminChange }, 'Admin')) : null), React__namespace.createElement('input', {
                 className: 'button',
                 type: 'submit',
                 value: 'Save',
             })));
         }
     }
-    const MyAccount = ReactRedux.connect(mapStateToProps$2, null)(Component$7);
+    const MyAccount = ReactRedux__namespace.connect(mapStateToProps$4, null)(Component$b);
 
-    class Component$8 extends React.Component {
+    class Component$a extends React__namespace.Component {
         constructor(props) {
             super(props);
             this.fetchOutput = this.fetchOutput.bind(this);
@@ -2131,42 +2154,42 @@
             });
         }
         render() {
-            return React.createElement('div', { className: 'job-detail-view' }, React.createElement('div', { className: 'job-detail-view__title' }, 'Job', React.createElement('span', { className: 'job-detail-view__job-info' }, this.props.jobId), React.createElement('span', { className: 'job-detail-view__job-info' }, this.state.description), React.createElement('span', { className: 'job-detail-view__job-info' }, moment__default['default'](this.state.time).fromNow())), React.createElement('pre', { className: 'job-detail-view__output', ref: (el) => this.outputRef = el }, this.state.output), React.createElement('div', { className: 'job-detail-view__bottom' }, React.createElement('div', { className: 'job-detail-view__status' }, 'Status: ' + (this.state.done ? 'Done' : 'Running')), (this.state.done ?
-                React.createElement('div', {
+            return React__namespace.createElement('div', { className: 'job-detail-view' }, React__namespace.createElement('div', { className: 'job-detail-view__title' }, 'Job', React__namespace.createElement('span', { className: 'job-detail-view__job-info' }, this.props.jobId), React__namespace.createElement('span', { className: 'job-detail-view__job-info' }, this.state.description), React__namespace.createElement('span', { className: 'job-detail-view__job-info' }, moment__default["default"](this.state.time).fromNow())), React__namespace.createElement('pre', { className: 'job-detail-view__output', ref: (el) => this.outputRef = el }, this.state.output), React__namespace.createElement('div', { className: 'job-detail-view__bottom' }, React__namespace.createElement('div', { className: 'job-detail-view__status' }, 'Status: ' + (this.state.done ? 'Done' : 'Running')), (this.state.done ?
+                React__namespace.createElement('div', {
                     className: 'job-detail-view__plots-button button',
                     onClick: this.onPlotsClick,
                 }, 'Plots') :
-                null), React.createElement('div', {
+                null), React__namespace.createElement('div', {
                 className: 'job-detail-view__config-button button',
                 onClick: this.onConfigClick,
-            }, 'Config'), React.createElement('div', {
+            }, 'Config'), React__namespace.createElement('div', {
                 className: 'job-detail-view__download-button button',
                 onClick: this.onDownloadClick,
             }, 'Download')));
         }
     }
-    const JobDetail = ReactRedux.connect()(Component$8);
+    const JobDetail = ReactRedux__namespace.connect()(Component$a);
 
-    class BackIcon extends React.PureComponent {
+    class BackIcon extends React__namespace.PureComponent {
         render() {
-            return React.createElement('svg', {
+            return React__namespace.createElement('svg', {
                 width: this.props.width.toString(),
                 height: this.props.height.toString(),
                 viewBox: '0 0 24 24',
                 xmlns: 'http://www.w3.org/2000/svg',
-            }, React.createElement('path', { d: 'M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z' }));
+            }, React__namespace.createElement('path', { d: 'M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z' }));
         }
     }
 
-    class Component$9 extends React.Component {
+    class Component$9 extends React__namespace.Component {
         constructor(props) {
             super(props);
             this.resizePlot = this.resizePlot.bind(this);
             this.fetchController = new AbortController();
-            this.plotElement = React.createRef();
+            this.plotElement = React__namespace.createRef();
         }
         resizePlot() {
-            Plotly.Plots.resize(assertNotNull(this.plotElement.current));
+            Plotly__namespace.Plots.resize(assertNotNull(this.plotElement.current));
         }
         fetchPlot(jobId, tribe) {
             this.fetchController = new AbortController();
@@ -2209,7 +2232,7 @@
                         title: 'Mutations',
                     },
                 };
-                Plotly.newPlot(assertNotNull(this.plotElement.current), data, layout);
+                Plotly__namespace.newPlot(assertNotNull(this.plotElement.current), data, layout);
             });
         }
         componentDidMount() {
@@ -2222,25 +2245,25 @@
             }
         }
         componentWillUnmount() {
-            Plotly.purge(assertNotNull(this.plotElement.current));
+            Plotly__namespace.purge(assertNotNull(this.plotElement.current));
             window.removeEventListener('resize', this.resizePlot);
             this.fetchController.abort();
         }
         render() {
-            return React.createElement('div', { className: 'plots-view__non-sidebar' }, React.createElement('div', { className: 'plots-view__plot', ref: this.plotElement }));
+            return React__namespace.createElement('div', { className: 'plots-view__non-sidebar' }, React__namespace.createElement('div', { className: 'plots-view__plot', ref: this.plotElement }));
         }
     }
-    const AverageMutations = ReactRedux.connect()(Component$9);
+    const AverageMutations = ReactRedux__namespace.connect()(Component$9);
 
-    class Component$a extends React.Component {
+    class Component$8 extends React__namespace.Component {
         constructor(props) {
             super(props);
             this.resizePlot = this.resizePlot.bind(this);
             this.fetchController = new AbortController();
-            this.plotElement = React.createRef();
+            this.plotElement = React__namespace.createRef();
         }
         resizePlot() {
-            Plotly.Plots.resize(assertNotNull(this.plotElement.current));
+            Plotly__namespace.Plots.resize(assertNotNull(this.plotElement.current));
         }
         fetchPlot(jobId, tribe) {
             this.fetchController = new AbortController();
@@ -2280,7 +2303,7 @@
                         side: 'right',
                     },
                 };
-                Plotly.newPlot(assertNotNull(this.plotElement.current), data, layout);
+                Plotly__namespace.newPlot(assertNotNull(this.plotElement.current), data, layout);
             });
         }
         componentDidMount() {
@@ -2293,35 +2316,35 @@
             }
         }
         componentWillUnmount() {
-            Plotly.purge(assertNotNull(this.plotElement.current));
+            Plotly__namespace.purge(assertNotNull(this.plotElement.current));
             window.removeEventListener('resize', this.resizePlot);
             this.fetchController.abort();
         }
         render() {
-            return React.createElement('div', { className: 'plots-view__non-sidebar' }, React.createElement('div', { className: 'plots-view__plot', ref: this.plotElement }));
+            return React__namespace.createElement('div', { className: 'plots-view__non-sidebar' }, React__namespace.createElement('div', { className: 'plots-view__plot', ref: this.plotElement }));
         }
     }
-    const FitnessHistory = ReactRedux.connect()(Component$a);
+    const FitnessHistory = ReactRedux__namespace.connect()(Component$8);
 
-    class Component$b extends React.Component {
+    class Component$7 extends React__namespace.Component {
         constructor(props) {
             super(props);
             this.resizePlot = this.resizePlot.bind(this);
             this.sliderInputChange = this.sliderInputChange.bind(this);
             this.fetchController = new AbortController();
-            this.plotElement = React.createRef();
+            this.plotElement = React__namespace.createRef();
             this.state = {
                 data: [],
                 currentIndex: 0,
             };
         }
         resizePlot() {
-            Plotly.Plots.resize(assertNotNull(this.plotElement.current));
+            Plotly__namespace.Plots.resize(assertNotNull(this.plotElement.current));
         }
         sliderInputChange(e) {
             const newIndex = parseInt(e.target.value);
             if (newIndex < this.state.data.length) {
-                Plotly.restyle(assertNotNull(this.plotElement.current), {
+                Plotly__namespace.restyle(assertNotNull(this.plotElement.current), {
                     y: [this.state.data[newIndex].dominant, this.state.data[newIndex].recessive],
                 }, [0, 1]);
             }
@@ -2385,7 +2408,7 @@
                         range: [0, maxY],
                     },
                 };
-                Plotly.newPlot(assertNotNull(this.plotElement.current), data, layout);
+                Plotly__namespace.newPlot(assertNotNull(this.plotElement.current), data, layout);
                 this.setState({
                     data: response,
                     currentIndex: response.length - 1,
@@ -2402,12 +2425,12 @@
             }
         }
         componentWillUnmount() {
-            Plotly.purge(assertNotNull(this.plotElement.current));
+            Plotly__namespace.purge(assertNotNull(this.plotElement.current));
             window.removeEventListener('resize', this.resizePlot);
             this.fetchController.abort();
         }
         render() {
-            return React.createElement('div', { className: 'plots-view__non-sidebar plots-view--has-slider' }, React.createElement('div', { className: 'plots-view__plot', ref: this.plotElement }), React.createElement('div', { className: 'plots-view__slider' }, React.createElement('div', { className: 'plots-view__slider-label' }, 'Generation:'), React.createElement('div', { className: 'plots-view__slider-number' }, this.state.data.length === 0 ? '' : this.state.data[this.state.currentIndex].generation), React.createElement('input', {
+            return React__namespace.createElement('div', { className: 'plots-view__non-sidebar plots-view--has-slider' }, React__namespace.createElement('div', { className: 'plots-view__plot', ref: this.plotElement }), React__namespace.createElement('div', { className: 'plots-view__slider' }, React__namespace.createElement('div', { className: 'plots-view__slider-label' }, 'Generation:'), React__namespace.createElement('div', { className: 'plots-view__slider-number' }, this.state.data.length === 0 ? '' : this.state.data[this.state.currentIndex].generation), React__namespace.createElement('input', {
                 className: 'plots-view__slider-input',
                 type: 'range',
                 max: this.state.data.length - 1,
@@ -2416,27 +2439,27 @@
             })));
         }
     }
-    const DeleteriousMutations = ReactRedux.connect()(Component$b);
+    const DeleteriousMutations = ReactRedux__namespace.connect()(Component$7);
 
-    class Component$c extends React.Component {
+    class Component$6 extends React__namespace.Component {
         constructor(props) {
             super(props);
             this.resizePlot = this.resizePlot.bind(this);
             this.sliderInputChange = this.sliderInputChange.bind(this);
             this.fetchController = new AbortController();
-            this.plotElement = React.createRef();
+            this.plotElement = React__namespace.createRef();
             this.state = {
                 data: [],
                 currentIndex: 0,
             };
         }
         resizePlot() {
-            Plotly.Plots.resize(assertNotNull(this.plotElement.current));
+            Plotly__namespace.Plots.resize(assertNotNull(this.plotElement.current));
         }
         sliderInputChange(e) {
             const newIndex = parseInt(e.target.value);
             if (newIndex < this.state.data.length) {
-                Plotly.restyle(assertNotNull(this.plotElement.current), {
+                Plotly__namespace.restyle(assertNotNull(this.plotElement.current), {
                     y: [this.state.data[newIndex].dominant, this.state.data[newIndex].recessive],
                 }, [0, 1]);
             }
@@ -2499,7 +2522,7 @@
                         range: [0, maxY],
                     },
                 };
-                Plotly.newPlot(assertNotNull(this.plotElement.current), data, layout);
+                Plotly__namespace.newPlot(assertNotNull(this.plotElement.current), data, layout);
                 this.setState({
                     data: response,
                     currentIndex: response.length - 1,
@@ -2516,12 +2539,12 @@
             }
         }
         componentWillUnmount() {
-            Plotly.purge(assertNotNull(this.plotElement.current));
+            Plotly__namespace.purge(assertNotNull(this.plotElement.current));
             window.removeEventListener('resize', this.resizePlot);
             this.fetchController.abort();
         }
         render() {
-            return React.createElement('div', { className: 'plots-view__non-sidebar plots-view--has-slider' }, React.createElement('div', { className: 'plots-view__plot', ref: this.plotElement }), React.createElement('div', { className: 'plots-view__slider' }, React.createElement('div', { className: 'plots-view__slider-label' }, 'Generation:'), React.createElement('div', { className: 'plots-view__slider-number' }, this.state.data.length === 0 ? '' : this.state.data[this.state.currentIndex].generation), React.createElement('input', {
+            return React__namespace.createElement('div', { className: 'plots-view__non-sidebar plots-view--has-slider' }, React__namespace.createElement('div', { className: 'plots-view__plot', ref: this.plotElement }), React__namespace.createElement('div', { className: 'plots-view__slider' }, React__namespace.createElement('div', { className: 'plots-view__slider-label' }, 'Generation:'), React__namespace.createElement('div', { className: 'plots-view__slider-number' }, this.state.data.length === 0 ? '' : this.state.data[this.state.currentIndex].generation), React__namespace.createElement('input', {
                 className: 'plots-view__slider-input',
                 type: 'range',
                 max: this.state.data.length - 1,
@@ -2530,27 +2553,27 @@
             })));
         }
     }
-    const BeneficialMutations = ReactRedux.connect()(Component$c);
+    const BeneficialMutations = ReactRedux__namespace.connect()(Component$6);
 
-    class Component$d extends React.Component {
+    class Component$5 extends React__namespace.Component {
         constructor(props) {
             super(props);
             this.resizePlot = this.resizePlot.bind(this);
             this.sliderInputChange = this.sliderInputChange.bind(this);
             this.fetchController = new AbortController();
-            this.plotElement = React.createRef();
+            this.plotElement = React__namespace.createRef();
             this.state = {
                 data: [],
                 currentIndex: 0,
             };
         }
         resizePlot() {
-            Plotly.Plots.resize(assertNotNull(this.plotElement.current));
+            Plotly__namespace.Plots.resize(assertNotNull(this.plotElement.current));
         }
         sliderInputChange(e) {
             const newIndex = parseInt(e.target.value);
             if (newIndex < this.state.data.length) {
-                Plotly.restyle(assertNotNull(this.plotElement.current), {
+                Plotly__namespace.restyle(assertNotNull(this.plotElement.current), {
                     y: [
                         this.state.data[newIndex].deleterious,
                         this.state.data[newIndex].favorable,
@@ -2668,7 +2691,7 @@
                         range: [0, maxY],
                     },
                 };
-                Plotly.newPlot(assertNotNull(this.plotElement.current), data, layout);
+                Plotly__namespace.newPlot(assertNotNull(this.plotElement.current), data, layout);
                 this.setState({
                     data: response,
                     currentIndex: response.length - 1,
@@ -2688,12 +2711,12 @@
         }
         componentWillUnmount() {
             console.log('snp componentWillUnmount');
-            Plotly.purge(assertNotNull(this.plotElement.current));
+            Plotly__namespace.purge(assertNotNull(this.plotElement.current));
             window.removeEventListener('resize', this.resizePlot);
             this.fetchController.abort();
         }
         render() {
-            return React.createElement('div', { className: 'plots-view__non-sidebar plots-view--has-slider' }, React.createElement('div', { className: 'plots-view__plot', ref: this.plotElement }), React.createElement('div', { className: 'plots-view__slider' }, React.createElement('div', { className: 'plots-view__slider-label' }, 'Generation:'), React.createElement('div', { className: 'plots-view__slider-number' }, this.state.data.length === 0 ? '' : this.state.data[this.state.currentIndex].generation), React.createElement('input', {
+            return React__namespace.createElement('div', { className: 'plots-view__non-sidebar plots-view--has-slider' }, React__namespace.createElement('div', { className: 'plots-view__plot', ref: this.plotElement }), React__namespace.createElement('div', { className: 'plots-view__slider' }, React__namespace.createElement('div', { className: 'plots-view__slider-label' }, 'Generation:'), React__namespace.createElement('div', { className: 'plots-view__slider-number' }, this.state.data.length === 0 ? '' : this.state.data[this.state.currentIndex].generation), React__namespace.createElement('input', {
                 className: 'plots-view__slider-input',
                 type: 'range',
                 max: this.state.data.length - 1,
@@ -2702,27 +2725,27 @@
             })));
         }
     }
-    const SnpFrequencies = ReactRedux.connect()(Component$d);
+    const SnpFrequencies = ReactRedux__namespace.connect()(Component$5);
 
-    class Component$e extends React.Component {
+    class Component$4 extends React__namespace.Component {
         constructor(props) {
             super(props);
             this.resizePlot = this.resizePlot.bind(this);
             this.sliderInputChange = this.sliderInputChange.bind(this);
             this.fetchController = new AbortController();
-            this.plotElement = React.createRef();
+            this.plotElement = React__namespace.createRef();
             this.state = {
                 data: [],
                 currentIndex: 0,
             };
         }
         resizePlot() {
-            Plotly.Plots.resize(assertNotNull(this.plotElement.current));
+            Plotly__namespace.Plots.resize(assertNotNull(this.plotElement.current));
         }
         sliderInputChange(e) {
             const newIndex = parseInt(e.target.value);
             if (newIndex < this.state.data.length) {
-                Plotly.restyle(assertNotNull(this.plotElement.current), {
+                Plotly__namespace.restyle(assertNotNull(this.plotElement.current), {
                     y: [
                         this.state.data[newIndex].deleterious,
                         this.state.data[newIndex].favorable,
@@ -2812,7 +2835,7 @@
                         range: [0, 1],
                     },
                 };
-                Plotly.newPlot(assertNotNull(this.plotElement.current), data, layout);
+                Plotly__namespace.newPlot(assertNotNull(this.plotElement.current), data, layout);
                 this.setState({
                     data: response,
                     currentIndex: response.length - 1,
@@ -2829,12 +2852,12 @@
             }
         }
         componentWillUnmount() {
-            Plotly.purge(assertNotNull(this.plotElement.current));
+            Plotly__namespace.purge(assertNotNull(this.plotElement.current));
             window.removeEventListener('resize', this.resizePlot);
             this.fetchController.abort();
         }
         render() {
-            return React.createElement('div', { className: 'plots-view__non-sidebar plots-view--has-slider' }, React.createElement('div', { className: 'plots-view__plot', ref: this.plotElement }), React.createElement('div', { className: 'plots-view__slider' }, React.createElement('div', { className: 'plots-view__slider-label' }, 'Generation:'), React.createElement('div', { className: 'plots-view__slider-number' }, this.state.data.length === 0 ? '' : this.state.data[this.state.currentIndex].generation), React.createElement('input', {
+            return React__namespace.createElement('div', { className: 'plots-view__non-sidebar plots-view--has-slider' }, React__namespace.createElement('div', { className: 'plots-view__plot', ref: this.plotElement }), React__namespace.createElement('div', { className: 'plots-view__slider' }, React__namespace.createElement('div', { className: 'plots-view__slider-label' }, 'Generation:'), React__namespace.createElement('div', { className: 'plots-view__slider-number' }, this.state.data.length === 0 ? '' : this.state.data[this.state.currentIndex].generation), React__namespace.createElement('input', {
                 className: 'plots-view__slider-input',
                 type: 'range',
                 max: this.state.data.length - 1,
@@ -2843,15 +2866,15 @@
             })));
         }
     }
-    const MinorAlleleFrequencies = ReactRedux.connect()(Component$e);
+    const MinorAlleleFrequencies = ReactRedux__namespace.connect()(Component$4);
 
-    class NoPlot extends React.PureComponent {
+    class NoPlot extends React__namespace.PureComponent {
         constructor(props) {
             super(props);
         }
         render() {
             const tribeStr = this.props.tribe === '0' ? 'the summary' : 'tribe ' + this.props.tribe;
-            return React.createElement('div', { className: 'plots-view__non-sidebar' }, React.createElement('div', { className: 'plots-view__no-plot' }, 'The ' + this.props.plotName + ' plot does not exist for ' + tribeStr));
+            return React__namespace.createElement('div', { className: 'plots-view__non-sidebar' }, React__namespace.createElement('div', { className: 'plots-view__no-plot' }, 'The ' + this.props.plotName + ' plot does not exist for ' + tribeStr));
         }
     }
 
@@ -2892,7 +2915,7 @@
             plots: state.plots,
         };
     }
-    function mapDispatchToProps$1(dispatch, ownProps) {
+    function mapDispatchToProps(dispatch, ownProps) {
         return {
             dispatch: dispatch,
             onLinkClick: (slug) => {
@@ -2903,7 +2926,7 @@
             },
         };
     }
-    class Component$f extends React.Component {
+    class Component$3 extends React__namespace.Component {
         constructor(props) {
             super(props);
             this.onSelectChanged = this.onSelectChanged.bind(this);
@@ -2938,33 +2961,33 @@
         getPlot() {
             if (this.props.activeSlug === 'average-mutations') {
                 return (this.fileExists(this.props.activeSlug) ?
-                    React.createElement(AverageMutations, { jobId: this.props.jobId, tribe: this.props.tribe })
-                    : React.createElement(NoPlot, { plotName: this.getPlotTitle(this.props.activeSlug), tribe: this.props.tribe }));
+                    React__namespace.createElement(AverageMutations, { jobId: this.props.jobId, tribe: this.props.tribe })
+                    : React__namespace.createElement(NoPlot, { plotName: this.getPlotTitle(this.props.activeSlug), tribe: this.props.tribe }));
             }
             else if (this.props.activeSlug === 'fitness-history') {
                 return (this.fileExists(this.props.activeSlug) ?
-                    React.createElement(FitnessHistory, { jobId: this.props.jobId, tribe: this.props.tribe })
-                    : React.createElement(NoPlot, { plotName: this.getPlotTitle(this.props.activeSlug), tribe: this.props.tribe }));
+                    React__namespace.createElement(FitnessHistory, { jobId: this.props.jobId, tribe: this.props.tribe })
+                    : React__namespace.createElement(NoPlot, { plotName: this.getPlotTitle(this.props.activeSlug), tribe: this.props.tribe }));
             }
             else if (this.props.activeSlug === 'deleterious-mutations') {
                 return (this.fileExists(this.props.activeSlug) ?
-                    React.createElement(DeleteriousMutations, { jobId: this.props.jobId, tribe: this.props.tribe })
-                    : React.createElement(NoPlot, { plotName: this.getPlotTitle(this.props.activeSlug), tribe: this.props.tribe }));
+                    React__namespace.createElement(DeleteriousMutations, { jobId: this.props.jobId, tribe: this.props.tribe })
+                    : React__namespace.createElement(NoPlot, { plotName: this.getPlotTitle(this.props.activeSlug), tribe: this.props.tribe }));
             }
             else if (this.props.activeSlug === 'beneficial-mutations') {
                 return (this.fileExists(this.props.activeSlug) ?
-                    React.createElement(BeneficialMutations, { jobId: this.props.jobId, tribe: this.props.tribe })
-                    : React.createElement(NoPlot, { plotName: this.getPlotTitle(this.props.activeSlug), tribe: this.props.tribe }));
+                    React__namespace.createElement(BeneficialMutations, { jobId: this.props.jobId, tribe: this.props.tribe })
+                    : React__namespace.createElement(NoPlot, { plotName: this.getPlotTitle(this.props.activeSlug), tribe: this.props.tribe }));
             }
             else if (this.props.activeSlug === 'snp-frequencies') {
                 return (this.fileExists(this.props.activeSlug) ?
-                    React.createElement(SnpFrequencies, { jobId: this.props.jobId, tribe: this.props.tribe })
-                    : React.createElement(NoPlot, { plotName: this.getPlotTitle(this.props.activeSlug), tribe: this.props.tribe }));
+                    React__namespace.createElement(SnpFrequencies, { jobId: this.props.jobId, tribe: this.props.tribe })
+                    : React__namespace.createElement(NoPlot, { plotName: this.getPlotTitle(this.props.activeSlug), tribe: this.props.tribe }));
             }
             else if (this.props.activeSlug === 'minor-allele-frequencies') {
                 return (this.fileExists(this.props.activeSlug) ?
-                    React.createElement(MinorAlleleFrequencies, { jobId: this.props.jobId, tribe: this.props.tribe })
-                    : React.createElement(NoPlot, { plotName: this.getPlotTitle(this.props.activeSlug), tribe: this.props.tribe }));
+                    React__namespace.createElement(MinorAlleleFrequencies, { jobId: this.props.jobId, tribe: this.props.tribe })
+                    : React__namespace.createElement(NoPlot, { plotName: this.getPlotTitle(this.props.activeSlug), tribe: this.props.tribe }));
             }
             else {
                 return null;
@@ -2982,18 +3005,18 @@
             this.fetchController.abort();
         }
         render() {
-            return React.createElement('div', { className: 'plots-view' }, React.createElement('div', { className: 'plots-view__sidebar' }, React.createElement('div', { className: 'plots-view__sidebar__title-area' }, React.createElement('div', { className: 'plots-view__sidebar__back', onClick: this.props.onBackClick }, React.createElement(BackIcon, { width: 24, height: 24 })), React.createElement('div', { className: 'plots-view__sidebar__title' }, 'Plots'), (this.props.plots.tribes.length > 0 ?
-                React.createElement('select', { className: 'plots-view__sidebar__select', value: this.props.tribe, onChange: this.onSelectChanged, }, React.createElement('option', { value: 0 }, 'Summary'), this.props.plots.tribes.map(tribe => React.createElement('option', { value: tribe }, 'Tribe ' + tribe)))
-                : null)), React.createElement('div', { className: 'plots-view__sidebar__items' }, LINKS.filter(link => this.props.plots.files.indexOf(link.filename) > -1).map(link => (React.createElement('div', {
+            return React__namespace.createElement('div', { className: 'plots-view' }, React__namespace.createElement('div', { className: 'plots-view__sidebar' }, React__namespace.createElement('div', { className: 'plots-view__sidebar__title-area' }, React__namespace.createElement('div', { className: 'plots-view__sidebar__back', onClick: this.props.onBackClick }, React__namespace.createElement(BackIcon, { width: 24, height: 24 })), React__namespace.createElement('div', { className: 'plots-view__sidebar__title' }, 'Plots'), (this.props.plots.tribes.length > 0 ?
+                React__namespace.createElement('select', { className: 'plots-view__sidebar__select', value: this.props.tribe, onChange: this.onSelectChanged, }, React__namespace.createElement('option', { value: 0 }, 'Summary'), this.props.plots.tribes.map(tribe => React__namespace.createElement('option', { value: tribe }, 'Tribe ' + tribe)))
+                : null)), React__namespace.createElement('div', { className: 'plots-view__sidebar__items' }, LINKS.filter(link => this.props.plots.files.indexOf(link.filename) > -1).map(link => (React__namespace.createElement('div', {
                 className: 'plots-view__sidebar__item ' + (this.props.activeSlug === link.slug ? 'plots-view__sidebar--active' : ''),
                 onClick: () => this.props.onLinkClick(link.slug),
                 key: link.slug,
             }, link.title))))), this.getPlot());
         }
     }
-    const Plots = ReactRedux.connect(mapStateToProps$3, mapDispatchToProps$1)(Component$f);
+    const Plots = ReactRedux__namespace.connect(mapStateToProps$3, mapDispatchToProps)(Component$3);
 
-    function mapStateToProps$4(state) {
+    function mapStateToProps$2(state) {
         return {
             route: state.route,
         };
@@ -3004,60 +3027,60 @@
         const editUserMatch = route.match(new RegExp('^/edit-user/(\\w+)/$'));
         const plotMatch = route.match(new RegExp('^/plots/(\\w+)/(\\w+)/([\\w-]+)/$'));
         if (route === '/') {
-            return React.createElement(NewJob, {
+            return React__namespace.createElement(NewJob, {
                 jobId: null,
                 key: 'new_job',
             });
         }
         else if (jobConfigMatch) {
-            return React.createElement(NewJob, {
+            return React__namespace.createElement(NewJob, {
                 jobId: jobConfigMatch[1],
                 key: 'job_config:' + jobConfigMatch[1],
             });
         }
         else if (route === '/login/') {
-            return React.createElement(Login, null);
+            return React__namespace.createElement(Login, null);
         }
         else if (route === '/job-listing/') {
-            return React.createElement(JobListing, null);
+            return React__namespace.createElement(JobListing, null);
         }
         else if (route === '/user-listing/') {
-            return React.createElement(UserListing, null);
+            return React__namespace.createElement(UserListing, null);
         }
         else if (route === '/create-user/') {
-            return React.createElement(CreateUser, null);
+            return React__namespace.createElement(CreateUser, null);
         }
         else if (editUserMatch) {
-            return React.createElement(EditUser, {
+            return React__namespace.createElement(EditUser, {
                 userId: editUserMatch[1],
             });
         }
         else if (route === '/my-account/') {
-            return React.createElement(MyAccount, null);
+            return React__namespace.createElement(MyAccount, null);
         }
         else if (jobDetailMatch) {
-            return React.createElement(JobDetail, {
+            return React__namespace.createElement(JobDetail, {
                 jobId: jobDetailMatch[1],
             });
         }
         else if (plotMatch) {
             const jobId = plotMatch[1];
             const tribe = plotMatch[2];
-            return React.createElement(Plots, { jobId: jobId, tribe: tribe, activeSlug: plotMatch[3] });
+            return React__namespace.createElement(Plots, { jobId: jobId, tribe: tribe, activeSlug: plotMatch[3] });
         }
         return null;
     }
-    function Component$g(props) {
-        return React.createElement('div', { className: 'page-content' }, getView(props.route));
+    function Component$2(props) {
+        return React__namespace.createElement('div', { className: 'page-content' }, getView(props.route));
     }
-    const Content = ReactRedux.connect(mapStateToProps$4)(Component$g);
+    const Content = ReactRedux__namespace.connect(mapStateToProps$2)(Component$2);
 
-    function mapStateToProps$5(state) {
+    function mapStateToProps$1(state) {
         return {
             route: state.route,
         };
     }
-    class Component$h extends React.Component {
+    class Component$1 extends React__namespace.Component {
         constructor(props) {
             super(props);
             this.state = {
@@ -3076,30 +3099,30 @@
             });
         }
         render() {
-            return React.createElement('div', { className: 'non-login' + (!this.state.loaded ? ' non-login--loading' : '') }, (this.state.loaded ?
-                React.createElement(React.Fragment, null, React.createElement('div', { className: 'page-header__spacer' }), React.createElement(Header, null), React.createElement(Content, null)) : null));
+            return React__namespace.createElement('div', { className: 'non-login' + (!this.state.loaded ? ' non-login--loading' : '') }, (this.state.loaded ?
+                React__namespace.createElement(React__namespace.Fragment, null, React__namespace.createElement('div', { className: 'page-header__spacer' }), React__namespace.createElement(Header, null), React__namespace.createElement(Content, null)) : null));
         }
     }
-    const NonLogin = ReactRedux.connect(mapStateToProps$5)(Component$h);
+    const NonLogin = ReactRedux__namespace.connect(mapStateToProps$1)(Component$1);
 
-    function mapStateToProps$6(state) {
+    function mapStateToProps(state) {
         return {
             route: state.route,
         };
     }
-    class Component$i extends React.Component {
+    class Component extends React__namespace.Component {
         render() {
-            return React.createElement('div', null, (this.props.route === '/login/' ?
-                React.createElement(Login, null) :
-                React.createElement(NonLogin, null)));
+            return React__namespace.createElement('div', null, (this.props.route === '/login/' ?
+                React__namespace.createElement(Login, null) :
+                React__namespace.createElement(NonLogin, null)));
         }
     }
-    const Root = ReactRedux.connect(mapStateToProps$6)(Component$i);
+    const Root = ReactRedux__namespace.connect(mapStateToProps)(Component);
 
     function init() {
-        const store = Redux.createStore(reducer);
-        const root = React.createElement(ReactRedux.Provider, { store: store }, React.createElement(Root, null));
-        ReactDOM.render(root, document.getElementById('react-root'));
+        const store = Redux__namespace.createStore(reducer);
+        const root = React__namespace.createElement(ReactRedux__namespace.Provider, { store: store }, React__namespace.createElement(Root, null));
+        ReactDOM__namespace.render(root, document.getElementById('react-root'));
         window.addEventListener('popstate', () => {
             store.dispatch({
                 type: 'ROUTE',
@@ -3109,4 +3132,4 @@
     }
     init();
 
-}(immer, ReactRedux, React, moment, Plotly, Redux, ReactDOM));
+})(immer, ReactRedux, React, moment, Plotly, Redux, ReactDOM);
