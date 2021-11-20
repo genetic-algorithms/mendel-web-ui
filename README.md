@@ -119,7 +119,7 @@ npm -g install <pkg>
 npm outdated --depth 0 -g   # verify nothing is out of date
 ```
 
-- Update your local/project packages:
+- Update your local/project packages. Note: these packages are just used when running locally in development and for the typescript types. In production runtime, the packages are downloaded from unpkg.com (see below).
 
 ```bash
 npm outdated --depth 0   # to see how many top-level pkgs will be updated
@@ -129,9 +129,12 @@ npm install <pkg>@latest
 npm list --depth 0   # to see the new versions of your top-level pkgs (needed in next step)
 npm list <pkg>   # see the version of this installed pkg
 # if some pkgs specified in package.json are missing, you need to: npm install <pkg>
+npm audit   # check for vulnerable pkgs
 ```
 
-- Edit `cmd/server/base_template.go` to pull the same package versions from [unpkg.com](https://unpkg.com/).
+- If you need to revert updates that broke something, revert `package-lock.json` and then run: `npm audit`
+
+- Edit `cmd/server/base_template.go` to pull the same package versions during production runtime from [unpkg.com](https://unpkg.com/).
   - The exception to that is the `@types/` pkgs in `package.json`. Those pkg versions tend to diverge from the actual corresponding js version.
   - To find the versions available for all pkgs in unpkg include `<pkg>/` in the url, e.g. [https://unpkg.com/react/](https://unpkg.com/react/). (The trailing `/` is important.)
   - The pkg fsevents is not currently available in unpkg, so should not be included in `cmd/server/base_template.go` (not sure why).
